@@ -1,5 +1,62 @@
 #include "CondFormats/L1TObjects/interface/L1TMuonGlobalParams.h"
 
+std::bitset<32> L1TMuonGlobalParams::caloInputEnables()
+{
+  std::bitset<32> subset;
+  size_t sum = 0;
+  for (int link = CALOLINK1; link < CALOLINK1 + 32; ++link, ++sum) {
+    subset.set(sum, inputEnables_.test(link-1));
+  }
+  return subset;
+}
+
+
+std::bitset<6> L1TMuonGlobalParams::eomtfInputEnables(const int &startLink)
+{
+  std::bitset<6> subset;
+  size_t proc = 0;
+  for (int link = startLink; link < startLink + 6; ++link, ++proc) {
+    subset.set(proc, inputEnables_.test(link-1));
+  }
+  return subset;
+}
+
+
+std::bitset<12> L1TMuonGlobalParams::bmtfInputEnables()
+{
+  std::bitset<12> subset;
+  size_t proc = 0;
+  for (int link = BMTFLINK1; link < BMTFLINK1 + 12; ++link, ++proc) {
+    subset.set(proc, inputEnables_.test(link-1));
+  }
+  return subset;
+}
+
+
+void L1TMuonGlobalParams::setCaloInputEnables(const std::bitset<32> &enables)
+{
+  for (size_t sum = 0; sum < 32; ++sum) {
+    inputEnables_.set(CALOLINK1 + sum, enables[sum]);
+  }
+}
+
+
+void L1TMuonGlobalParams::setEOmtfInputEnables(const int &startLink, const std::bitset<6> &enables)
+{
+  for (size_t proc = 0; proc < 6; ++proc) {
+    inputEnables_.set(startLink + proc, enables[proc]);
+  }
+}
+
+
+void L1TMuonGlobalParams::setBmtfInputEnables(const std::bitset<12> &enables)
+{
+  for (size_t proc = 0; proc < 12; ++proc) {
+    inputEnables_.set(BMTFLINK1 + proc, enables[proc]);
+  }
+}
+
+
 void L1TMuonGlobalParams::print(std::ostream& out) const {
 
   out << "L1 MicroGMT Parameters" << std::endl;
@@ -13,7 +70,6 @@ void L1TMuonGlobalParams::print(std::ostream& out) const {
   out << " Rel isolation checkMem LUT path: "        << this->relIsoCheckMemLUTPath() << std::endl;
   out << " Index selMem phi LUT path: "              << this->idxSelMemPhiLUTPath() << std::endl;
   out << " Index selMem eta LUT path: "              << this->idxSelMemEtaLUTPath() << std::endl;
-  //out << " Barrel Single MatchQual LUT path: "       << this->brlSingleMatchQualLUTPath() << ", max dR (Used when LUT path empty): " << this->brlSingleMatchQualLUTMaxDR() << std::endl;
   out << " Forward pos MatchQual LUT path: "         << this->fwdPosSingleMatchQualLUTPath() << ", max dR (Used when LUT path empty): " << this->fwdPosSingleMatchQualLUTMaxDR() << std::endl;
   out << " Forward neg MatchQual LUT path: "         << this->fwdNegSingleMatchQualLUTPath() << ", max dR (Used when LUT path empty): " << this->fwdNegSingleMatchQualLUTMaxDR() << std::endl;
   out << " Overlap pos MatchQual LUT path: "         << this->ovlPosSingleMatchQualLUTPath() << ", max dR (Used when LUT path empty): " << this->ovlPosSingleMatchQualLUTMaxDR() << std::endl;

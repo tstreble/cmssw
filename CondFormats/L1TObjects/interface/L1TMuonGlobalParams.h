@@ -56,23 +56,6 @@ public:
         fEtaExtrapolation=17,
         sortRank=18,
         NUM_GMTPARAMNODES=19
-        //brlSingleMatchQual=4,
-        //fwdPosSingleMatchQual=5,
-        //fwdNegSingleMatchQual=6,
-        //ovlPosSingleMatchQual=7,
-        //ovlNegSingleMatchQual=8,
-        //bOPosMatchQual=9,
-        //bONegMatchQual=10,
-        //fOPosMatchQual=11,
-        //fONegMatchQual=12,
-        //bPhiExtrapolation=13,
-        //oPhiExtrapolation=14,
-        //fPhiExtrapolation=15,
-        //bEtaExtrapolation=16,
-        //oEtaExtrapolation=17,
-        //fEtaExtrapolation=18,
-        //sortRank=19,
-        //NUM_GMTPARAMNODES=20
   };
 
   // string parameters indices
@@ -83,6 +66,9 @@ public:
 
   // double parameters indices
   enum dpIdx {maxdr=0, maxdrEtaFine=1};
+
+  // input enable indices
+  enum linkNr {CALOLINK1=1, EMTFPLINK1=36, OMTFPLINK1=42, BMTFLINK1=48, OMTFNLINK1=60, EMTFNLINK1=66};
 
   L1TMuonGlobalParams() { version_=Version; pnodes_.resize(NUM_GMTPARAMNODES); }
   ~L1TMuonGlobalParams() {}
@@ -97,12 +83,27 @@ public:
   void setBxMin(int bxMin) { bxMin_ = bxMin; }
   void setBxMax(int bxMax) { bxMax_ = bxMax; }
 
+  // Input enables
+  std::bitset<32> caloInputEnables();
+  std::bitset<6>  emtfpInputEnables() { return eomtfInputEnables(EMTFPLINK1); };
+  std::bitset<6>  omtfpInputEnables() { return eomtfInputEnables(OMTFPLINK1); };
+  std::bitset<12> bmtfInputEnables();
+  std::bitset<6>  omtfnInputEnables() { return eomtfInputEnables(OMTFNLINK1); };
+  std::bitset<6>  emtfnInputEnables() { return eomtfInputEnables(EMTFNLINK1); };
+  bool inputEnable(size_t link) { return inputEnables_.test(link-1); };
+  void setCaloInputEnables(const std::bitset<32> &enables);
+  void setEmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFPLINK1, enables); };
+  void setOmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFPLINK1, enables); };
+  void setBmtfInputEnables(const std::bitset<12> &enables);
+  void setOmtfnInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFNLINK1, enables); };
+  void setEmtfnInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFNLINK1, enables); };
+  void setInputEnable(size_t link, bool enable) { inputEnables_.set(link, enable); };
+
   // LUTs
   l1t::LUT* absIsoCheckMemLUT()        { return &pnodes_[absIsoCheckMem].LUT_; }
   l1t::LUT* relIsoCheckMemLUT()        { return &pnodes_[relIsoCheckMem].LUT_; }
   l1t::LUT* idxSelMemPhiLUT()          { return &pnodes_[idxSelMemPhi].LUT_; }
   l1t::LUT* idxSelMemEtaLUT()          { return &pnodes_[idxSelMemEta].LUT_; }
-  //l1t::LUT* brlSingleMatchQualLUT()    { return &pnodes_[brlSingleMatchQual].LUT_; }
   l1t::LUT* fwdPosSingleMatchQualLUT() { return &pnodes_[fwdPosSingleMatchQual].LUT_; }
   l1t::LUT* fwdNegSingleMatchQualLUT() { return &pnodes_[fwdNegSingleMatchQual].LUT_; }
   l1t::LUT* ovlPosSingleMatchQualLUT() { return &pnodes_[ovlPosSingleMatchQual].LUT_; }
@@ -122,7 +123,6 @@ public:
   void setRelIsoCheckMemLUT        (const l1t::LUT & lut) { pnodes_[relIsoCheckMem].type_ = "LUT"; pnodes_[relIsoCheckMem].LUT_ = lut; }
   void setIdxSelMemPhiLUT          (const l1t::LUT & lut) { pnodes_[idxSelMemPhi].type_ = "LUT"; pnodes_[idxSelMemPhi].LUT_ = lut; }
   void setIdxSelMemEtaLUT          (const l1t::LUT & lut) { pnodes_[idxSelMemEta].type_ = "LUT"; pnodes_[idxSelMemEta].LUT_ = lut; }
-  //void setBrlSingleMatchQualLUT    (const l1t::LUT & lut) { pnodes_[brlSingleMatchQual].type_ = "LUT"; pnodes_[brlSingleMatchQual].LUT_ = lut; }
   void setFwdPosSingleMatchQualLUT (const l1t::LUT & lut) { pnodes_[fwdPosSingleMatchQual].type_ = "LUT"; pnodes_[fwdPosSingleMatchQual].LUT_ = lut; }
   void setFwdNegSingleMatchQualLUT (const l1t::LUT & lut) { pnodes_[fwdNegSingleMatchQual].type_ = "LUT"; pnodes_[fwdNegSingleMatchQual].LUT_ = lut; }
   void setOvlPosSingleMatchQualLUT (const l1t::LUT & lut) { pnodes_[ovlPosSingleMatchQual].type_ = "LUT"; pnodes_[ovlPosSingleMatchQual].LUT_ = lut; }
@@ -144,7 +144,6 @@ public:
   std::string relIsoCheckMemLUTPath() const        { return pnodes_[relIsoCheckMem].sparams_.size() > spIdx::fname ? pnodes_[relIsoCheckMem].sparams_[spIdx::fname] : ""; }
   std::string idxSelMemPhiLUTPath() const          { return pnodes_[idxSelMemPhi].sparams_.size() > spIdx::fname ? pnodes_[idxSelMemPhi].sparams_[spIdx::fname] : ""; }
   std::string idxSelMemEtaLUTPath() const          { return pnodes_[idxSelMemEta].sparams_.size() > spIdx::fname ? pnodes_[idxSelMemEta].sparams_[spIdx::fname] : ""; }
-  //std::string brlSingleMatchQualLUTPath() const    { return pnodes_[brlSingleMatchQual].sparams_.size() > spIdx::fname ? pnodes_[brlSingleMatchQual].sparams_[spIdx::fname] : ""; }
   std::string fwdPosSingleMatchQualLUTPath() const { return pnodes_[fwdPosSingleMatchQual].sparams_.size() > spIdx::fname ? pnodes_[fwdPosSingleMatchQual].sparams_[spIdx::fname] : ""; }
   std::string fwdNegSingleMatchQualLUTPath() const { return pnodes_[fwdNegSingleMatchQual].sparams_.size() > spIdx::fname ? pnodes_[fwdNegSingleMatchQual].sparams_[spIdx::fname] : ""; }
   std::string ovlPosSingleMatchQualLUTPath() const { return pnodes_[ovlPosSingleMatchQual].sparams_.size() > spIdx::fname ? pnodes_[ovlPosSingleMatchQual].sparams_[spIdx::fname] : ""; }
@@ -164,7 +163,6 @@ public:
   void setRelIsoCheckMemLUTPath        (std::string path) { pnodes_[relIsoCheckMem].sparams_.push_back(path); }
   void setIdxSelMemPhiLUTPath          (std::string path) { pnodes_[idxSelMemPhi].sparams_.push_back(path); }
   void setIdxSelMemEtaLUTPath          (std::string path) { pnodes_[idxSelMemEta].sparams_.push_back(path); }
-  //void setBrlSingleMatchQualLUTPath    (std::string path) { pnodes_[brlSingleMatchQual].sparams_.push_back(path); }
   void setFwdPosSingleMatchQualLUTPath (std::string path) { pnodes_[fwdPosSingleMatchQual].sparams_.push_back(path); }
   void setFwdNegSingleMatchQualLUTPath (std::string path) { pnodes_[fwdNegSingleMatchQual].sparams_.push_back(path); }
   void setOvlPosSingleMatchQualLUTPath (std::string path) { pnodes_[ovlPosSingleMatchQual].sparams_.push_back(path); }
@@ -182,7 +180,6 @@ public:
   void setSortRankLUTPath              (std::string path) { pnodes_[sortRank].sparams_.push_back(path); }
 
   // Cancel out LUT max dR
-  //double brlSingleMatchQualLUTMaxDR() const    { return pnodes_[brlSingleMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[brlSingleMatchQual].dparams_[dpIdx::maxdr] : 0.; }
   double fwdPosSingleMatchQualLUTMaxDR() const { return pnodes_[fwdPosSingleMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[fwdPosSingleMatchQual].dparams_[dpIdx::maxdr] : 0.; }
   double fwdNegSingleMatchQualLUTMaxDR() const { return pnodes_[fwdNegSingleMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[fwdNegSingleMatchQual].dparams_[dpIdx::maxdr] : 0.; }
   double ovlPosSingleMatchQualLUTMaxDR() const { return pnodes_[ovlPosSingleMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[ovlPosSingleMatchQual].dparams_[dpIdx::maxdr] : 0.; }
@@ -193,7 +190,6 @@ public:
   double bONegMatchQualLUTMaxDREtaFine() const { return pnodes_[bONegMatchQual].dparams_.size() > dpIdx::maxdrEtaFine ? pnodes_[bONegMatchQual].dparams_[dpIdx::maxdrEtaFine] : 0.; }
   double fOPosMatchQualLUTMaxDR() const        { return pnodes_[fOPosMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[fOPosMatchQual].dparams_[dpIdx::maxdr] : 0.; }
   double fONegMatchQualLUTMaxDR() const        { return pnodes_[fONegMatchQual].dparams_.size() > dpIdx::maxdr ? pnodes_[fONegMatchQual].dparams_[dpIdx::maxdr] : 0.; }
-  //void setBrlSingleMatchQualLUTMaxDR    (double maxDR) { pnodes_[brlSingleMatchQual].dparams_.push_back(maxDR); }
   void setFwdPosSingleMatchQualLUTMaxDR (double maxDR) { pnodes_[fwdPosSingleMatchQual].dparams_.push_back(maxDR); }
   void setFwdNegSingleMatchQualLUTMaxDR (double maxDR) { pnodes_[fwdNegSingleMatchQual].dparams_.push_back(maxDR); }
   void setOvlPosSingleMatchQualLUTMaxDR (double maxDR) { pnodes_[ovlPosSingleMatchQual].dparams_.push_back(maxDR); }
@@ -220,6 +216,12 @@ private:
   int bxMax_;
 
   std::vector<Node> pnodes_;
+
+  // each bit represents one uGMT input link
+  std::bitset<72> inputEnables_;
+
+  std::bitset<6> eomtfInputEnables(const int &startLink);
+  void setEOmtfInputEnables(const int &startLink, const std::bitset<6> &enables);
 
   COND_SERIALIZABLE;
 };
