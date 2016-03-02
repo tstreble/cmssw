@@ -84,6 +84,7 @@ public:
   void setBxMax(int bxMax) { bxMax_ = bxMax; }
 
   // Input enables
+  std::bitset<72> inputEnables() { return inputEnables_; };
   std::bitset<32> caloInputEnables();
   std::bitset<6>  emtfpInputEnables() { return eomtfInputEnables(EMTFPLINK1); };
   std::bitset<6>  omtfpInputEnables() { return eomtfInputEnables(OMTFPLINK1); };
@@ -91,6 +92,7 @@ public:
   std::bitset<6>  omtfnInputEnables() { return eomtfInputEnables(OMTFNLINK1); };
   std::bitset<6>  emtfnInputEnables() { return eomtfInputEnables(EMTFNLINK1); };
   bool inputEnable(size_t link) { return inputEnables_.test(link-1); };
+  void setInputEnables(const std::bitset<72> &enables) { inputEnables_ = enables; }; 
   void setCaloInputEnables(const std::bitset<32> &enables);
   void setEmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFPLINK1, enables); };
   void setOmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFPLINK1, enables); };
