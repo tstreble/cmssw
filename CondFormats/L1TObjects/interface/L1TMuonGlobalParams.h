@@ -68,7 +68,7 @@ public:
   enum dpIdx {maxdr=0, maxdrEtaFine=1};
 
   // input enable indices
-  enum linkNr {CALOLINK1=1, EMTFPLINK1=36, OMTFPLINK1=42, BMTFLINK1=48, OMTFNLINK1=60, EMTFNLINK1=66};
+  enum linkNr {CALOLINK1=8, EMTFPLINK1=36, OMTFPLINK1=42, BMTFLINK1=48, OMTFNLINK1=60, EMTFNLINK1=66}; // link numbers start at 0
 
   L1TMuonGlobalParams() { version_=Version; pnodes_.resize(NUM_GMTPARAMNODES); }
   ~L1TMuonGlobalParams() {}
@@ -85,7 +85,7 @@ public:
 
   // Input enables
   std::bitset<72> inputEnables() { return inputEnables_; };
-  std::bitset<32> caloInputEnables();
+  std::bitset<28> caloInputEnables();
   std::bitset<6>  emtfpInputEnables() { return eomtfInputEnables(EMTFPLINK1); };
   std::bitset<6>  omtfpInputEnables() { return eomtfInputEnables(OMTFPLINK1); };
   std::bitset<12> bmtfInputEnables();
@@ -93,7 +93,7 @@ public:
   std::bitset<6>  emtfnInputEnables() { return eomtfInputEnables(EMTFNLINK1); };
   bool inputEnable(size_t link) { return inputEnables_.test(link-1); };
   void setInputEnables(const std::bitset<72> &enables) { inputEnables_ = enables; }; 
-  void setCaloInputEnables(const std::bitset<32> &enables);
+  void setCaloInputEnables(const std::bitset<28> &enables);
   void setEmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFPLINK1, enables); };
   void setOmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFPLINK1, enables); };
   void setBmtfInputEnables(const std::bitset<12> &enables);

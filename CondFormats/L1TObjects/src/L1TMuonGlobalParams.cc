@@ -1,10 +1,10 @@
 #include "CondFormats/L1TObjects/interface/L1TMuonGlobalParams.h"
 
-std::bitset<32> L1TMuonGlobalParams::caloInputEnables()
+std::bitset<28> L1TMuonGlobalParams::caloInputEnables()
 {
-  std::bitset<32> subset;
+  std::bitset<28> subset;
   size_t sum = 0;
-  for (int link = CALOLINK1; link < CALOLINK1 + 32; ++link, ++sum) {
+  for (int link = CALOLINK1; link < CALOLINK1 + 28; ++link, ++sum) {
     subset.set(sum, inputEnables_.test(link-1));
   }
   return subset;
@@ -33,9 +33,9 @@ std::bitset<12> L1TMuonGlobalParams::bmtfInputEnables()
 }
 
 
-void L1TMuonGlobalParams::setCaloInputEnables(const std::bitset<32> &enables)
+void L1TMuonGlobalParams::setCaloInputEnables(const std::bitset<28> &enables)
 {
-  for (size_t sum = 0; sum < 32; ++sum) {
+  for (size_t sum = 0; sum < 28; ++sum) {
     inputEnables_.set(CALOLINK1 + sum, enables[sum]);
   }
 }
@@ -64,6 +64,9 @@ void L1TMuonGlobalParams::print(std::ostream& out) const {
   out << "Firmware version: " << fwVersion_ << std::endl;
 
   out << "Output BX range from " << bxMin_ << " to " << bxMax_ << std::endl;
+
+  out << "InputEnables: " << inputEnables_ << std::endl;
+  out << "              EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0" << std::endl;
 
   out << "LUT paths (LUTs are generated analytically if path is empty)" << std::endl;
   out << " Abs isolation checkMem LUT path: "        << this->absIsoCheckMemLUTPath() << std::endl;

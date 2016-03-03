@@ -81,9 +81,9 @@ L1TMuonGlobalParamsESProducer::L1TMuonGlobalParamsESProducer(const edm::Paramete
 
    bool caloInputEnable = iConfig.getParameter<bool>("caloInputEnable");
    if (caloInputEnable) {
-      m_params.setCaloInputEnables(std::bitset<32>(0xFFFFFFFF));
+      m_params.setCaloInputEnables(std::bitset<28>(0xFFFFFFF));
    } else {
-      m_params.setCaloInputEnables(std::bitset<32>());
+      m_params.setCaloInputEnables(std::bitset<28>());
    }
 
    std::vector<unsigned> bmtfInputEnables = iConfig.getParameter<std::vector<unsigned> >("bmtfInputEnables");
@@ -116,8 +116,8 @@ L1TMuonGlobalParamsESProducer::L1TMuonGlobalParamsESProducer(const edm::Paramete
        emtfnEnables.set(i-6, emtfInputEnables[i] > 0);
      }
    }
-   m_params.setOmtfpInputEnables(emtfpEnables);
-   m_params.setOmtfnInputEnables(emtfnEnables);
+   m_params.setEmtfpInputEnables(emtfpEnables);
+   m_params.setEmtfnInputEnables(emtfnEnables);
 
 
    m_params.setFwdPosSingleMatchQualLUTMaxDR(iConfig.getParameter<double>("FwdPosSingleMatchQualLUTMaxDR"));
