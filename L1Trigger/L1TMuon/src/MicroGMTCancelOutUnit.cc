@@ -57,7 +57,7 @@ MicroGMTCancelOutUnit::setCancelOutBits(GMTInternalWedges& wedges, tftype trackF
       coll2.push_back(mu);
     }
     if (mode == cancelmode::coordinate) {
-      getCoordinateCancelBits(coll1, coll2);
+      getCoordinateCancelBits(coll2, coll1); // in case of a tie coll1 muon wins
     } else {
       getTrackAddrCancelBits(coll1, coll2);
     }
@@ -255,7 +255,7 @@ MicroGMTCancelOutUnit::getTrackAddrCancelBits(std::vector<std::shared_ptr<GMTInt
         }
         //std::cout << "Shared hits found: " << nMatchedStations << std::endl;
         if (nMatchedStations > 0) {
-          if ((*mu_w1)->origin().hwQual() > (*mu_w2)->origin().hwQual()) {
+          if ((*mu_w1)->origin().hwQual() >= (*mu_w2)->origin().hwQual()) {
             (*mu_w2)->setHwCancelBit(1);
           } else {
             (*mu_w1)->setHwCancelBit(1);
