@@ -98,6 +98,7 @@ using namespace l1t;
         // ----------member data ---------------------------
         int m_bxMin;
         int m_bxMax;
+        std::bitset<72> m_inputEnables;
         std::unique_ptr<L1TMuonGlobalParams> microGMTParams;
         edm::InputTag m_barrelTfInputTag;
         edm::InputTag m_overlapTfInputTag;
@@ -392,9 +393,11 @@ L1TMuonProducer::splitAndConvertMuons(const edm::Handle<MicroGMTConfiguration::I
   int muIdx = 0;
   int currentLink = 0;
   for (size_t i = 0; i < in->size(bx); ++i, ++muIdx) {
-    if (currentLink != in->at(bx, i).link()) {
+    int link = in->at(bx, i).link();
+    if (!m_inputEnables.test(link)) continue; // only process if input link is enabled
+    if (currentLink != link) {
       muIdx = 0;
-      currentLink = in->at(bx, i).link();
+      currentLink = link;
     }
     int gPhi = MicroGMTConfiguration::calcGlobalPhi(in->at(bx, i).hwPhi(), in->at(bx, i).trackFinderType(), in->at(bx, i).processor());
     int tfMuonIdx = 3 * (currentLink - 36) + muIdx;
@@ -427,9 +430,11 @@ L1TMuonProducer::convertMuons(const edm::Handle<MicroGMTConfiguration::InputColl
   int muIdx = 0;
   int currentLink = 0;
   for (size_t i = 0; i < in->size(bx); ++i, ++muIdx) {
-    if (currentLink != in->at(bx, i).link()) {
+    int link = in->at(bx, i).link();
+    if (!m_inputEnables.test(link)) continue; // only process if input link is enabled
+    if (currentLink != link) {
       muIdx = 0;
-      currentLink = in->at(bx, i).link();
+      currentLink = link;
     }
     int gPhi = MicroGMTConfiguration::calcGlobalPhi(in->at(bx, i).hwPhi(), in->at(bx, i).trackFinderType(), in->at(bx, i).processor());
     int tfMuonIdx = 3 * (currentLink - 36) + muIdx;
@@ -469,6 +474,7 @@ L1TMuonProducer::beginRun(edm::Run const& run, edm::EventSetup const& iSetup)
   //microGMTParams->print(std::cout);
   m_bxMin = microGMTParams->bxMin();
   m_bxMax = microGMTParams->bxMax();
+  m_inputEnables  = microGMTParams->inputEnables();
   m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParams->sortRankLUTPath(), microGMTParams->fwVersion(), microGMTParams->sortRankLUTPtFactor(), microGMTParams->sortRankLUTQualFactor());
   m_isolationUnit.initialise(microGMTParams.get());
   m_cancelOutUnit.initialise(microGMTParams.get());
