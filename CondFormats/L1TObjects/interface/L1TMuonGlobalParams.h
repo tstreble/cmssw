@@ -8,8 +8,8 @@
 /// \author: Thomas Reis
 ///
 
-#ifndef L1TGMTParams_h
-#define L1TGMTParams_h
+#ifndef L1TMuonGlobalParams_h
+#define L1TMuonGlobalParams_h
 
 #include <memory>
 #include <iostream>
