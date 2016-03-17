@@ -19,7 +19,7 @@ gmtParams = cms.ESProducer('L1TMuonGlobalParamsESProducer',
     bxMax = cms.int32(2),
 
     # uGMT inputs to disable
-    disableCaloInputs = cms.bool(False),
+    caloInputsDisable = cms.bool(False),
     bmtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # BMTF 0-11
     omtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # OMTF+0-5, OMTF-0-5
     emtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # EMTF+0-5, EMTF-0-5

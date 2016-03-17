@@ -81,7 +81,7 @@ L1TMuonGlobalParamsESProducer::L1TMuonGlobalParamsESProducer(const edm::Paramete
       m_params_helper.setBxMax(bxMax);
    }
 
-   bool disableCaloInputs = iConfig.getParameter<bool>("disableCaloInputs");
+   bool disableCaloInputs = iConfig.getParameter<bool>("caloInputsDisable");
    if (disableCaloInputs) {
       m_params_helper.setCaloInputsToDisable(std::bitset<28>(0xFFFFFFF));
    } else {
