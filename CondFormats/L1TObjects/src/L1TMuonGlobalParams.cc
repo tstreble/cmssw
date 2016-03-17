@@ -1,58 +1,94 @@
 #include "CondFormats/L1TObjects/interface/L1TMuonGlobalParams.h"
 
-std::bitset<28> L1TMuonGlobalParams::caloInputEnables()
+std::bitset<72> L1TMuonGlobalParams::inputsToDisable() const
 {
-  std::bitset<28> subset;
-  size_t sum = 0;
-  for (int link = CALOLINK1; link < CALOLINK1 + 28; ++link, ++sum) {
-    subset.set(sum, inputEnables_.test(link-1));
+  std::bitset<72> inputsToDisable;
+  if (pnodes_[INPUTS_TO_DISABLE].uparams_.size() < 4) {
+    return inputsToDisable;
   }
-  return subset;
+
+  for (size_t i = 0; i < 28; ++i) {
+    inputsToDisable[CALOLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[CALOINPUTS_TO_DISABLE] >> i) & 0x1);
+    if (i < CALOLINK1) {
+      // disable unused inputs
+      inputsToDisable[i] = 0x1;
+    }
+    if (i < 12) {
+      inputsToDisable[BMTFLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[BMTFINPUTS_TO_DISABLE] >> i) & 0x1);
+      if (i < 6) {
+        inputsToDisable[EMTFPLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[EMTFINPUTS_TO_DISABLE] >> i) & 0x1);
+        inputsToDisable[OMTFPLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[OMTFINPUTS_TO_DISABLE] >> i) & 0x1);
+        inputsToDisable[OMTFNLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[OMTFINPUTS_TO_DISABLE] >> (i + 6)) & 0x1);
+        inputsToDisable[EMTFNLINK1 + i] = ((pnodes_[INPUTS_TO_DISABLE].uparams_[EMTFINPUTS_TO_DISABLE] >> (i + 6)) & 0x1);
+      }
+    }
+  }
+  return inputsToDisable;
 }
 
 
-std::bitset<6> L1TMuonGlobalParams::eomtfInputEnables(const int &startLink)
+void L1TMuonGlobalParams::setFwVersion(unsigned fwVersion)
 {
-  std::bitset<6> subset;
-  size_t proc = 0;
-  for (int link = startLink; link < startLink + 6; ++link, ++proc) {
-    subset.set(proc, inputEnables_.test(link-1));
-  }
-  return subset;
+  pnodes_[FWVERSION].uparams_.resize(1);
+  pnodes_[FWVERSION].uparams_[FWVERSION_IDX] = fwVersion;
 }
 
 
-std::bitset<12> L1TMuonGlobalParams::bmtfInputEnables()
+void L1TMuonGlobalParams::setBxMin(int bxMin)
 {
-  std::bitset<12> subset;
-  size_t proc = 0;
-  for (int link = BMTFLINK1; link < BMTFLINK1 + 12; ++link, ++proc) {
-    subset.set(proc, inputEnables_.test(link-1));
-  }
-  return subset;
+  pnodes_[BXRANGE].iparams_.resize(2);
+  pnodes_[BXRANGE].iparams_[BXMIN] = bxMin;
 }
 
 
-void L1TMuonGlobalParams::setCaloInputEnables(const std::bitset<28> &enables)
+void L1TMuonGlobalParams::setBxMax(int bxMax)
 {
-  for (size_t sum = 0; sum < 28; ++sum) {
-    inputEnables_.set(CALOLINK1 + sum, enables[sum]);
+  pnodes_[BXRANGE].iparams_.resize(2);
+  pnodes_[BXRANGE].iparams_[BXMAX] = bxMax;
+}
+
+
+void L1TMuonGlobalParams::setInputsToDisable(const std::bitset<72> &inputsToDisable)
+{
+  pnodes_[INPUTS_TO_DISABLE].uparams_.resize(4);
+  for (size_t i = 0; i < 28; ++i) {
+    pnodes_[INPUTS_TO_DISABLE].uparams_[CALOINPUTS_TO_DISABLE] += (inputsToDisable.test(CALOLINK1 + i) << i);
+    if (i < 12) {
+      pnodes_[INPUTS_TO_DISABLE].uparams_[BMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(BMTFLINK1 + i) << i);
+      if (i < 6) {
+        pnodes_[INPUTS_TO_DISABLE].uparams_[OMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(OMTFPLINK1 + i) << i);
+        pnodes_[INPUTS_TO_DISABLE].uparams_[OMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(OMTFNLINK1 + i) << (i + 6));
+        pnodes_[INPUTS_TO_DISABLE].uparams_[EMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(EMTFPLINK1 + i) << i);
+        pnodes_[INPUTS_TO_DISABLE].uparams_[EMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(EMTFNLINK1 + i) << (i + 6));
+      }
+    }
   }
 }
 
 
-void L1TMuonGlobalParams::setEOmtfInputEnables(const int &startLink, const std::bitset<6> &enables)
+void L1TMuonGlobalParams::setCaloInputsToDisable(const std::bitset<28> &inputsToDisable)
 {
-  for (size_t proc = 0; proc < 6; ++proc) {
-    inputEnables_.set(startLink + proc, enables[proc]);
+  pnodes_[INPUTS_TO_DISABLE].uparams_.resize(4);
+  for (size_t i = 0; i < 28; ++i) {
+    pnodes_[INPUTS_TO_DISABLE].uparams_[CALOINPUTS_TO_DISABLE] += (inputsToDisable.test(i) << i);
   }
 }
 
 
-void L1TMuonGlobalParams::setBmtfInputEnables(const std::bitset<12> &enables)
+void L1TMuonGlobalParams::setEOmtfInputsToDisable(const size_t &startIdx, const int &tfIdx, const std::bitset<6> &inputsToDisable)
 {
-  for (size_t proc = 0; proc < 12; ++proc) {
-    inputEnables_.set(BMTFLINK1 + proc, enables[proc]);
+  pnodes_[INPUTS_TO_DISABLE].uparams_.resize(4);
+  for (size_t i = 0; i < 6; ++i) {
+    pnodes_[INPUTS_TO_DISABLE].uparams_[tfIdx] += (inputsToDisable.test(i) << (i + startIdx));
+  }
+}
+
+
+void L1TMuonGlobalParams::setBmtfInputsToDisable(const std::bitset<12> &inputsToDisable)
+{
+  pnodes_[INPUTS_TO_DISABLE].uparams_.resize(4);
+  for (size_t i = 0; i < 12; ++i) {
+    pnodes_[INPUTS_TO_DISABLE].uparams_[BMTFINPUTS_TO_DISABLE] += (inputsToDisable.test(i) << i);
   }
 }
 
@@ -61,12 +97,12 @@ void L1TMuonGlobalParams::print(std::ostream& out) const {
 
   out << "L1 MicroGMT Parameters" << std::endl;
 
-  out << "Firmware version: " << fwVersion_ << std::endl;
+  out << "Firmware version: " << this->fwVersion() << std::endl;
 
-  out << "Output BX range from " << bxMin_ << " to " << bxMax_ << std::endl;
+  out << "Output BX range from " << this->bxMin() << " to " << this->bxMax() << std::endl;
 
-  out << "InputEnables: " << inputEnables_ << std::endl;
-  out << "              EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0" << std::endl;
+  out << "InputsToDisable: " << this->inputsToDisable() << std::endl;
+  out << "                 EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0" << std::endl;
 
   out << "LUT paths (LUTs are generated analytically if path is empty)" << std::endl;
   out << " Abs isolation checkMem LUT path: "        << this->absIsoCheckMemLUTPath() << std::endl;

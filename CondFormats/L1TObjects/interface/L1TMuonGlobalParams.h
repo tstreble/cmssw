@@ -55,14 +55,17 @@ public:
         oEtaExtrapolation=16,
         fEtaExtrapolation=17,
         sortRank=18,
-        NUM_GMTPARAMNODES=19
+        FWVERSION=19,
+        BXRANGE=20,
+        INPUTS_TO_DISABLE=21,
+        NUM_GMTPARAMNODES=22
   };
 
   // string parameters indices
   enum spIdx {fname=0};
 
   // unsigned parameters indices
-  enum upIdx {ptFactor=0, qualFactor=1};
+  enum upIdx {ptFactor=0, qualFactor=1, FWVERSION_IDX=0, BXMIN=0, BXMAX=1, CALOINPUTS_TO_DISABLE=0, BMTFINPUTS_TO_DISABLE=1, OMTFINPUTS_TO_DISABLE=2, EMTFINPUTS_TO_DISABLE=3};
 
   // double parameters indices
   enum dpIdx {maxdr=0, maxdrEtaFine=1};
@@ -74,32 +77,24 @@ public:
   ~L1TMuonGlobalParams() {}
 
   // FW version
-  unsigned fwVersion() const { return fwVersion_; }
-  void setFwVersion(unsigned fwVersion) { fwVersion_ = fwVersion; }
+  unsigned fwVersion() const { return pnodes_[FWVERSION].uparams_.size() > FWVERSION_IDX ? pnodes_[FWVERSION].uparams_[FWVERSION_IDX] : 0; }
+  void setFwVersion(unsigned fwVersion);
 
   // BX range
-  int bxMin() const { return bxMin_; }
-  int bxMax() const { return bxMax_; }
-  void setBxMin(int bxMin) { bxMin_ = bxMin; }
-  void setBxMax(int bxMax) { bxMax_ = bxMax; }
+  int bxMin() const { return pnodes_[BXRANGE].iparams_.size() > BXMIN ? pnodes_[BXRANGE].iparams_[BXMIN] : 0; }
+  int bxMax() const { return pnodes_[BXRANGE].iparams_.size() > BXMAX ? pnodes_[BXRANGE].iparams_[BXMAX] : 0; }
+  void setBxMin(int bxMin);
+  void setBxMax(int bxMax);
 
-  // Input enables
-  std::bitset<72> inputEnables() { return inputEnables_; };
-  std::bitset<28> caloInputEnables();
-  std::bitset<6>  emtfpInputEnables() { return eomtfInputEnables(EMTFPLINK1); };
-  std::bitset<6>  omtfpInputEnables() { return eomtfInputEnables(OMTFPLINK1); };
-  std::bitset<12> bmtfInputEnables();
-  std::bitset<6>  omtfnInputEnables() { return eomtfInputEnables(OMTFNLINK1); };
-  std::bitset<6>  emtfnInputEnables() { return eomtfInputEnables(EMTFNLINK1); };
-  bool inputEnable(size_t link) { return inputEnables_.test(link-1); };
-  void setInputEnables(const std::bitset<72> &enables) { inputEnables_ = enables; }; 
-  void setCaloInputEnables(const std::bitset<28> &enables);
-  void setEmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFPLINK1, enables); };
-  void setOmtfpInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFPLINK1, enables); };
-  void setBmtfInputEnables(const std::bitset<12> &enables);
-  void setOmtfnInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(OMTFNLINK1, enables); };
-  void setEmtfnInputEnables(const std::bitset<6> &enables) { setEOmtfInputEnables(EMTFNLINK1, enables); };
-  void setInputEnable(size_t link, bool enable) { inputEnables_.set(link, enable); };
+  // Input disables
+  std::bitset<72> inputsToDisable() const;
+  void setInputsToDisable(const std::bitset<72> &inputsToDisable); 
+  void setCaloInputsToDisable(const std::bitset<28> &disables);
+  void setEmtfpInputsToDisable(const std::bitset<6> &disables) { setEOmtfInputsToDisable(0, EMTFINPUTS_TO_DISABLE, disables); };
+  void setOmtfpInputsToDisable(const std::bitset<6> &disables) { setEOmtfInputsToDisable(0, OMTFINPUTS_TO_DISABLE, disables); };
+  void setBmtfInputsToDisable(const std::bitset<12> &disables);
+  void setOmtfnInputsToDisable(const std::bitset<6> &disables) { setEOmtfInputsToDisable(6, OMTFINPUTS_TO_DISABLE, disables); };
+  void setEmtfnInputsToDisable(const std::bitset<6> &disables) { setEOmtfInputsToDisable(6, EMTFINPUTS_TO_DISABLE, disables); };
 
   // LUTs
   l1t::LUT* absIsoCheckMemLUT()        { return &pnodes_[absIsoCheckMem].LUT_; }
@@ -212,18 +207,14 @@ public:
 
 private:
   unsigned version_;
-  unsigned fwVersion_;
-
-  int bxMin_;
-  int bxMax_;
 
   std::vector<Node> pnodes_;
 
   // each bit represents one uGMT input link
   std::bitset<72> inputEnables_;
 
-  std::bitset<6> eomtfInputEnables(const int &startLink);
-  void setEOmtfInputEnables(const int &startLink, const std::bitset<6> &enables);
+  std::bitset<6> eomtfInputsToDisable(const int &startLink);
+  void setEOmtfInputsToDisable(const size_t &startIdx, const int &tfIdx, const std::bitset<6> &disables);
 
   COND_SERIALIZABLE;
 };

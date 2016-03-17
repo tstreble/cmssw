@@ -18,11 +18,11 @@ gmtParams = cms.ESProducer('L1TMuonGlobalParamsESProducer',
     bxMin = cms.int32(-2),
     bxMax = cms.int32(2),
 
-    # enable uGMT inputs
-    caloInputEnable = cms.bool(True),
-    bmtfInputEnables = cms.vuint32(1,1,1,1,1,1,1,1,1,1,1,1), # BMTF 0-11
-    omtfInputEnables = cms.vuint32(1,1,1,1,1,1,1,1,1,1,1,1), # OMTF+0-5, OMTF-0-5
-    emtfInputEnables = cms.vuint32(1,1,1,1,1,1,1,1,1,1,1,1), # EMTF+0-5, EMTF-0-5
+    # uGMT inputs to disable
+    disableCaloInputs = cms.bool(False),
+    bmtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # BMTF 0-11
+    omtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # OMTF+0-5, OMTF-0-5
+    emtfInputsToDisable = cms.vuint32(0,0,0,0,0,0,0,0,0,0,0,0), # EMTF+0-5, EMTF-0-5
 
     AbsIsoCheckMemLUTPath        = cms.string(os.path.join(lut_dir, 'AbsIsoCheckMem.txt')),
     RelIsoCheckMemLUTPath        = cms.string(os.path.join(lut_dir, 'RelIsoCheckMem.txt')),

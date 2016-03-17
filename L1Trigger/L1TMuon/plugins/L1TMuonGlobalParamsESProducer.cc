@@ -79,45 +79,45 @@ L1TMuonGlobalParamsESProducer::L1TMuonGlobalParamsESProducer(const edm::Paramete
       m_params.setBxMax(bxMax);
    }
 
-   bool caloInputEnable = iConfig.getParameter<bool>("caloInputEnable");
-   if (caloInputEnable) {
-      m_params.setCaloInputEnables(std::bitset<28>(0xFFFFFFF));
+   bool disableCaloInputs = iConfig.getParameter<bool>("disableCaloInputs");
+   if (disableCaloInputs) {
+      m_params.setCaloInputsToDisable(std::bitset<28>(0xFFFFFFF));
    } else {
-      m_params.setCaloInputEnables(std::bitset<28>());
+      m_params.setCaloInputsToDisable(std::bitset<28>());
    }
 
-   std::vector<unsigned> bmtfInputEnables = iConfig.getParameter<std::vector<unsigned> >("bmtfInputEnables");
-   std::bitset<12> bmtfEnables;
-   for (size_t i = 0; i < bmtfInputEnables.size(); ++i) {
-     bmtfEnables.set(i, bmtfInputEnables[i] > 0);
+   std::vector<unsigned> bmtfInputsToDisable = iConfig.getParameter<std::vector<unsigned> >("bmtfInputsToDisable");
+   std::bitset<12> bmtfDisables;
+   for (size_t i = 0; i < bmtfInputsToDisable.size(); ++i) {
+     bmtfDisables.set(i, bmtfInputsToDisable[i] > 0);
    }
-   m_params.setBmtfInputEnables(bmtfEnables);
+   m_params.setBmtfInputsToDisable(bmtfDisables);
 
-   std::vector<unsigned> omtfInputEnables = iConfig.getParameter<std::vector<unsigned> >("omtfInputEnables");
-   std::bitset<6> omtfpEnables;
-   std::bitset<6> omtfnEnables;
-   for (size_t i = 0; i < omtfInputEnables.size(); ++i) {
+   std::vector<unsigned> omtfInputsToDisable = iConfig.getParameter<std::vector<unsigned> >("omtfInputsToDisable");
+   std::bitset<6> omtfpDisables;
+   std::bitset<6> omtfnDisables;
+   for (size_t i = 0; i < omtfInputsToDisable.size(); ++i) {
      if (i < 6) {
-       omtfpEnables.set(i, omtfInputEnables[i] > 0);
+       omtfpDisables.set(i, omtfInputsToDisable[i] > 0);
      } else {
-       omtfnEnables.set(i-6, omtfInputEnables[i] > 0);
+       omtfnDisables.set(i-6, omtfInputsToDisable[i] > 0);
      }
    }
-   m_params.setOmtfpInputEnables(omtfpEnables);
-   m_params.setOmtfnInputEnables(omtfnEnables);
+   m_params.setOmtfpInputsToDisable(omtfpDisables);
+   m_params.setOmtfnInputsToDisable(omtfnDisables);
 
-   std::vector<unsigned> emtfInputEnables = iConfig.getParameter<std::vector<unsigned> >("emtfInputEnables");
-   std::bitset<6> emtfpEnables;
-   std::bitset<6> emtfnEnables;
-   for (size_t i = 0; i < emtfInputEnables.size(); ++i) {
+   std::vector<unsigned> emtfInputsToDisable = iConfig.getParameter<std::vector<unsigned> >("emtfInputsToDisable");
+   std::bitset<6> emtfpDisables;
+   std::bitset<6> emtfnDisables;
+   for (size_t i = 0; i < emtfInputsToDisable.size(); ++i) {
      if (i < 6) {
-       emtfpEnables.set(i, emtfInputEnables[i] > 0);
+       emtfpDisables.set(i, emtfInputsToDisable[i] > 0);
      } else {
-       emtfnEnables.set(i-6, emtfInputEnables[i] > 0);
+       emtfnDisables.set(i-6, emtfInputsToDisable[i] > 0);
      }
    }
-   m_params.setEmtfpInputEnables(emtfpEnables);
-   m_params.setEmtfnInputEnables(emtfnEnables);
+   m_params.setEmtfpInputsToDisable(emtfpDisables);
+   m_params.setEmtfnInputsToDisable(emtfnDisables);
 
 
    m_params.setFwdPosSingleMatchQualLUTMaxDR(iConfig.getParameter<double>("FwdPosSingleMatchQualLUTMaxDR"));
