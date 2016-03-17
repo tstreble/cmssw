@@ -210,9 +210,6 @@ private:
 
   std::vector<Node> pnodes_;
 
-  // each bit represents one uGMT input link
-  std::bitset<72> inputEnables_;
-
   std::bitset<6> eomtfInputsToDisable(const int &startLink);
   void setEOmtfInputsToDisable(const size_t &startIdx, const int &tfIdx, const std::bitset<6> &disables);
 
