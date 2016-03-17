@@ -47,6 +47,7 @@
 
 #include "CondFormats/L1TObjects/interface/L1TMuonGlobalParams.h"
 #include "CondFormats/DataRecord/interface/L1TMuonGlobalParamsRcd.h"
+#include "L1Trigger/L1TMuon/interface/L1TMuonGlobalParamsHelper.h"
 
 #include "TMath.h"
 //
@@ -99,7 +100,7 @@ using namespace l1t;
         int m_bxMin;
         int m_bxMax;
         std::bitset<72> m_inputsToDisable;
-        std::unique_ptr<L1TMuonGlobalParams> microGMTParams;
+        std::unique_ptr<L1TMuonGlobalParamsHelper> microGMTParamsHelper;
         edm::InputTag m_barrelTfInputTag;
         edm::InputTag m_overlapTfInputTag;
         edm::InputTag m_endcapTfInputTag;
@@ -466,19 +467,19 @@ L1TMuonProducer::beginRun(edm::Run const& run, edm::EventSetup const& iSetup)
   edm::ESHandle<L1TMuonGlobalParams> microGMTParamsHandle;
   microGMTParamsRcd.get(microGMTParamsHandle);
 
-  microGMTParams = std::unique_ptr<L1TMuonGlobalParams>(new L1TMuonGlobalParams(*microGMTParamsHandle.product()));
-  if (!microGMTParams) {
+  microGMTParamsHelper = std::unique_ptr<L1TMuonGlobalParamsHelper>(new L1TMuonGlobalParamsHelper(*microGMTParamsHandle.product()));
+  if (!microGMTParamsHelper) {
     edm::LogError("L1TMuonProducer") << "Could not retrieve parameters from Event Setup" << std::endl;
   }
 
-  //microGMTParams->print(std::cout);
-  m_bxMin = microGMTParams->bxMin();
-  m_bxMax = microGMTParams->bxMax();
-  m_inputsToDisable  = microGMTParams->inputsToDisable();
+  //microGMTParamsHelper->print(std::cout);
+  m_bxMin = microGMTParamsHelper->bxMin();
+  m_bxMax = microGMTParamsHelper->bxMax();
+  m_inputsToDisable  = microGMTParamsHelper->inputsToDisable();
   edm::LogVerbatim("L1TMuonProducer") << "uGMT inputsToDisable: " << m_inputsToDisable << "\n                      EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0";
-  m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParams->sortRankLUTPath(), microGMTParams->fwVersion(), microGMTParams->sortRankLUTPtFactor(), microGMTParams->sortRankLUTQualFactor());
-  m_isolationUnit.initialise(microGMTParams.get());
-  m_cancelOutUnit.initialise(microGMTParams.get());
+  m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParamsHelper->sortRankLUTPath(), microGMTParamsHelper->fwVersion(), microGMTParamsHelper->sortRankLUTPtFactor(), microGMTParamsHelper->sortRankLUTQualFactor());
+  m_isolationUnit.initialise(microGMTParamsHelper.get());
+  m_cancelOutUnit.initialise(microGMTParamsHelper.get());
 }
 
 // ------------ method called when ending the processing of a run  ------------
