@@ -40,16 +40,15 @@ public:
         fEtaExtrapolation=17,
         sortRank=18,
         FWVERSION=19,
-        BXRANGE=20,
-        INPUTS_TO_DISABLE=21,
-        NUM_GMTPARAMNODES=22
+        INPUTS_TO_DISABLE=20,
+        NUM_GMTPARAMNODES=21
   };
 
   // string parameters indices
   enum spIdx {fname=0};
 
   // unsigned parameters indices
-  enum upIdx {ptFactor=0, qualFactor=1, FWVERSION_IDX=0, BXMIN=0, BXMAX=1, CALOINPUTS_TO_DISABLE=0, BMTFINPUTS_TO_DISABLE=1, OMTFINPUTS_TO_DISABLE=2, EMTFINPUTS_TO_DISABLE=3};
+  enum upIdx {ptFactor=0, qualFactor=1, FWVERSION_IDX=0, CALOINPUTS_TO_DISABLE=0, BMTFINPUTS_TO_DISABLE=1, OMTFINPUTS_TO_DISABLE=2, EMTFINPUTS_TO_DISABLE=3};
 
   // double parameters indices
   enum dpIdx {maxdr=0, maxdrEtaFine=1};
@@ -64,12 +63,6 @@ public:
   // FW version
   unsigned fwVersion() const { return pnodes_[FWVERSION].uparams_.size() > FWVERSION_IDX ? pnodes_[FWVERSION].uparams_[FWVERSION_IDX] : 0; }
   void setFwVersion(unsigned fwVersion);
-
-  // BX range
-  int bxMin() const { return pnodes_[BXRANGE].iparams_.size() > BXMIN ? pnodes_[BXRANGE].iparams_[BXMIN] : 0; }
-  int bxMax() const { return pnodes_[BXRANGE].iparams_.size() > BXMAX ? pnodes_[BXRANGE].iparams_[BXMAX] : 0; }
-  void setBxMin(int bxMin);
-  void setBxMax(int bxMax);
 
   // Input disables
   std::bitset<72> inputsToDisable() const;

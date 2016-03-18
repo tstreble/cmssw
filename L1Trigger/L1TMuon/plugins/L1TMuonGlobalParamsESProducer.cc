@@ -71,16 +71,6 @@ L1TMuonGlobalParamsESProducer::L1TMuonGlobalParamsESProducer(const edm::Paramete
    unsigned fwVersion = iConfig.getParameter<unsigned>("fwVersion");
    m_params_helper.setFwVersion(fwVersion);
 
-   int bxMin = iConfig.getParameter<int>("bxMin");
-   int bxMax = iConfig.getParameter<int>("bxMax");
-   if (bxMin > bxMax) {
-      m_params_helper.setBxMin(bxMax);
-      m_params_helper.setBxMax(bxMin);
-   } else {
-      m_params_helper.setBxMin(bxMin);
-      m_params_helper.setBxMax(bxMax);
-   }
-
    bool disableCaloInputs = iConfig.getParameter<bool>("caloInputsDisable");
    if (disableCaloInputs) {
       m_params_helper.setCaloInputsToDisable(std::bitset<28>(0xFFFFFFF));

@@ -97,6 +97,7 @@ using namespace l1t;
                                    int bx) const;
 
         // ----------member data ---------------------------
+        bool m_autoBxRange;
         int m_bxMin;
         int m_bxMax;
         std::bitset<72> m_inputsToDisable;
@@ -139,6 +140,10 @@ L1TMuonProducer::L1TMuonProducer(const edm::ParameterSet& iConfig) : m_debugOut(
   m_overlapTfInputTag = iConfig.getParameter<edm::InputTag>("overlapTFInput");
   m_endcapTfInputTag = iConfig.getParameter<edm::InputTag>("forwardTFInput");
   m_trigTowerTag = iConfig.getParameter<edm::InputTag>("triggerTowerInput");
+
+  m_autoBxRange = iConfig.getParameter<bool>("autoBxRange");
+  m_bxMin = iConfig.getParameter<int>("bxMin");
+  m_bxMax = iConfig.getParameter<int>("bxMax");
 
   m_barrelTfInputToken = consumes<MicroGMTConfiguration::InputCollection>(m_barrelTfInputTag);
   m_overlapTfInputToken = consumes<MicroGMTConfiguration::InputCollection>(m_overlapTfInputTag);
@@ -188,6 +193,13 @@ L1TMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(m_endcapTfInputToken, emtfMuons);
   iEvent.getByToken(m_overlapTfInputToken, omtfMuons);
   iEvent.getByToken(m_caloTowerInputToken, trigTowers);
+
+  // find out the BX range from the inputs
+  // the smallest BX window defines the output BX window
+  if (!m_autoBxRange) {
+    m_bxMin = std::max({bmtfMuons->getFirstBX(), emtfMuons->getFirstBX(), omtfMuons->getFirstBX(), trigTowers->getFirstBX()});
+    m_bxMax = std::min({bmtfMuons->getLastBX(), emtfMuons->getLastBX(), omtfMuons->getLastBX(), trigTowers->getLastBX()});
+  }
 
   // set BX range for outputs
   outMuons->setBXRange(m_bxMin, m_bxMax);
@@ -473,8 +485,6 @@ L1TMuonProducer::beginRun(edm::Run const& run, edm::EventSetup const& iSetup)
   }
 
   //microGMTParamsHelper->print(std::cout);
-  m_bxMin = microGMTParamsHelper->bxMin();
-  m_bxMax = microGMTParamsHelper->bxMax();
   m_inputsToDisable  = microGMTParamsHelper->inputsToDisable();
   edm::LogVerbatim("L1TMuonProducer") << "uGMT inputsToDisable: " << m_inputsToDisable << "\n                      EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0";
   m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParamsHelper->sortRankLUTPath(), microGMTParamsHelper->fwVersion(), microGMTParamsHelper->sortRankLUTPtFactor(), microGMTParamsHelper->sortRankLUTQualFactor());

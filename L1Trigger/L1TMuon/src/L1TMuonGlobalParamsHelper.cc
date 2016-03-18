@@ -42,20 +42,6 @@ void L1TMuonGlobalParamsHelper::setFwVersion(unsigned fwVersion)
 }
 
 
-void L1TMuonGlobalParamsHelper::setBxMin(int bxMin)
-{
-  pnodes_[BXRANGE].iparams_.resize(2);
-  pnodes_[BXRANGE].iparams_[BXMIN] = bxMin;
-}
-
-
-void L1TMuonGlobalParamsHelper::setBxMax(int bxMax)
-{
-  pnodes_[BXRANGE].iparams_.resize(2);
-  pnodes_[BXRANGE].iparams_[BXMAX] = bxMax;
-}
-
-
 void L1TMuonGlobalParamsHelper::setInputsToDisable(const std::bitset<72> &inputsToDisable)
 {
   pnodes_[INPUTS_TO_DISABLE].uparams_.resize(4);
@@ -106,8 +92,6 @@ void L1TMuonGlobalParamsHelper::print(std::ostream& out) const {
   out << "L1 MicroGMT Parameters" << std::endl;
 
   out << "Firmware version: " << this->fwVersion() << std::endl;
-
-  out << "Output BX range from " << this->bxMin() << " to " << this->bxMax() << std::endl;
 
   out << "InputsToDisable: " << this->inputsToDisable() << std::endl;
   out << "                 EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0" << std::endl;
