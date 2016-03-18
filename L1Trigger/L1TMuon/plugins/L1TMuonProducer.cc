@@ -196,7 +196,7 @@ L1TMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // find out the BX range from the inputs
   // the smallest BX window defines the output BX window
-  if (!m_autoBxRange) {
+  if (m_autoBxRange) {
     m_bxMin = std::max({bmtfMuons->getFirstBX(), emtfMuons->getFirstBX(), omtfMuons->getFirstBX(), trigTowers->getFirstBX()});
     m_bxMax = std::min({bmtfMuons->getLastBX(), emtfMuons->getLastBX(), omtfMuons->getLastBX(), trigTowers->getLastBX()});
   }
