@@ -47,6 +47,7 @@
 
 #include "CondFormats/L1TObjects/interface/L1TMuonGlobalParams.h"
 #include "CondFormats/DataRecord/interface/L1TMuonGlobalParamsRcd.h"
+#include "L1Trigger/L1TMuon/interface/L1TMuonGlobalParamsHelper.h"
 
 #include "TMath.h"
 //
@@ -96,9 +97,11 @@ using namespace l1t;
                                    int bx) const;
 
         // ----------member data ---------------------------
+        bool m_autoBxRange;
         int m_bxMin;
         int m_bxMax;
-        std::unique_ptr<L1TMuonGlobalParams> microGMTParams;
+        std::bitset<72> m_inputsToDisable;
+        std::unique_ptr<L1TMuonGlobalParamsHelper> microGMTParamsHelper;
         edm::InputTag m_barrelTfInputTag;
         edm::InputTag m_overlapTfInputTag;
         edm::InputTag m_endcapTfInputTag;
@@ -137,6 +140,10 @@ L1TMuonProducer::L1TMuonProducer(const edm::ParameterSet& iConfig) : m_debugOut(
   m_overlapTfInputTag = iConfig.getParameter<edm::InputTag>("overlapTFInput");
   m_endcapTfInputTag = iConfig.getParameter<edm::InputTag>("forwardTFInput");
   m_trigTowerTag = iConfig.getParameter<edm::InputTag>("triggerTowerInput");
+
+  m_autoBxRange = iConfig.getParameter<bool>("autoBxRange");
+  m_bxMin = iConfig.getParameter<int>("bxMin");
+  m_bxMax = iConfig.getParameter<int>("bxMax");
 
   m_barrelTfInputToken = consumes<MicroGMTConfiguration::InputCollection>(m_barrelTfInputTag);
   m_overlapTfInputToken = consumes<MicroGMTConfiguration::InputCollection>(m_overlapTfInputTag);
@@ -186,6 +193,13 @@ L1TMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(m_endcapTfInputToken, emtfMuons);
   iEvent.getByToken(m_overlapTfInputToken, omtfMuons);
   iEvent.getByToken(m_caloTowerInputToken, trigTowers);
+
+  // find out the BX range from the inputs
+  // the smallest BX window defines the output BX window
+  if (m_autoBxRange) {
+    m_bxMin = std::max({bmtfMuons->getFirstBX(), emtfMuons->getFirstBX(), omtfMuons->getFirstBX(), trigTowers->getFirstBX()});
+    m_bxMax = std::min({bmtfMuons->getLastBX(), emtfMuons->getLastBX(), omtfMuons->getLastBX(), trigTowers->getLastBX()});
+  }
 
   // set BX range for outputs
   outMuons->setBXRange(m_bxMin, m_bxMax);
@@ -392,9 +406,11 @@ L1TMuonProducer::splitAndConvertMuons(const edm::Handle<MicroGMTConfiguration::I
   int muIdx = 0;
   int currentLink = 0;
   for (size_t i = 0; i < in->size(bx); ++i, ++muIdx) {
-    if (currentLink != in->at(bx, i).link()) {
+    int link = in->at(bx, i).link();
+    if (m_inputsToDisable.test(link)) continue; // only process if input link is enabled
+    if (currentLink != link) {
       muIdx = 0;
-      currentLink = in->at(bx, i).link();
+      currentLink = link;
     }
     int gPhi = MicroGMTConfiguration::calcGlobalPhi(in->at(bx, i).hwPhi(), in->at(bx, i).trackFinderType(), in->at(bx, i).processor());
     int tfMuonIdx = 3 * (currentLink - 36) + muIdx;
@@ -427,9 +443,11 @@ L1TMuonProducer::convertMuons(const edm::Handle<MicroGMTConfiguration::InputColl
   int muIdx = 0;
   int currentLink = 0;
   for (size_t i = 0; i < in->size(bx); ++i, ++muIdx) {
-    if (currentLink != in->at(bx, i).link()) {
+    int link = in->at(bx, i).link();
+    if (m_inputsToDisable.test(link)) continue; // only process if input link is enabled
+    if (currentLink != link) {
       muIdx = 0;
-      currentLink = in->at(bx, i).link();
+      currentLink = link;
     }
     int gPhi = MicroGMTConfiguration::calcGlobalPhi(in->at(bx, i).hwPhi(), in->at(bx, i).trackFinderType(), in->at(bx, i).processor());
     int tfMuonIdx = 3 * (currentLink - 36) + muIdx;
@@ -461,17 +479,17 @@ L1TMuonProducer::beginRun(edm::Run const& run, edm::EventSetup const& iSetup)
   edm::ESHandle<L1TMuonGlobalParams> microGMTParamsHandle;
   microGMTParamsRcd.get(microGMTParamsHandle);
 
-  microGMTParams = std::unique_ptr<L1TMuonGlobalParams>(new L1TMuonGlobalParams(*microGMTParamsHandle.product()));
-  if (!microGMTParams) {
+  microGMTParamsHelper = std::unique_ptr<L1TMuonGlobalParamsHelper>(new L1TMuonGlobalParamsHelper(*microGMTParamsHandle.product()));
+  if (!microGMTParamsHelper) {
     edm::LogError("L1TMuonProducer") << "Could not retrieve parameters from Event Setup" << std::endl;
   }
 
-  //microGMTParams->print(std::cout);
-  m_bxMin = microGMTParams->bxMin();
-  m_bxMax = microGMTParams->bxMax();
-  m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParams->sortRankLUTPath(), microGMTParams->fwVersion(), microGMTParams->sortRankLUTPtFactor(), microGMTParams->sortRankLUTQualFactor());
-  m_isolationUnit.initialise(microGMTParams.get());
-  m_cancelOutUnit.initialise(microGMTParams.get());
+  //microGMTParamsHelper->print(std::cout);
+  m_inputsToDisable  = microGMTParamsHelper->inputsToDisable();
+  edm::LogVerbatim("L1TMuonProducer") << "uGMT inputsToDisable: " << m_inputsToDisable << "\n                      EMTF-|OMTF-|   BMTF    |OMTF+|EMTF+|            CALO           |  res  0";
+  m_rankPtQualityLUT = l1t::MicroGMTRankPtQualLUTFactory::create(microGMTParamsHelper->sortRankLUTPath(), microGMTParamsHelper->fwVersion(), microGMTParamsHelper->sortRankLUTPtFactor(), microGMTParamsHelper->sortRankLUTQualFactor());
+  m_isolationUnit.initialise(microGMTParamsHelper.get());
+  m_cancelOutUnit.initialise(microGMTParamsHelper.get());
 }
 
 // ------------ method called when ending the processing of a run  ------------
