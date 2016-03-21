@@ -39,17 +39,17 @@ bool UCTTower::process() {
   towerData = calibratedECALET + calibratedHCALET;
   if(towerData > etMask) towerData = etMask;
   uint32_t er = 0;
-  if(ecalET == 0 || hcalET == 0) {
+  if(calibratedECALET == 0 || calibratedHCALET == 0) {
     er = 0;
     towerData |= zeroFlagMask;
-    if(hcalET == 0 && ecalET != 0)
+    if(calibratedHCALET == 0 && calibratedECALET != 0)
       towerData |= eohrFlagMask;
   }
-  else if(ecalET == hcalET) {
+  else if(calibratedECALET == calibratedHCALET) {
     er = 0;
     towerData |= eohrFlagMask;
   }
-  else if(ecalET > hcalET) {
+  else if(calibratedECALET > calibratedHCALET) {
     er = logECALET - logHCALET;
     if(er > erMaxV) er = erMaxV;
     towerData |= eohrFlagMask;
@@ -80,7 +80,16 @@ bool UCTTower::processHFTower() {
     const std::vector< uint32_t > a = hfLUT->at((region - NRegionsInCard) * NHFEtaInRegion + iEta);
     calibratedET = a[hcalET];
   }
-  towerData = calibratedET + (hcalFB << miscShift) + (location() << ecalShift);
+  uint32_t absCaloEta = abs(caloEta());
+  if(absCaloEta > 29 && absCaloEta < 40) {
+    // Divide by two (since two duplicate towers are sent)
+    calibratedET /= 2;
+  }
+  else if(absCaloEta == 40 || absCaloEta == 41) {
+    // Divide by four
+    calibratedET /= 4;
+  }
+  towerData = calibratedET + (hcalFB << miscShift);
   return true;
 }
 
