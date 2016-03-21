@@ -11,7 +11,7 @@ L1TMuonGlobalParamsHelper::L1TMuonGlobalParamsHelper(const L1TMuonGlobalParams p
 std::bitset<72> L1TMuonGlobalParamsHelper::inputFlags(const int &nodeIdx) const
 {
   std::bitset<72> inputFlags;
-  if (pnodes_[nodeIdx].uparams_.size() < 4) {
+  if (pnodes_[nodeIdx].uparams_.size() != 4) {
     return inputFlags;
   }
 
@@ -29,6 +29,38 @@ std::bitset<72> L1TMuonGlobalParamsHelper::inputFlags(const int &nodeIdx) const
         inputFlags[OMTFNLINK1 + i] = ((pnodes_[nodeIdx].uparams_[OMTFINPUTS] >> (i + 6)) & 0x1);
         inputFlags[EMTFNLINK1 + i] = ((pnodes_[nodeIdx].uparams_[EMTFINPUTS] >> (i + 6)) & 0x1);
       }
+    }
+  }
+  return inputFlags;
+}
+
+
+std::bitset<28> L1TMuonGlobalParamsHelper::caloInputFlags(const int &nodeIdx) const
+{
+  if (pnodes_[nodeIdx].uparams_.size() == 4) {
+    return std::bitset<28>(pnodes_[nodeIdx].uparams_[CALOINPUTS]);
+  } else {
+    return std::bitset<28>();
+  }
+}
+
+
+std::bitset<12> L1TMuonGlobalParamsHelper::tfInputFlags(const int &nodeIdx, const int &tfIdx) const
+{
+  if (pnodes_[nodeIdx].uparams_.size() == 4) {
+    return std::bitset<12>(pnodes_[nodeIdx].uparams_[tfIdx]);
+  } else {
+    return std::bitset<12>();
+  }
+}
+
+
+std::bitset<6> L1TMuonGlobalParamsHelper::eomtfInputFlags(const int &nodeIdx, const size_t &startIdx, const int &tfIdx) const
+{
+  std::bitset<6> inputFlags;
+  if (pnodes_[nodeIdx].uparams_.size() == 4) {
+    for (size_t i = 0; i < 6; ++i) {
+      inputFlags[i] = ((pnodes_[nodeIdx].uparams_[tfIdx] >> (i + startIdx)) & 0x1);
     }
   }
   return inputFlags;
@@ -69,20 +101,20 @@ void L1TMuonGlobalParamsHelper::setCaloInputFlags(const int &nodeIdx, const std:
 }
 
 
+void L1TMuonGlobalParamsHelper::setTfInputFlags(const int &nodeIdx, const int &tfIdx, const std::bitset<12> &inputFlags)
+{
+  pnodes_[nodeIdx].uparams_.resize(4);
+  for (size_t i = 0; i < 12; ++i) {
+    pnodes_[nodeIdx].uparams_[tfIdx] += (inputFlags.test(i) << i);
+  }
+}
+
+
 void L1TMuonGlobalParamsHelper::setEOmtfInputFlags(const int &nodeIdx, const size_t &startIdx, const int &tfIdx, const std::bitset<6> &inputFlags)
 {
   pnodes_[nodeIdx].uparams_.resize(4);
   for (size_t i = 0; i < 6; ++i) {
     pnodes_[nodeIdx].uparams_[tfIdx] += (inputFlags.test(i) << (i + startIdx));
-  }
-}
-
-
-void L1TMuonGlobalParamsHelper::setBmtfInputFlags(const int &nodeIdx, const std::bitset<12> &inputFlags)
-{
-  pnodes_[nodeIdx].uparams_.resize(4);
-  for (size_t i = 0; i < 12; ++i) {
-    pnodes_[nodeIdx].uparams_[BMTFINPUTS] += (inputFlags.test(i) << i);
   }
 }
 
