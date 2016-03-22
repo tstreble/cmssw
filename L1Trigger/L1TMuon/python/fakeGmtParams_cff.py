@@ -15,9 +15,6 @@ gmtParamsSource = cms.ESSource(
 gmtParams = cms.ESProducer('L1TMuonGlobalParamsESProducer',
     fwVersion = cms.uint32(1),
 
-    bxMin = cms.int32(-2),
-    bxMax = cms.int32(2),
-
     # uGMT inputs to disable
     # disabled inputs are not used in the algo but are still in the readout
     caloInputsDisable = cms.bool(False),
