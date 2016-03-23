@@ -137,6 +137,13 @@ void l1t::Stage2Layer2TauAlgorithmFirmwareImp1::merging(const std::vector<l1t::C
                 isolBit = (hwIsoEnergy <= (params_->tauIsolationLUT()->data(LUTaddress)) ? 1 : 0);
                 tau.setHwIso(isolBit);
 
+                // development vars
+                tau.setIsMerged(false);
+                tau.setRawEt((short int) mainCluster.hwPt());
+                tau.setHasEM(mainCluster.hwPtEm() > 0);
+                tau.setIsoEt((short int) hwIsoEnergy);
+                tau.setNTT((short int) nrTowers);
+
                 //cout << "** DEBUG: eta: " << mainCluster.hwEta() << " et: " << tauHwFootprint << " nTT: " << nrTowers << endl;
                 //cout << "    ---> isoThr: " << params_->tauIsolationLUT()->data(LUTaddress) << " | isoEnergy: " << hwIsoEnergy << endl;
                 //cout << "    ---> isolBit: " << isolBit << endl;
@@ -412,6 +419,14 @@ void l1t::Stage2Layer2TauAlgorithmFirmwareImp1::merging(const std::vector<l1t::C
 
                 isolBit = (hwIsoEnergy <= (params_->tauIsolationLUT()->data(LUTaddress)) ? 1 : 0);
                 tau.setHwIso(isolBit);
+
+                // development vars
+                tau.setIsMerged(true);
+                tau.setRawEt((short int) (mainCluster.hwPt() + secondaryCluster->hwPt()));
+                tau.setHasEM(mainCluster.hwPtEm() > 0);
+                tau.setIsoEt((short int) hwIsoEnergy);
+                tau.setNTT((short int) nrTowers);
+
 
                 // Physical eta/phi. Computed from ieta/iphi of the seed tower and the fine-grain position within the seed
                 // use fg positon of main cluster only
