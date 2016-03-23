@@ -136,6 +136,12 @@ L1TCaloLayer1::L1TCaloLayer1(const edm::ParameterSet& iConfig) :
       }
     }
   }
+
+  // This sort corresponds to the sort condition on
+  // the output CaloTowerBxCollection
+  std::sort(twrList.begin(), twrList.end(), [](UCTTower* a, UCTTower* b) {
+      return CaloTools::caloTowerHash(a->caloEta(), a->caloPhi()) < CaloTools::caloTowerHash(b->caloEta(), b->caloPhi());
+      });
 }
 
 L1TCaloLayer1::~L1TCaloLayer1() {
@@ -227,8 +233,6 @@ L1TCaloLayer1::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   int theBX = 0; // Currently we only read and process the "hit" BX only
 
-  towersColl->resize(theBX, CaloTools::caloTowerHashMax()+1);
-  
   for(uint32_t twr = 0; twr < twrList.size(); twr++) {
     CaloTower caloTower;
     caloTower.setHwPt(twrList[twr]->et());               // Bits 0-8 of the 16-bit word per the interface protocol document
@@ -238,8 +242,7 @@ L1TCaloLayer1::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     caloTower.setHwPhi(twrList[twr]->caloPhi());         // caloPhi = 1-72
     caloTower.setHwEtEm(twrList[twr]->getEcalET());      // This is provided as a courtesy - not available to hardware
     caloTower.setHwEtHad(twrList[twr]->getHcalET());     // This is provided as a courtesy - not available to hardware
-    unsigned hash = CaloTools::caloTowerHash(twrList[twr]->caloEta(), twrList[twr]->caloPhi());
-    towersColl->set(theBX, hash, caloTower);
+    towersColl->push_back(theBX, caloTower);
   }
 
   iEvent.put(towersColl);
