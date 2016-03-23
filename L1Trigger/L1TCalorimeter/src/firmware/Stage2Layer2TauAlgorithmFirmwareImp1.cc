@@ -157,11 +157,11 @@ void l1t::Stage2Layer2TauAlgorithmFirmwareImp1::merging(const std::vector<l1t::C
                 double seedPhi     = CaloTools::towerPhi(mainCluster.hwEta(), mainCluster.hwPhi());
                 double seedPhiSize = CaloTools::towerPhiSize(mainCluster.hwEta());
                 if(mainCluster.fgEta()==0)      eta = seedEta; // center
-                else if(mainCluster.fgEta()==2) eta = seedEta + seedEtaSize*0.25; // center + 1/4
-                else if(mainCluster.fgEta()==1) eta = seedEta - seedEtaSize*0.25; // center - 1/4
+                else if(mainCluster.fgEta()==2) eta = seedEta + seedEtaSize*0.251; // center + 1/4
+                else if(mainCluster.fgEta()==1) eta = seedEta - seedEtaSize*0.251; // center - 1/4
                 if(mainCluster.fgPhi()==0)      phi = seedPhi; // center
-                else if(mainCluster.fgPhi()==2) phi = seedPhi + seedPhiSize*0.25; // center + 1/4
-                else if(mainCluster.fgPhi()==1) phi = seedPhi - seedPhiSize*0.25; // center - 1/4
+                else if(mainCluster.fgPhi()==2) phi = seedPhi + seedPhiSize*0.251; // center + 1/4
+                else if(mainCluster.fgPhi()==1) phi = seedPhi - seedPhiSize*0.251; // center - 1/4
 
                 // Set 4-vector
                 math::PtEtaPhiMLorentzVector calibP4((double)calibPt*params_->egLsb(), eta, phi, 0.);
@@ -437,11 +437,11 @@ void l1t::Stage2Layer2TauAlgorithmFirmwareImp1::merging(const std::vector<l1t::C
                 double seedPhi     = CaloTools::towerPhi(mainCluster.hwEta(), mainCluster.hwPhi());
                 double seedPhiSize = CaloTools::towerPhiSize(mainCluster.hwEta());
                 if(mainCluster.fgEta()==0)      eta = seedEta; // center
-                else if(mainCluster.fgEta()==2) eta = seedEta + seedEtaSize*0.25; // center + 1/4
-                else if(mainCluster.fgEta()==1) eta = seedEta - seedEtaSize*0.25; // center - 1/4
+                else if(mainCluster.fgEta()==2) eta = seedEta + seedEtaSize*0.251; // center + 1/4
+                else if(mainCluster.fgEta()==1) eta = seedEta - seedEtaSize*0.251; // center - 1/4
                 if(mainCluster.fgPhi()==0)      phi = seedPhi; // center
-                else if(mainCluster.fgPhi()==2) phi = seedPhi + seedPhiSize*0.25; // center + 1/4
-                else if(mainCluster.fgPhi()==1) phi = seedPhi - seedPhiSize*0.25; // center - 1/4
+                else if(mainCluster.fgPhi()==2) phi = seedPhi + seedPhiSize*0.251; // center + 1/4
+                else if(mainCluster.fgPhi()==1) phi = seedPhi - seedPhiSize*0.251; // center - 1/4
 
                 // Set 4-vector
                 math::PtEtaPhiMLorentzVector calibP4((double)calibPt*params_->egLsb(), eta, phi, 0.);
