@@ -179,17 +179,34 @@ process.fakeL1GTinput = cms.EDProducer("l1t::FakeInputProducer",
                     )
 
 ## Load our L1 menu
-process.load('L1Trigger.L1TGlobal.StableParametersConfig_cff')
+process.load('L1Trigger.L1TGlobal.StableParameters_cff')
 
 process.load("L1Trigger.L1TGlobal.TriggerMenu_cff")
-process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_Collisions2015_25nsStage1_v7_uGT.xml')
+process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_Collisions2016_dev_v3.xml')
 #process.menuDumper = cms.EDAnalyzer("L1TUtmTriggerMenuDumper")
+
+## Fill External conditions
+process.load('L1Trigger.L1TGlobal.simGtExtFakeProd_cfi')
+process.simGtExtFakeProd.bxFirst = cms.int32(-2)
+process.simGtExtFakeProd.bxLast = cms.int32(2)
+process.simGtExtFakeProd.setBptxAND   = cms.bool(True)
+process.simGtExtFakeProd.setBptxPlus  = cms.bool(True)
+process.simGtExtFakeProd.setBptxMinus = cms.bool(True)
+process.simGtExtFakeProd.setBptxOR    = cms.bool(True)
 
 
 ## Run the Stage 2 uGT emulator
-process.load('L1Trigger.L1TGlobal.simGlobalStage2Digis_cff')
-process.simGlobalStage2Digis.PrescaleCSVFile = cms.string('prescale_L1TGlobal.csv')
-process.simGlobalStage2Digis.PrescaleSet = cms.uint32(1)
+process.load('L1Trigger.L1TGlobal.simGtStage2Digis_cfi')
+process.simGtStage2Digis.PrescaleCSVFile = cms.string('prescale_L1TGlobal.csv')
+process.simGtStage2Digis.PrescaleSet = cms.uint32(1)
+process.simGtStage2Digis.ExtInputTag = cms.InputTag("simGtExtFakeProd")
+process.simGtStage2Digis.MuonInputTag = cms.InputTag("gtInput")
+process.simGtStage2Digis.EGammaInputTag = cms.InputTag("gtInput")
+process.simGtStage2Digis.TauInputTag = cms.InputTag("gtInput")
+process.simGtStage2Digis.JetInputTag = cms.InputTag("gtInput")
+process.simGtStage2Digis.EtSumInputTag = cms.InputTag("gtInput")
+
+
 #process.simGlobalStage2Digis.Verbosity = cms.untracked.int32(1)
 
 
@@ -199,8 +216,8 @@ process.dumpGTRecord = cms.EDAnalyzer("l1t::GtRecordDump",
 		tauInputTag   = cms.InputTag("gtInput"),
 		jetInputTag   = cms.InputTag("gtInput"),
 		etsumInputTag = cms.InputTag("gtInput"),
-		uGtAlgInputTag = cms.InputTag("simGlobalStage2Digis"),
-		uGtExtInputTag = cms.InputTag("gtInput"),
+		uGtAlgInputTag = cms.InputTag("simGtStage2Digis"),
+		uGtExtInputTag = cms.InputTag("simGtExtFakeProd"),
 		bxOffset       = cms.int32(skip),
 		minBx          = cms.int32(0),
 		maxBx          = cms.int32(0),
@@ -217,7 +234,7 @@ process.dumpGTRecord = cms.EDAnalyzer("l1t::GtRecordDump",
 
 
 process.load("L1Trigger.GlobalTriggerAnalyzer.l1GtTrigReport_cfi")
-process.l1GtTrigReport.L1GtRecordInputTag = "simGlobalStage2Digis"
+process.l1GtTrigReport.L1GtRecordInputTag = "simGtStage2Digis"
 process.l1GtTrigReport.PrintVerbosity = 2
 process.report = cms.Path(process.l1GtTrigReport)
 
@@ -234,7 +251,8 @@ else:
 process.p1 = cms.Path(
     process.gtInput
 #    *process.dumpGT
-    *process.simGlobalStage2Digis
+    *process.simGtExtFakeProd
+    *process.simGtStage2Digis
     *process.dumpGTRecord
 #    +process.menuDumper
 #    * process.debug
