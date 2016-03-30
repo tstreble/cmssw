@@ -182,28 +182,6 @@ float l1t::CaloTools::towerPhiSize(int ieta)
   return 2.*M_PI/kNPhi;
 }
 
-
-// convert from calo ieta to internal MP ieta
-int l1t::CaloTools::mpEta(int ieta) {
-
-  if (ieta>kHFBegin) return ieta-1;
-  else if (ieta<-1*kHFBegin) return ieta+1;
-  else return ieta;
-
-}
-
-
-// convert from internal MP ieta to calo ieta
-int l1t::CaloTools::caloEta(int mpEta) {
-
-  if (mpEta>kHFBegin) return mpEta+1;
-  else if (mpEta<-1*kHFBegin) return mpEta-1;
-  else return mpEta;
-
-}
-
-
-// convert calorimeter ieta to RCT region index
 int l1t::CaloTools::regionEta(int ieta)
 {
 
@@ -243,8 +221,6 @@ int l1t::CaloTools::gtPhi(int ieta, int iphi) {
   return round ( phi / kGTPhiLSB );
 
 }
-
-
 
 
 
