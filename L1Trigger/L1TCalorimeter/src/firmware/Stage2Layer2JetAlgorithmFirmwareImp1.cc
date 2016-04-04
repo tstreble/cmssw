@@ -405,6 +405,36 @@ void l1t::Stage2Layer2JetAlgorithmFirmwareImp1::calibrate(std::vector<l1t::Jet> 
 
     }
 
+  }
+  else if( params_->jetCalibrationType() == "function8PtParams22EtaBins" ){
+    // as above but with cap on max correction at low pT
+
+    if( params_->jetCalibrationParams().size() != 8*22){
+      edm::LogError("l1t|stage 2") << "Invalid input vector to calo params. Input vector of size: " <<
+           params_->jetCalibrationParams().size() << "  Require size: 176  Not calibrating Stage 2 Jets" << std::endl;
+      return;
+    }
+
+    for(std::vector<l1t::Jet>::iterator jet = jets.begin(); jet!=jets.end(); jet++){
+
+      if(jet->hwPt() < calibThreshold) continue;
+
+      int etaBin = CaloTools::regionEta( jet->hwEta() );
+
+      double params[8];
+      for(int i=0; i<8; i++){
+        params[i] = params_->jetCalibrationParams()[etaBin*8 + i];
+      }
+
+      double ptPhys = jet->hwPt() * params_->jetLsb();
+      double correction = params[6];
+      if (ptPhys>params[7]) correction = calibFit(ptPhys, params);
+
+      math::XYZTLorentzVector p4;
+      *jet = l1t::Jet( p4, correction*jet->hwPt(), jet->hwEta(), jet->hwPhi(), 0);
+
+    }
+
   } else {
     if(params_->jetCalibrationType() != "None" && params_->jetCalibrationType() != "none") 
       edm::LogError("l1t|stage 2") << "Invalid calibration type in calo params. Not calibrating Stage 2 Jets" << std::endl;
