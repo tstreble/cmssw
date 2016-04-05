@@ -8,6 +8,7 @@
 <use name="CondFormats/EcalObjects"/>
 <use name="CondFormats/L1TObjects"/>
 <use name="DataFormats/L1Trigger"/>
+<use name="DataFormats/L1TMuon"/>
 <use name="DataFormats/L1GlobalTrigger"/>
 <use name="DataFormats/L1TCalorimeter"/>
 <use name="DataFormats/L1TGlobal"/>
