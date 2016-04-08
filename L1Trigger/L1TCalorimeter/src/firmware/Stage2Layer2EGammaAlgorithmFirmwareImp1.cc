@@ -118,20 +118,15 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
 
 
       // Identification of the egamma
-      // Based on the seed tower FG bit, the H/E ratio of the seed toswer, and the shape of the cluster
-      bool hOverEBit = idHOverE(cluster, egamma.hwPt());  // Temporary, will ultimately be provided by Layer 1
+      // Based on the seed tower FG bit, the H/E ratio of the seed tower, and the shape of the cluster
+      bool hOverEBit = cluster.hOverE()>0;
       bool shapeBit  = idShape(cluster, egamma.hwPt());
-      bool fgBit     = !(cluster.hwSeedPt()>6 && cluster.fgECAL()); 
+      bool fgBit     = !(cluster.fgECAL()); 
       int qual = 0;
       if(fgBit)     qual |= (0x1); // first bit = FG
       if(hOverEBit) qual |= (0x1<<1); // second bit = H/E
       if(shapeBit)  qual |= (0x1<<2); // third bit = shape
       egamma.setHwQual( qual ); 
-
-      // Energy calibration
-      // Corrections function of ieta, ET, and cluster shape
-      int calibPt = calibratedPt(cluster, egamma.hwPt());
-      egamma.setHwPt(calibPt);
 
       // Isolation 
       int isoLeftExtension = params_->egIsoAreaNrTowersEta();
@@ -158,6 +153,11 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
       int isolBit = hwEtSum-hwFootPrint <= params_->egIsolationLUT()->data(lutAddress);       
       egamma.setHwIso(isolBit);
       
+      // Energy calibration
+      // Corrections function of ieta, ET, and cluster shape      
+      int calibPt = calibratedPt(cluster, egamma.hwPt());
+      egamma.setHwPt(calibPt);
+
 
       // Physical eta/phi. Computed from ieta/iphi of the seed tower and the fine-grain position within the seed
       double eta = 0.;
@@ -212,6 +212,7 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
     int fgBit = egamma.hwQual() & (0x1);
     int hOverEBit = egamma.hwQual()>>1 & (0x1);
     int shapeBit = egamma.hwQual()>>2 & (0x1);
+
     if(fgBit && shapeBit && hOverEBit){
       if(egamma.hwEta()<0)
 	egammas_eta_neg.push_back(egamma);
@@ -342,8 +343,8 @@ unsigned l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::isoLutIndex(int iEta,unsi
       if(iEtaNormed>28) iEtaNormed = 28;
       if(E>255) E = 255;
       unsigned int compressednTT = params_->egCompressShapesLUT()->data((0x1<<7)+(0x1<<8)+(0x1<<5)+nrTowers);
-      unsigned int compressedE     = params_->egCompressShapesLUT()->data((0x1<<7)+E);
-      unsigned int compressedEta   = params_->egCompressShapesLUT()->data((0x1<<7)+(0x1<<8)+iEtaNormed);
+      unsigned int compressedE     = params_->egCompressShapesLUT()->data((0x1<<7)+E)<<1;
+      unsigned int compressedEta   = params_->egCompressShapesLUT()->data((0x1<<7)+(0x1<<8)+iEtaNormed)<<1;
       return (compressednTT | compressedE | compressedEta);
     }
   
@@ -382,15 +383,13 @@ int l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::calibratedPt(const l1t::CaloCl
   if( clus.checkClusterFlag(CaloCluster::INCLUDE_SS) ) shape |= (0x1<<6);
 
   unsigned int lutAddress = calibrationLutIndex(clus.hwEta(), hwPt, shape); 
-  int corr = params_->egCalibrationLUT()->data(lutAddress); // 9 bits. [0,1]. corrPt = (1+corr)*rawPt
-  // the correction can only increase the energy, and it cannot increase it more than a factor two
+  int corr = params_->egCalibrationLUT()->data(lutAddress); // 9 bits. [0,2]. corrPt = (corr)*rawPt
+  // the correction can increase or decrease the energy by a factor 2 at most
   int rawPt = hwPt;
   if(rawPt>255)
     rawPt = 255;// 8 bits threshold
   int corrXrawPt = corr*rawPt;// 17 bits
-  // round corr*rawPt
-  int addPt = corrXrawPt>>9;// 8 MS bits (truncation)
-  int corrPt = rawPt + addPt;
+  int corrPt = corrXrawPt>>8;// 9 MS bits
   //Saturation done in Demux
   //if(corrPt>255) corrPt = 255;// 8 bits threshold
   return corrPt;
