@@ -34,6 +34,9 @@ std::vector<ConvertedHit> PrimConv(std::vector<TriggerPrimitive> TriggPrim, int 
 	int station = Det.station(), chamber = Det.chamber(), ring = Det.ring(), wire = C3.getCSCData().keywire, sector = Det.triggerSector(), strip = C3.getCSCData().strip; 
 	int pattern = C3.getPattern(), Id = C3.Id(), quality = C3.getCSCData().quality, BX = C3.getCSCData().bx, endcap = Det.endcap();
 	
+	if(station == 1 && ring == 1 && strip > 127)
+		ring = 4;
+	
 	if(ring == 4){Id += 9;}
 
 	//if(endcap == 1 && sector == 1)//
@@ -158,7 +161,7 @@ std::vector<ConvertedHit> PrimConv(std::vector<TriggerPrimitive> TriggPrim, int 
 	
 		eightstrip = (eightstrip>>1);
 		patcor = (patcor>>1);
-		//if(ring == 4) eightstrip -= 512;
+		if(ring == 4 && strip > 127) eightstrip -= 512;
 	}	
 	
 	if(clctpatsign) patcor = -patcor;
