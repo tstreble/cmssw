@@ -90,13 +90,7 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::clustering(const std::vector
       cluster.setHwPtEm(hwEtEm);
       cluster.setHwPtHad(hwEtHad);
       cluster.setHwSeedPt(hwEt);
-
-      // H/E of the cluster is H/E of the seed, with possible threshold on H
-      // H/E is currently encoded on 9 bits, from 0 to 1
-      //int hwEtHadTh = (tower.hwEtHad()>=hcalThreshold_ ? tower.hwEtHad() : 0);
-      //int hOverE    = (tower.hwEtEm()>0 ? (hwEtHadTh<<9)/tower.hwEtEm() : 511);
-      //if(hOverE>511) hOverE = 511;
-
+      
       bool hOverE = idHoverE(tower);
       cluster.setHOverE(hOverE);
       // FG of the cluster is FG of the seed
@@ -237,7 +231,6 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::filtering(const std::vector<
     // retrieve neighbour cluster candidates. At this stage they only contain the seed tower.
     int iEta   = cluster.hwEta();
     int iPhi   = cluster.hwPhi();
-
     bool filter = false;
     for( int deta = -1; deta < 2; ++deta ) 
     {
@@ -279,7 +272,6 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::refining(const std::vector<l
     {
       int iEta = cluster.hwEta();
       int iPhi = cluster.hwPhi();
-
       int iEtaP  = caloNav.offsetIEta(iEta, 1);
       int iEtaM  = caloNav.offsetIEta(iEta, -1);
       int iPhiP  = caloNav.offsetIPhi(iPhi, 1);
@@ -457,12 +449,9 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::refining(const std::vector<l
       //
       cluster.setFgEta(fgEta);
       cluster.setFgPhi(fgPhi);
-
     }
   }
 }
-
-
 
 
 
@@ -474,7 +463,7 @@ bool l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::idHoverE(const l1t::CaloTowe
 
   bool hOverEBit = true;
 
-  int ratio = tow.hwEtRatio();
+  int ratio =  tow.hwEtRatio();
   int qual  = tow.hwQual();
   bool denomZeroFlag = ((qual&0x1) > 0);
   bool eOverHFlag    = ((qual&0x2) > 0);
@@ -486,10 +475,10 @@ bool l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::idHoverE(const l1t::CaloTowe
   if (!denomZeroFlag && !eOverHFlag) // H > E, ratio = log(H/E)
     hOverEBit = false;
   if (!denomZeroFlag && eOverHFlag){ // E >= H , so ratio==log(E/H)
-    if(abs(tow.hwEta())<16)
+    if(abs(tow.hwEta())< 16 )
       hOverEBit = ratio >= 5;
     else
-      hOverEBit = ratio >= 4;
+    hOverEBit = ratio >= 4;
   }
   
   return hOverEBit;
