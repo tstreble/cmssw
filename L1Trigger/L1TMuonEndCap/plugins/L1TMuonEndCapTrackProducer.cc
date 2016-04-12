@@ -48,9 +48,6 @@ void L1TMuonEndCapTrackProducer::produce(edm::Event& ev,
 
   //bool verbose = false;
 
-
-  //std::cout<<"Start Upgraded Track Finder Producer::::: event = "<<ev.id().event()<<"\n\n";
-
   //fprintf (write,"12345\n"); //<-- part of printing text file to send verilog code, not needed if George's package is included
 
 
@@ -77,6 +74,7 @@ void L1TMuonEndCapTrackProducer::produce(edm::Event& ev,
     auto digi = (*chamber).second.first;
     auto dend = (*chamber).second.second;
     for( ; digi != dend; ++digi ) {
+	
       out.push_back(TriggerPrimitive((*chamber).first,*digi));
     }
   }
@@ -101,7 +99,6 @@ void L1TMuonEndCapTrackProducer::produce(edm::Event& ev,
 
 		tester.push_back(*tp);
 
-		//std::cout<<"\ntrigger prim found station:"<<tp->detId<CSCDetId>().station()<<std::endl;
       }
 
      }
@@ -334,7 +331,7 @@ for(int SectIndex=0;SectIndex<NUM_SECTORS;SectIndex++){//perform TF on all 12 se
         //int bx = 0;
 		float theta_angle = (AllTracks[fbest].theta*0.2851562 + 8.5)*(3.14159265359/180);
 		float eta = (-1)*log(tan(theta_angle/2));
-		std::pair<int,l1t::RegionalMuonCand> outPair(sebx,outCand);
+		std::pair<int,l1t::RegionalMuonCand> outPair(ebx,outCand);
 		
 		if(!ME13 && fabs(eta) > 1.1)
 			holder.push_back(outPair);
