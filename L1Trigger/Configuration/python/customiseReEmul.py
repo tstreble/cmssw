@@ -92,7 +92,6 @@ def L1TReEmulFromRAW(process):
 def L1TReEmulMCFromRAW(process):
     L1TReEmulFromRAW(process)
     if eras.stage2L1Trigger.isChosen():
-        L1TReEmulStage2FromRAW(process)
         process.simEmtfDigis.CSCInput           = cms.InputTag('simCscTriggerPrimitiveDigis','MPCSORTED')
         process.simOmtfDigis.srcCSC             = cms.InputTag('simCscTriggerPrimitiveDigis','MPCSORTED')
     return process
