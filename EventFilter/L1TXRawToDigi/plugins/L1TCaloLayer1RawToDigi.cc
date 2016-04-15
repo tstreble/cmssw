@@ -303,7 +303,8 @@ void L1TCaloLayer1RawToDigi::makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data,
       for(uint32_t iPhi = 0; iPhi < 2; iPhi++) {
 	if(iPhi == 1 && iEta == 40) iEta = 41;
 	int cPhi = 1 + lPhi * 4 + iPhi * 2; // Calorimeter phi index: 1, 3, 5, ... 71
-        if(iEta == 40) cPhi += 2; // Last two HF are 3, 7, 11, ...
+        if(iEta == 41) cPhi -= 2; // Last two HF are 3, 7, 11, ...
+        cPhi = (cPhi+69)%72 + 1; // cPhi -= 2 mod 72
 	int cEta = iEta;
 	if(negativeEta) cEta = -iEta;
 	// This code is fragile! Note that towerDatum is packed as is done in HcalTriggerPrimitiveSample
