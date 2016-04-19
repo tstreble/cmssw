@@ -139,6 +139,7 @@ namespace stage2 {
        jet.setHwEta(CaloTools::caloEta(mpEta));
        jet.setHwPhi((raw_data >> 6) & 0x7F);
        jet.setHwPt((raw_data >> 13) & 0xFFFF);
+       jet.setHwQual((raw_data>>29) & 0x1 );
          
        LogDebug("L1T") << "Jet: eta " << jet.hwEta() << " phi " << jet.hwPhi() << " pT " << jet.hwPt() << " qual " << jet.hwQual();
 
@@ -169,12 +170,13 @@ namespace stage2 {
        }
        
        LogDebug("L1") << "block ID=" << block.header().getID() << " etasign=" << etasign;
-       
-       eg.setHwEta(etasign*((raw_data >> 4) & 0x3F));
-       eg.setHwPhi((raw_data >> 10) & 0x7F);
-       eg.setHwPt((raw_data >> 21) & 0x3FF);
-       eg.setHwQual( 0 );  // placeholder because we need to decide what goes here
-       eg.setHwIso((raw_data >> 1) & 0x2); 
+
+       eg.setHwEta(etasign*((raw_data >> 3) & 0x3F));
+       eg.setHwPhi((raw_data >> 9) & 0x7F);
+       eg.setHwPt((raw_data >> 20) & 0xFFF);
+       eg.setHwIso((raw_data>>1) & 0x2);       
+       eg.setHwQual((raw_data>>16) & 0x4 );
+
 	   
        LogDebug("L1T") << "Egamma: eta " << eg.hwEta() << " phi " << eg.hwPhi() << " pT " << eg.hwPt() << " qual " << eg.hwQual();
        
@@ -205,11 +207,11 @@ namespace stage2 {
        
        LogDebug("L1") << "block ID=" << block.header().getID() << " etasign=" << etasign;
        
-       tau.setHwEta(etasign*((raw_data >> 4) & 0x3F));
-       tau.setHwPhi((raw_data >> 10) & 0x7F);
-       tau.setHwPt((raw_data >> 21) & 0x3FF);
-       tau.setHwQual( 0 );
-       tau.setHwIso((raw_data >> 1) & 0x2);  
+       tau.setHwEta(etasign*((raw_data >> 3) & 0x3F));
+       tau.setHwPhi((raw_data >> 9) & 0x7F);
+       tau.setHwPt((raw_data >> 20) & 0xFFF);
+       tau.setHwIso((raw_data>>1) & 0x2);       
+       tau.setHwQual((raw_data>>16) & 0x4 );
        
        LogDebug("L1T") << "Tau: eta " << tau.hwEta() << " phi " << tau.hwPhi() << " pT " << tau.hwPt() << " qual " << tau.hwQual();
        
