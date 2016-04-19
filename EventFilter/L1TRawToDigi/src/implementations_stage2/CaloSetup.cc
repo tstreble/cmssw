@@ -61,7 +61,11 @@ namespace l1t {
                auto jet_unp = UnpackerFactory::get()->make("stage2::JetUnpacker");
                auto tau_unp = UnpackerFactory::get()->make("stage2::TauUnpacker");
 
-               auto mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker");
+	       auto mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker");
+	       if (fw >= 0x10010007) {  // change to 0x10010008 before making a PR !
+		 mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker_v2");
+	       }
+	       
 
                UnpackerMap res;
                if (fed == 1366 || (fed == 1360 && board == 0x221B)) {
