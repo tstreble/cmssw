@@ -62,9 +62,9 @@ namespace l1t {
                auto tau_unp = UnpackerFactory::get()->make("stage2::TauUnpacker");
 
 	       auto mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker");
-	       if (fw >= 0x10010007) {  // change to 0x10010008 before making a PR !
-		 mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker_v2");
-	       }
+	       //	       if (fw >= 0x10010007) {  // change to 0x10010008 before making a PR !
+	       mp_unp = UnpackerFactory::get()->make("stage2::MPUnpacker_0x1001000b");
+		 //	       }
 	       
 
                UnpackerMap res;
