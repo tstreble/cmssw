@@ -174,8 +174,8 @@ namespace stage2 {
        eg.setHwEta(etasign*((raw_data >> 3) & 0x3F));
        eg.setHwPhi((raw_data >> 9) & 0x7F);
        eg.setHwPt((raw_data >> 20) & 0xFFF);
-       eg.setHwIso((raw_data>>1) & 0x2);       
-       eg.setHwQual((raw_data>>16) & 0x4 );
+       eg.setHwIso((raw_data>>1) & 0x3);       
+       eg.setHwQual((raw_data>>16) & 0xf );
 
 	   
        LogDebug("L1T") << "Egamma: eta " << eg.hwEta() << " phi " << eg.hwPhi() << " pT " << eg.hwPt() << " qual " << eg.hwQual();
@@ -210,8 +210,8 @@ namespace stage2 {
        tau.setHwEta(etasign*((raw_data >> 3) & 0x3F));
        tau.setHwPhi((raw_data >> 9) & 0x7F);
        tau.setHwPt((raw_data >> 20) & 0xFFF);
-       tau.setHwIso((raw_data>>1) & 0x2);       
-       tau.setHwQual((raw_data>>16) & 0x4 );
+       tau.setHwIso((raw_data>>1) & 0x3);       
+       tau.setHwQual((raw_data>>16) & 0xf );
        
        LogDebug("L1T") << "Tau: eta " << tau.hwEta() << " phi " << tau.hwPhi() << " pT " << tau.hwPt() << " qual " << tau.hwQual();
        
