@@ -141,7 +141,7 @@ for(int SectIndex=0;SectIndex<NUM_SECTORS;SectIndex++){//perform TF on all 12 se
 						   : OutputHits->at(iHit).CSC_ID() + 9 ) ) &&
 		 ConvHits.at(iCHit).Wire()    == OutputHits->at(iHit).Wire()    &&
 		 ConvHits.at(iCHit).Strip()   == OutputHits->at(iHit).Strip()   &&
-		 ConvHits.at(iCHit).BX()      == OutputHits->at(iHit).BX() ) {
+		 ConvHits.at(iCHit).BX() - 6  == OutputHits->at(iHit).BX() ) {
 	      // isMatched = true;
 	      OutputHits->at(iHit).set_zone_hit    ( ConvHits.at(iCHit).Zhit()   );
 	      OutputHits->at(iHit).set_phi_hit     ( ConvHits.at(iCHit).Ph_hit() );
@@ -335,7 +335,7 @@ for(int SectIndex=0;SectIndex<NUM_SECTORS;SectIndex++){//perform TF on all 12 se
 				       A->TP().getCSCData().cscID          == OutputHits->at(iHit).CSC_ID()  and
 				       A->Wire()                           == OutputHits->at(iHit).Wire()    and
 				       A->Strip()                          == OutputHits->at(iHit).Strip()   and
-				       A->TP().getCSCData().bx             == OutputHits->at(iHit).BX() ) {
+				       A->TP().getCSCData().bx - 6         == OutputHits->at(iHit).BX() ) {
 				    thisHit = OutputHits->at(iHit);
 				    thisTrack.push_HitIndex(iHit);
 				  }

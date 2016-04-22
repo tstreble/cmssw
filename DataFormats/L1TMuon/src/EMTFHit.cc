@@ -36,7 +36,7 @@ namespace l1t {
     set_strip     ( _digi.getStrip()   );
     set_pattern   ( _digi.getPattern() );
     set_bend      ( _digi.getBend()    );
-    set_bx        ( _digi.getBX()      );
+    set_bx        ( _digi.getBX() - 6  ); // Standard for csctfDigis in data, simCscTriggerPrimitiveDigis in MC
     set_mpc_link  ( _digi.getMPCLink() );
     set_bx0       ( _digi.getBX0()     );
     set_sync_err  ( _digi.getSyncErr() );
