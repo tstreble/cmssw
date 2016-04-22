@@ -211,7 +211,8 @@ int getNLBdPhiBin(float dPhi, int bits, int max=512)
   /* float sign_ = 1; */
   /* if (dPhi<0) */
   /*   sign_ = -1; */
-  /* dPhi = fabs(dPhi); */
+
+  dPhi = fabs(dPhi);
   
   if (max==256)
     {
@@ -1149,18 +1150,10 @@ float CalculatePt(L1TMuon::InternalTrack track , const edm::EventSetup& es, int 
        
       }
         
-			switch(s-7){
-      case 1: mode_inv |= 1;break;
-      case 2: mode_inv |= 2;break;
-      case 3: mode_inv |= 4;break;
-      case 4: mode_inv |= 8;break;
-      default: mode_inv |= 0;
-			}
-			x++;
+      x++;
 		}
 	}
 	
-	// Why do we set mode_inv both here and 5 lines above? - AWB 22.04.16
 	mode_inv = 0;
 	if(mode & 1)
 		mode_inv |= 8;
@@ -1170,8 +1163,8 @@ float CalculatePt(L1TMuon::InternalTrack track , const edm::EventSetup& es, int 
 		mode_inv |= 2;
 	if(mode & 8)
 		mode_inv |= 1;
-	
-	if(verbose) std::cout<<"\nInverted mode = "<< mode_inv <<std::endl; 
+
+	if(verbose) std::cout << "\n Mode = " << mode << ", inverted mode = " << mode_inv << std::endl; 
 	
 	//////////////////////////////////////////////////
 	//// Calculate Delta Phi and Eta Combinations ////
