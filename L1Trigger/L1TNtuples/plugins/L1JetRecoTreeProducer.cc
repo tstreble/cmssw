@@ -181,7 +181,6 @@ void L1JetRecoTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSe
   edm::Handle<reco::CaloMETCollection> caloMet;
   iEvent.getByToken(caloMetToken_, caloMet);
 
-
   if (pfJets.isValid()) {
 
     jet_data->nJets=0;
@@ -217,7 +216,6 @@ void L1JetRecoTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSe
   if (caloMet.isValid()) {
 
     doCaloMet(caloMet);
-
   }
   else {
     if (!caloMetMissing_) {edm::LogWarning("MissingProduct") << "CaloMet not found. Branch will not be filled" << std::endl;}
@@ -385,11 +383,11 @@ L1JetRecoTreeProducer::doCaloMet(edm::Handle<reco::CaloMETCollection> caloMet) {
 
   const reco::CaloMETCollection *metCol = caloMet.product();
   const reco::CaloMET theMet = metCol->front();
-  
+
   met_data->caloMet     = theMet.et();
   met_data->caloMetPhi  = theMet.phi();
   met_data->caloSumEt   = theMet.sumEt();
-  
+
 }
 
 bool
