@@ -49,9 +49,13 @@ void l1t::Stage2Layer2EtSumAlgorithmFirmwareImp1::processEvent(const std::vector
         l1t::CaloTower tower = l1t::CaloTools::getTower(towers, ieta, iphi);
 
 		if (tower.hwPt()>metTowThresholdHw_ && CaloTools::mpEta(abs(tower.hwEta()))<=metEtaMax_) {
-
+		  
+		  // x- and -y coefficients are truncated by after multiplication of Et by trig coefficient.
+		  // The trig coefficients themselves take values [-1023,1023] and so were scaled by
+		  // 2^10 = 1024, which requires bitwise shift to the right of the final value by 10 bits.
+		  // This is accounted for at ouput of demux (see Stage2Layer2DemuxSumsAlgoFirmwareImp1.cc)
 		  ringEx += (int32_t) (tower.hwPt() * std::trunc ( cos_coeff[iphi - 1] ));
-		  ringEy += (int32_t) (tower.hwPt() * std::trunc ( sin_coeff[iphi-1] ));
+		  ringEy += (int32_t) (tower.hwPt() * std::trunc ( sin_coeff[iphi - 1] ));
 
 		}
 		if (tower.hwPt()>ettTowThresholdHw_ && CaloTools::mpEta(abs(tower.hwEta()))<=ettEtaMax_) 
@@ -62,9 +66,6 @@ void l1t::Stage2Layer2EtSumAlgorithmFirmwareImp1::processEvent(const std::vector
       ey += ringEy;
       et += ringEt;
     }
-
-    ex >>= 10;
-    ey >>= 10;
 
     math::XYZTLorentzVector p4;
 
