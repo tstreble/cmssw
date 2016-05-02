@@ -7,12 +7,8 @@ l1JetRecoTree = cms.EDAnalyzer("L1JetRecoTreeProducer",
   jetptThreshold          = cms.double(30),
   jetetaMax               = cms.double(3.),
   pfMetToken              = cms.untracked.InputTag("pfMetT1"),
-<<<<<<< HEAD
   caloMetToken            = cms.untracked.InputTag("caloMet"),
   caloMetBEToken          = cms.untracked.InputTag("caloMetBE")
-=======
-  caloMetToken            = cms.untracked.InputTag("caloMet")
->>>>>>> 3bfd3dc... pfMet Type-1 correction applied and the addition of caloMet in the sums branch of ntuples
 )
 
 
