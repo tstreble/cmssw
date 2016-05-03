@@ -44,85 +44,85 @@ namespace l1t {
   // Based on L1Trigger/L1TMuonEndCap/interface/PtAssignment.h
   // "Mode" here is the true mode, not the inverted mode used in PtAssignment.h
   void EMTFTrack::Import_pT_LUT(int _mode, unsigned long _address) {
-    if     (_mode == 12) { // mode_inv == 3
+    if     (_mode == 12) {
       set_dPhi_12     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_12 (dPhi_12 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_12   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_1      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_2      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_1        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_2        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_1      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_2      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_1        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_2        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 10) { // mode_inv == 5
+    else if (_mode == 10) {
       set_dPhi_13     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_13 (dPhi_13 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_13   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_1      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_3      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_1        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_3        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_1      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_3      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_1        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_3        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 9) { // mode_inv == 9
+    else if (_mode == 9) {
       set_dPhi_14     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_14 (dPhi_14 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_14   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_1      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_4      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_1        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_4        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_1      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_1 (clct_1   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_4      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_1        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_4        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 6) { // mode_inv = 6
+    else if (_mode == 6) {
       set_dPhi_23     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_23 (dPhi_23 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_23   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_2      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_3      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_2        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_3        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_2      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_3      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_2        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_3        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 5) { // mode_inv == 10
+    else if (_mode == 5) {
       set_dPhi_24     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_24 (dPhi_24 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_24   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_2      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_4      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_2        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_4        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_2      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_2 (clct_2   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_4      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_2        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_4        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 3) { // mode_inv == 12
+    else if (_mode == 3) {
       set_dPhi_34     ( ( _address >> (0) )   & ( (1 << 9) - 1) );
       set_dPhi_34 (dPhi_34 * (( ( _address >> (0+9) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
       set_dTheta_34   ( ( _address >> (0+9+1) ) & ( (1 << 3) - 1) );
-      set_clct_3      ( ( _address >> (0+9+1+3) ) & ( (1 << 2) - 1) );
-      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+3+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_clct_4      ( ( _address >> (0+9+1+3+2+1) ) & ( (1 << 2) - 1) );
-      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+3+2+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
-      set_fr_3        ( ( _address >> (0+9+1+3+2+1+2+1) ) & ( (1 << 1) - 1) );
-      set_fr_4        ( ( _address >> (0+9+1+3+2+1+2+1+1) ) & ( (1 << 1) - 1) );
-      set_eta_LUT     ( ( _address >> (0+9+1+3+2+1+2+1+1+1) ) & ( (1 << 5) - 1) );
+      set_clct_3      ( ( _address >> (0+9+1+2) ) & ( (1 << 2) - 1) );
+      set_clct_3 (clct_3   * ( ( ( _address >> (0+9+1+2+3) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_clct_4      ( ( _address >> (0+9+1+2+3+1) ) & ( (1 << 2) - 1) );
+      set_clct_4 (clct_4   * ( ( ( _address >> (0+9+1+2+3+1+2) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
+      set_fr_3        ( ( _address >> (0+9+1+2+3+1+2+1) ) & ( (1 << 1) - 1) );
+      set_fr_4        ( ( _address >> (0+9+1+2+3+1+2+1+1) ) & ( (1 << 1) - 1) );
+      set_eta_LUT     ( ( _address >> (0+9+1+2+3+1+2+1+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+9+1+3+2+1+2+1+1+1+5) ) & ( (1 << 4) - 1) );
     }      
-    else if (_mode == 14) { // mode_inv == 7
+    else if (_mode == 14) {
       set_dPhi_12     ( ( _address >> (0) )     & ( (1 << 7) - 1) );
       set_dPhi_23     ( ( _address >> (0+7) )   & ( (1 << 5) - 1) );
       set_dPhi_12 (dPhi_12 * (( ( _address >> (0+7+5) ) & ( (1 << 1) - 1) ) == 0 ? -1 : 1) );
@@ -134,7 +134,7 @@ namespace l1t {
       set_eta_LUT     ( ( _address >> (0+7+5+1+1+3+2+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+7+5+1+1+3+2+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 13) { // mode_inv == 11
+    else if (_mode == 13) {
       set_dPhi_12     ( ( _address >> (0) )     & ( (1 << 7) - 1) );
       set_dPhi_24     ( ( _address >> (0+7) )   & ( (1 << 5) - 1) );
       set_dPhi_12 (dPhi_12 * (( ( _address >> (0+7+5) ) & ( (1 << 1) - 1 ) ) == 0 ? -1 : 1) );
@@ -158,7 +158,7 @@ namespace l1t {
       set_eta_LUT     ( ( _address >> (0+7+5+1+1+3+2+1+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+7+5+1+1+3+2+1+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 7) { // mode_inv == 14
+    else if (_mode == 7) {
       set_dPhi_23     ( ( _address >> (0) )     & ( (1 << 7) - 1) );
       set_dPhi_34     ( ( _address >> (0+7) )   & ( (1 << 6) - 1) );
       set_dPhi_23 (dPhi_23 * (( ( _address >> (0+7+6) ) & ( (1 << 1) - 1 ) ) == 0 ? -1 : 1) );
@@ -169,7 +169,7 @@ namespace l1t {
       set_eta_LUT     ( ( _address >> (0+7+6+1+1+3+2+1) ) & ( (1 << 5) - 1) );
       set_mode_LUT    ( ( _address >> (0+7+6+1+1+3+2+1+5) ) & ( (1 << 4) - 1) );
     }
-    else if (_mode == 15) { // mode_inv == 15
+    else if (_mode == 15) {
       set_dPhi_12     ( ( _address >> (0) )     & ( (1 << 7) - 1) );
       set_dPhi_23     ( ( _address >> (0+7) )   & ( (1 << 5) - 1) );
       set_dPhi_34     ( ( _address >> (0+7+5) ) & ( (1 << 6) - 1) );
