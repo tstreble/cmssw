@@ -24,27 +24,26 @@ caloStage2Params.egLsb                      = cms.double(0.5)
 caloStage2Params.egSeedThreshold            = cms.double(2.)
 caloStage2Params.egNeighbourThreshold       = cms.double(1.)
 caloStage2Params.egHcalThreshold            = cms.double(0.)
-caloStage2Params.egTrimmingLUTFile          = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egTrimmingLUT_10_v16.01.19.txt")
+caloStage2Params.egTrimmingLUTFile          = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egTrimmingLUT_5.txt")
 caloStage2Params.egMaxHcalEt                = cms.double(0.)
 caloStage2Params.egMaxPtHOverE          = cms.double(128.)
-caloStage2Params.egMaxHOverELUTFile         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/HoverEIdentification_0.995_v15.12.23.txt")
-caloStage2Params.egCompressShapesLUTFile    = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egCompressLUT_v4.txt")
+caloStage2Params.egMaxHOverELUTFile         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egMaxHOverELUT_995eff.txt")
+caloStage2Params.egCompressShapesLUTFile    = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egCompressLUT_v1.txt")
 caloStage2Params.egShapeIdType              = cms.string("compressed")
 caloStage2Params.egShapeIdVersion           = cms.uint32(0)
-caloStage2Params.egShapeIdLUTFile           = cms.FileInPath("L1Trigger/L1TCalorimeter/data/shapeIdentification_adapt0.99_compressedieta_compressedE_compressedshape_v15.12.08.txt")
+caloStage2Params.egShapeIdLUTFile           = cms.FileInPath("L1Trigger/L1TCalorimeter/data/shapeIdentification_0.99_compressedieta_compressedE_compressedshape_v15.10.20.txt")
 caloStage2Params.egPUSType                  = cms.string("None")
-caloStage2Params.egIsolationType            = cms.string("compressed")
-caloStage2Params.egIsoLUTFile               = cms.FileInPath("L1Trigger/L1TCalorimeter/data/IsoIdentification_0.25_adapt_extrap_EBEE_v16.04.04.txt")
+caloStage2Params.egIsoLUTFile               = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egIsoLUTPU40bx25NrRings4Eff95.txt")
 caloStage2Params.egIsoAreaNrTowersEta       = cms.uint32(2)
 caloStage2Params.egIsoAreaNrTowersPhi       = cms.uint32(4)
 caloStage2Params.egIsoVetoNrTowersPhi       = cms.uint32(3)
 #caloStage2Params.egIsoPUEstTowerGranularity = cms.uint32(1)
 #caloStage2Params.egIsoMaxEtaAbsForTowerSum  = cms.uint32(4)
 #caloStage2Params.egIsoMaxEtaAbsForIsoSum    = cms.uint32(27)
-caloStage2Params.egPUSParams                = cms.vdouble(1,4,32) #Isolation window in firmware goes up to abs(ieta)=32 for now
+caloStage2Params.egPUSParams                = cms.vdouble(1,4,27)
 caloStage2Params.egCalibrationType          = cms.string("compressed")
 caloStage2Params.egCalibrationVersion       = cms.uint32(0)
-caloStage2Params.egCalibrationLUTFile       = cms.FileInPath("L1Trigger/L1TCalorimeter/data/corrections_Trimming5_compressedieta_compressedE_compressedshape_v16.04.01.txt")
+caloStage2Params.egCalibrationLUTFile       = cms.FileInPath("L1Trigger/L1TCalorimeter/data/corrections_Trimming5_PU40bx25_compressedieta_compressedE_compressedshape_v15.10.20.txt")
 
 # Tau
 caloStage2Params.tauLsb                        = cms.double(0.5)
@@ -53,11 +52,10 @@ caloStage2Params.tauNeighbourThreshold         = cms.double(0.)
 caloStage2Params.tauIsoAreaNrTowersEta         = cms.uint32(2)
 caloStage2Params.tauIsoAreaNrTowersPhi         = cms.uint32(4)
 caloStage2Params.tauIsoVetoNrTowersPhi         = cms.uint32(2)
-caloStage2Params.tauPUSType                    = cms.string("None")
-caloStage2Params.tauIsoLUTFile                 = cms.FileInPath("L1Trigger/L1TCalorimeter/data/Tau_Iso_LUT_Option_21_NoLayer1Calibration_noCompressionBlock_v4.0.0.txt")
-caloStage2Params.tauCalibrationLUTFile         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/Tau_Calibration_LUT_NoLayer1Calibration_v9.0.0.txt")
-caloStage2Params.tauCompressLUTFile            = cms.FileInPath("L1Trigger/L1TCalorimeter/data/tauCompressAllLUT_12bit_v3.txt")
-caloStage2Params.tauPUSParams                  = cms.vdouble(1,4,32)
+caloStage2Params.tauPUSType                 = cms.string("None")
+caloStage2Params.tauIsoLUTFile                 = cms.FileInPath("L1Trigger/L1TCalorimeter/data/tauIsoLUTetPU.txt")
+caloStage2Params.tauCalibrationLUTFile         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/tauCalibrationLUT.txt")
+caloStage2Params.tauPUSParams                  = cms.vdouble(1,4,27)
 
 # jets
 caloStage2Params.jetLsb                = cms.double(0.5)
@@ -65,10 +63,10 @@ caloStage2Params.jetSeedThreshold      = cms.double(1.5)
 caloStage2Params.jetNeighbourThreshold = cms.double(0.)
 caloStage2Params.jetPUSType            = cms.string("ChunkyDonut")
 
-# Calibration options
-# function6PtParams22EtaBins or None
-#caloStage2Params.jetCalibrationType    = cms.string("None")
-caloStage2Params.jetCalibrationType = cms.string("function6PtParams22EtaBins")
+#Calibration options 
+# e.g. function6PtParams22EtaBins
+caloStage2Params.jetCalibrationType    = cms.string("None")
+#caloStage2Params.jetCalibrationType = cms.string("function6PtParams22EtaBins")
 
 
 #Vector with 6 parameters for eta bin, from low eta to high
@@ -103,9 +101,9 @@ caloStage2Params.jetCalibrationParams  = jetCalibParamsVector
 
 # sums: 0=ET, 1=HT, 2=MET, 3=MHT
 caloStage2Params.etSumLsb                = cms.double(0.5)
-caloStage2Params.etSumEtaMin             = cms.vint32(1, 1, 1, 1)
-caloStage2Params.etSumEtaMax             = cms.vint32(28,  28,  28,  28)
-caloStage2Params.etSumEtThreshold        = cms.vdouble(0.,  35.,  0.,  35.)
+caloStage2Params.etSumEtaMin             = cms.vint32(0, 0, 0, 0)
+caloStage2Params.etSumEtaMax             = cms.vint32(40,  36,  40,  36)
+caloStage2Params.etSumEtThreshold        = cms.vdouble(0.,  0.,   0.,   0.)
 
 # Layer 1 LUT specification
 #
@@ -120,3 +118,5 @@ caloStage2Params.layer1HCalScaleETBins = cms.vint32([1])
 caloStage2Params.layer1HCalScaleFactors = cms.vdouble([1.]*28)
 caloStage2Params.layer1HFScaleETBins = cms.vint32([1])
 caloStage2Params.layer1HFScaleFactors = cms.vdouble([1.]*12)
+
+
