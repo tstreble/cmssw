@@ -283,12 +283,12 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
       int CSCID = ME->CSC_ID();
       int Station = ME->Station();
       int CSCID_offset = (Sector - 1) * 9;
-      int strip = 0; // FIXME EMTF TEAM //int strip = ME->CLCT_key_half_strip();
-      int wire = 0; // FIXME EMTF TEAM //int wire = ME->Key_wire_group();
+      int strip = ME->CLCT_key_half_strip();
+      int wire = ME->Key_wire_group();
       int CSCID_offset_ring1 = CSCID + (3 * (Sector-1)) + 1; 
       int CSCID_offset_ring2 = CSCID + (6 * (Sector-1)) - 2;
       int ring = 0;
-      int bx=0;  // FIXME EMTF TEAM //int bx = ME->Tbin_num() - 3;
+      int bx = ME->Tbin_num() - 3;
       bool SE = ME->SE();
       bool SM = ME->SM();
       bool BXE = ME->BXE();
@@ -511,9 +511,9 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
     l1t::emtf::SPCollection SPCollection = EMTFOutput->GetSPCollection();
 
     for (std::vector<l1t::emtf::SP>::const_iterator SP = SPCollection.begin(); SP != SPCollection.end(); ++SP) {
-      int Quality=0; //FIXME EMTF TEAM //int Quality = SP->Quality();
+      int Quality = SP->Quality();
       float Eta_GMT = SP->Eta_GMT();
-      float Phi_GMT_global_rad = 0; //FIXME EMTF TEAM //float Phi_GMT_global_rad = SP->Phi_GMT_global() * (M_PI/180);
+      float Phi_GMT_global_rad = SP->Phi_GMT_global() * (M_PI/180);
       if (Phi_GMT_global_rad > M_PI) Phi_GMT_global_rad -= 2*M_PI;
       
 
@@ -540,8 +540,8 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
         }
       }
 
-      //FIXME EMTF TEAM //emtfTrackBX->Fill(Endcap * Sector, SP->TBIN_num() - 3);
-      //FIXME EMTF TEAM //emtfTrackPt->Fill(SP->Pt());
+      emtfTrackBX->Fill(Endcap * Sector, SP->TBIN_num() - 3);
+      emtfTrackPt->Fill(SP->Pt());
       emtfTrackEta->Fill(Eta_GMT);
       emtfTrackPhi->Fill(Phi_GMT_global_rad);
       emtfTrackOccupancy->Fill(Eta_GMT, Phi_GMT_global_rad);
