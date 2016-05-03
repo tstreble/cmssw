@@ -81,8 +81,8 @@ void XMLConfigReader::readLUT(l1t::LUT *lut,const L1TMuonOverlapParams & aConfig
     if(type=="iEta") out = it->key().theEtaCode;
     if(type=="iPt") out = it->key().thePtCode;
     if(type=="meanDistPhi"){
-      for(unsigned int iLayer = 0;iLayer<aConfig.nLayers();++iLayer){
-	for(unsigned int iRefLayer=0;iRefLayer<aConfig.nRefLayers();++iRefLayer){
+      for(unsigned int iLayer = 0;iLayer<(unsigned) aConfig.nLayers();++iLayer){
+	for(unsigned int iRefLayer=0;iRefLayer<(unsigned) aConfig.nRefLayers();++iRefLayer){
 	  out = (1<<(outWidth-1)) + it->meanDistPhiValue(iLayer,iRefLayer);
 	  strStream<<in<<" "<<out<<std::endl;
 	  ++in;
@@ -90,8 +90,8 @@ void XMLConfigReader::readLUT(l1t::LUT *lut,const L1TMuonOverlapParams & aConfig
       }
     }
     if(type=="pdf"){
-      for(unsigned int iLayer = 0;iLayer<aConfig.nLayers();++iLayer){
-	for(unsigned int iRefLayer=0;iRefLayer<aConfig.nRefLayers();++iRefLayer){
+      for(unsigned int iLayer = 0;iLayer<(unsigned)aConfig.nLayers();++iLayer){
+	for(unsigned int iRefLayer=0;iRefLayer<(unsigned)aConfig.nRefLayers();++iRefLayer){
 	  for(unsigned int iPdf=0;iPdf<exp2(aConfig.nPdfAddrBits());++iPdf){
 	    out = it->pdfValue(iLayer,iRefLayer,iPdf);
 	    strStream<<in<<" "<<out<<std::endl;
@@ -169,7 +169,7 @@ GoldenPattern * XMLConfigReader::buildGP(DOMElement* aGPElement,
   int iCharge = std::atoi(_toString(aGPElement->getAttribute(_toDOMS("iCharge"))).c_str());
   int val = 0;
   unsigned int nLayers = aGPElement->getElementsByTagName(_toDOMS("Layer"))->getLength();
-  assert(nLayers==aConfig.nLayers());
+  assert(nLayers==(unsigned) aConfig.nLayers());
 
   DOMNode *aNode = 0;
   DOMElement* aLayerElement = 0;
@@ -184,7 +184,7 @@ GoldenPattern * XMLConfigReader::buildGP(DOMElement* aGPElement,
     aLayerElement = static_cast<DOMElement *>(aNode); 
     ///MeanDistPhi vector
     unsigned int nItems = aLayerElement->getElementsByTagName(_toDOMS("RefLayer"))->getLength();
-    assert(nItems==aConfig.nRefLayers());
+    assert(nItems==(unsigned) aConfig.nRefLayers());
     GoldenPattern::vector1D meanDistPhi1D(nItems);
     for(unsigned int iItem=0;iItem<nItems;++iItem){
       aNode = aLayerElement->getElementsByTagName(_toDOMS("RefLayer"))->item(iItem);
@@ -200,7 +200,7 @@ GoldenPattern * XMLConfigReader::buildGP(DOMElement* aGPElement,
     else stringStr.str("value");    
     nItems = aLayerElement->getElementsByTagName(_toDOMS("PDF"))->getLength();
     assert(nItems==aConfig.nRefLayers()*exp2(aConfig.nPdfAddrBits()));
-    for(unsigned int iRefLayer=0;iRefLayer<aConfig.nRefLayers();++iRefLayer){
+    for(unsigned int iRefLayer=0;iRefLayer<(unsigned) aConfig.nRefLayers();++iRefLayer){
       pdf1D.assign(exp2(aConfig.nPdfAddrBits()),0);
       for(unsigned int iPdf=0;iPdf<exp2(aConfig.nPdfAddrBits());++iPdf){
 	aNode = aLayerElement->getElementsByTagName(_toDOMS("PDF"))->item(iRefLayer*exp2(aConfig.nPdfAddrBits())+iPdf);
