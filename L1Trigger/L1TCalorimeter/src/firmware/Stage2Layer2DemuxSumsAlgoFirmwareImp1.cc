@@ -65,19 +65,19 @@ void l1t::Stage2Layer2DemuxSumsAlgoFirmwareImp1::processEvent(const std::vector<
         continue; // Should throw an exception or something?
       }
     }
-  
-  if (et>0xFFF)   et   = 0xFFF;
-  if (metx>0xFFF) metx = 0xFFF;
-  if (mety>0xFFF) mety = 0xFFF;
-  if (ht>0xFFF)   ht   = 0xFFF;
-  if (mhtx>0xFFF) mhtx = 0xFFF;
-  if (mhty>0xFFF) mhty = 0xFFF;
 
+  
   // Final MET calculation
   if (metx != 0 || mety != 0 ) cordic_( metx , mety , metPhi , met );
+  // sets the met scale back to the original range for output into GT, this corresponds to
+  // the previous scaling of sin/cos factors in calculation of metx and mety by 2^10 = 1024
+  met >>= 10; 
 
   // Final MHT calculation
   if (mhtx != 0 || mhty != 0 ) cordic_( mhtx , mhty , mhtPhi , mht );
+  // sets the mht scale back to the original range for output into GT, the other 4
+  // bits are brought back just before the accumulation of ring sum in MP jet sum algorithm
+  mht >>= 6; 
 
   // Make final collection
   math::XYZTLorentzVector p4;
