@@ -62,6 +62,7 @@ caloParams = cms.ESProducer(
     egIsoMaxEtaAbsForTowerSum  = cms.uint32(4),
     egIsoMaxEtaAbsForIsoSum    = cms.uint32(27),
     egBypassEGVetos            = cms.uint32(0),
+    egFGHoENeighbourTowers     = cms.uint32(0),
 
     # Tau
     tauRegionMask                 = cms.int32(0),

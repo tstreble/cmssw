@@ -449,6 +449,42 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::refining(const std::vector<l
       //
       cluster.setFgEta(fgEta);
       cluster.setFgPhi(fgPhi);
+
+      //H/E with neighbour towers
+      if(params_->egFGHoENeighbourTowers()){
+
+	bool HoE = cluster.hOverE()>0;
+
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) HoE &= idHoverE(towerNW);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  HoE &= idHoverE(towerN);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) HoE &= idHoverE(towerNE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  HoE &= idHoverE(towerE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) HoE &= idHoverE(towerSE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  HoE &= idHoverE(towerS);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) HoE &= idHoverE(towerSW);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  HoE &= idHoverE(towerW); 
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) HoE &= idHoverE(towerNN);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) HoE &= idHoverE(towerSS);
+
+	bool FG = cluster.fgECAL(); //FG is a veto, needs to be ORed
+
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) FG |= (towerNW.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  FG |= (towerN.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) FG |= (towerNE.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  FG |= (towerE.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) FG |= (towerSE.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  FG |= (towerS.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) FG |= (towerSW.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  FG |= (towerW.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) FG |= (towerNN.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) FG |= (towerSS.hwQual() & (0x1<<3));
+	
+	cluster.setHOverE(HoE);
+
+      }
+
+
+
     }
   }
 }
