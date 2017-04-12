@@ -40,7 +40,8 @@ namespace l1t {
            jetBypassPUSFlag=28,
            egHOverEBarrel=29,
            egHOverEEndcap=30,
-	   NUM_CALOPARAMNODES=31
+           egUseHoELUT=31,
+	   NUM_CALOPARAMNODES=32
     };
 
     CaloParamsHelper() { pnode_.resize(NUM_CALOPARAMNODES); }
@@ -126,6 +127,7 @@ namespace l1t {
     unsigned egBypassEGVetos() { return pnode_[egBypassEGVetosFlag].uparams_[0]; }
     int egHOverEcutBarrel() const {return pnode_[egHOverEBarrel].iparams_[0]; }
     int egHOverEcutEndcap() const {return pnode_[egHOverEEndcap].iparams_[0]; }
+    unsigned egUseHoverELUT() { return pnode_[egUseHoELUT].uparams_[0]; }
 
     unsigned egIsoAreaNrTowersEta()const{return egp_.isoAreaNrTowersEta_;}
     unsigned egIsoAreaNrTowersPhi()const{return egp_.isoAreaNrTowersPhi_;}
@@ -169,6 +171,10 @@ namespace l1t {
     void setEgHOverEcutEndcap(int cut) { 
       pnode_[egHOverEEndcap].iparams_.resize(1);
       pnode_[egHOverEEndcap].iparams_[0] = cut; 
+    }
+    void setEgUseHoverELUT(unsigned flag) {
+      pnode_[egUseHoELUT].uparams_.resize(1);
+      pnode_[egUseHoELUT].uparams_[0] = flag;
     }
 
     void setEgIsoAreaNrTowersEta(unsigned iEgIsoAreaNrTowersEta){egp_.isoAreaNrTowersEta_=iEgIsoAreaNrTowersEta;}

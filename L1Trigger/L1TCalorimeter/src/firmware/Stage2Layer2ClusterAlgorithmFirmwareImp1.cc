@@ -475,12 +475,44 @@ bool l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::idHoverE(const l1t::CaloTowe
   if (!denomZeroFlag && !eOverHFlag) // H > E, ratio = log(H/E)
     hOverEBit = false;
   if (!denomZeroFlag && eOverHFlag){ // E >= H , so ratio==log(E/H)
+
+  if(params_->egUseHoverELUT()){
+
+    int lutAddress = HoverELutIndex(tow.hwEta(),tow.hwPt());
+    hOverEBit = ratio >= params_->egMaxHOverELUT()->data(lutAddress); //MinHoverELUT would be a more appropriate nameI
+
+  }
+  
+  else{  //2016 H/E
+
     if(abs(tow.hwEta())< 16 )
       hOverEBit = ratio > params_->egHOverEcutBarrel(); // equivalent to H/E<=pow(2,-egHOverEcut)
     else
       hOverEBit = ratio > params_->egHOverEcutEndcap();
+
+   }
+
   }
   
   return hOverEBit;
+
+}
+
+
+
+
+
+/*****************************************************************/
+unsigned l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::HoverELutIndex(int iEta,int E)
+/*****************************************************************/
+{
+
+  unsigned int iEtaNormed = abs(iEta);
+  if(iEtaNormed>28) iEtaNormed = 28;
+  if(E>255) E = 255;
+  unsigned int compressedE     = params_->egCompressShapesLUT()->data((0x1<<7)+E)>>4;
+  unsigned int compressedEta   = params_->egCompressShapesLUT()->data((0x1<<7)+(0x1<<8)+iEtaNormed)>>4;
+  return (compressedE | compressedEta);
+
 
 }
