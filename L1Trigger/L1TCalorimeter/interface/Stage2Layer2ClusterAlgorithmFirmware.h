@@ -40,6 +40,7 @@ namespace l1t
       void refining(const std::vector<l1t::CaloTower>& towers, std::vector<l1t::CaloCluster>& clusters);
 
       bool idHoverE(const l1t::CaloTower tow);
+      bool idHoverE_loose(const l1t::CaloTower tow);
 
       // parameters
       ClusterInput clusterInput_;

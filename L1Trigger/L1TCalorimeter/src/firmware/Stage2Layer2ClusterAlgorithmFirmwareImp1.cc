@@ -232,6 +232,7 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::filtering(const std::vector<
     int iEta   = cluster.hwEta();
     int iPhi   = cluster.hwPhi();
     bool filter = false;
+    
     for( int deta = -1; deta < 2; ++deta ) 
     {
 	  for( int dphi = -4; dphi < 5; ++dphi )
@@ -239,7 +240,6 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::filtering(const std::vector<
           int iEtaNeigh = caloNav.offsetIEta(iEta,  deta);
           int iPhiNeigh = caloNav.offsetIPhi(iPhi,  dphi);
           const l1t::CaloCluster& clusterNeigh = l1t::CaloTools::getCluster(clusters, iEtaNeigh, iPhiNeigh);
-	  	    
 
           if      (mask[8-(dphi+4)][deta+1] == 0) continue;
           else if (mask[8-(dphi+4)][deta+1] == 1) filter = (clusterNeigh.hwPt() >   cluster.hwPt());
@@ -455,35 +455,34 @@ void l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::refining(const std::vector<l
 
 	bool HoE = cluster.hOverE()>0;
 
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) HoE &= idHoverE(towerNW);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  HoE &= idHoverE(towerN);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) HoE &= idHoverE(towerNE);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  HoE &= idHoverE(towerE);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) HoE &= idHoverE(towerSE);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  HoE &= idHoverE(towerS);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) HoE &= idHoverE(towerSW);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  HoE &= idHoverE(towerW); 
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) HoE &= idHoverE(towerNN);
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) HoE &= idHoverE(towerSS);
-
-	bool FG = cluster.fgECAL(); //FG is a veto, needs to be ORed
-
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) FG |= (towerNW.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  FG |= (towerN.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) FG |= (towerNE.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  FG |= (towerE.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) FG |= (towerSE.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  FG |= (towerS.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) FG |= (towerSW.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  FG |= (towerW.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) FG |= (towerNN.hwQual() & (0x1<<3));
-	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) FG |= (towerSS.hwQual() & (0x1<<3));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) HoE &= idHoverE_loose(towerNW);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  HoE &= idHoverE_loose(towerN);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) HoE &= idHoverE_loose(towerNE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  HoE &= idHoverE_loose(towerE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) HoE &= idHoverE_loose(towerSE);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  HoE &= idHoverE_loose(towerS);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) HoE &= idHoverE_loose(towerSW);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  HoE &= idHoverE_loose(towerW);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) HoE &= idHoverE_loose(towerNN);
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) HoE &= idHoverE_loose(towerSS);
+	
+	/*bool FG = cluster.fgECAL(); //FG is a veto, needs to be ORed
+	
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) FG |= ( (towerNW.hwQual() & (0x1<<3)) && (towerEtNW>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  FG |= ( (towerN.hwQual() & (0x1<<3)) && (towerEtN>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) FG |= ( (towerNE.hwQual() & (0x1<<3)) && (towerEtNE>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  FG |= ( (towerE.hwQual() & (0x1<<3)) && (towerEtE>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) FG |= ( (towerSE.hwQual() & (0x1<<3)) && (towerEtSE>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  FG |= ( (towerS.hwQual() & (0x1<<3)) && (towerEtS>=20));
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) FG |= ( (towerSW.hwQual() & (0x1<<3)) && (towerEtSW>=20) );
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  FG |= ( (towerW.hwQual() & (0x1<<3)) && (towerEtW>=20) );
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) FG |= ( (towerNN.hwQual() & (0x1<<3)) && (towerEtNN>=20) );
+	if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) FG |= ( (towerSS.hwQual() & (0x1<<3)) && (towerEtSS>=20) );*/
 	
 	cluster.setHOverE(HoE);
+	//cluster.setFgECAL(FG);
 
       }
-
-
 
     }
   }
@@ -518,5 +517,19 @@ bool l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::idHoverE(const l1t::CaloTowe
   }
   
   return hOverEBit;
+
+}
+
+
+
+
+
+bool l1t::Stage2Layer2ClusterAlgorithmFirmwareImp1::idHoverE_loose(const l1t::CaloTower tow){
+
+  int qual  = tow.hwQual();
+  bool eOverHFlag    = ((qual&0x2) > 0);
+
+  if(tow.hwPt()<10) return true;
+  else return eOverHFlag;
 
 }
