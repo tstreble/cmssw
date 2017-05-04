@@ -109,9 +109,26 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
       if(clusterTrim.checkClusterFlag(CaloCluster::INCLUDE_SS)) egamma.setHwPt(egamma.hwPt() + towerEtSS);
 
 
+      //Extended H/E flag computed using untrimmed cluster
+      bool HoE_ext = idHoverE_ext(seed);     
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) HoE_ext &= idHoverE_ext(towerNW);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  HoE_ext &= idHoverE_ext(towerN);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) HoE_ext &= idHoverE_ext(towerNE);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  HoE_ext &= idHoverE_ext(towerE);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) HoE_ext &= idHoverE_ext(towerSE);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  HoE_ext &= idHoverE_ext(towerS);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) HoE_ext &= idHoverE_ext(towerSW);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  HoE_ext &= idHoverE_ext(towerW);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) HoE_ext &= idHoverE_ext(towerNN);
+      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) HoE_ext &= idHoverE_ext(towerSS);
+
+
+
       // Identification of the egamma
       // Based on the seed tower FG bit, the H/E ratio of the seed tower, and the shape of the cluster
       bool hOverEBit = cluster.hOverE()>0;
+      if(!params_->egBypassExtHOverE())
+	hOverEBit &= HoE_ext;
       bool shapeBit  = idShape(cluster, egamma.hwPt());
       bool fgBit     = !(cluster.fgECAL()); 
       int qual = 0;
@@ -524,5 +541,22 @@ int l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::returnHoE(const l1t::CaloTower
   //else E >= H , so ratio=log(E/H)
 
   return ratio;
+
+}
+
+
+
+
+
+
+
+
+bool l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::idHoverE_ext(const l1t::CaloTower tow){
+
+  int qual  = tow.hwQual();
+  bool eOverHFlag    = ((qual&0x2) > 0);
+
+  if(tow.hwPt()<=10) return true; //Only applied for towers with ET>5 GeV
+  else return eOverHFlag;
 
 }

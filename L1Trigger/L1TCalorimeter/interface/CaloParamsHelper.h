@@ -42,7 +42,8 @@ namespace l1t {
            egHOverEEndcap=30,
 	   etSumPUS=31,
 	   etSumBypassPUSFlag=32,
-	   NUM_CALOPARAMNODES=33
+	   egBypassExtHoE=33,
+	   NUM_CALOPARAMNODES=34
     };
 
     CaloParamsHelper() { pnode_.resize(NUM_CALOPARAMNODES); }
@@ -126,6 +127,8 @@ namespace l1t {
     int egMinPtHOverEIsolation() const { return egp_.minPtHOverEIsolation_; }
     int egMaxPtHOverEIsolation() const { return egp_.maxPtHOverEIsolation_; }
     unsigned egBypassEGVetos() { return pnode_[egBypassEGVetosFlag].uparams_[0]; }
+    unsigned egBypassExtHOverE() { return pnode_[egBypassExtHoE].uparams_[0]; }
+
     int egHOverEcutBarrel() const {return pnode_[egHOverEBarrel].iparams_[0]; }
     int egHOverEcutEndcap() const {return pnode_[egHOverEEndcap].iparams_[0]; }
 
@@ -163,6 +166,10 @@ namespace l1t {
     void setEgBypassEGVetos(unsigned flag) { 
       pnode_[egBypassEGVetosFlag].uparams_.resize(1);
       pnode_[egBypassEGVetosFlag].uparams_[0] = flag; 
+    }
+    void setEgBypassExtHOverE(unsigned flag) {
+      pnode_[egBypassExtHoE].uparams_.resize(1);
+      pnode_[egBypassExtHoE].uparams_[0] = flag;
     }
     void setEgHOverEcutBarrel(int cut) { 
       pnode_[egHOverEBarrel].iparams_.resize(1);
