@@ -53,6 +53,7 @@ caloParams = cms.ESProducer(
     egPUSType               = cms.string("None"),
     egIsolationType          = cms.string("unspecified"),
     egIsoLUTFile               = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egIsoLUT.txt"),
+    egIsoLUTFile2               = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egIsoLUT.txt"),
     #egIsoLUTFileBarrel         = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egIsoLUT_stage1_isol0.30.txt"),
     #egIsoLUTFileEndcaps        = cms.FileInPath("L1Trigger/L1TCalorimeter/data/egIsoLUT_stage1_isol0.50.txt"),
     egIsoAreaNrTowersEta       = cms.uint32(2),
