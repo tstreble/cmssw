@@ -109,16 +109,17 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
       if(clusterTrim.checkClusterFlag(CaloCluster::INCLUDE_SS)) egamma.setHwPt(egamma.hwPt() + towerEtSS);
 
 
-      //Extended H/E flag computed using untrimmed cluster
-      bool HoE_ext = idHoverE_ext(seed);     
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NW)) HoE_ext &= idHoverE_ext(towerNW);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_N))  HoE_ext &= idHoverE_ext(towerN);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NE)) HoE_ext &= idHoverE_ext(towerNE);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_E))  HoE_ext &= idHoverE_ext(towerE);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SE)) HoE_ext &= idHoverE_ext(towerSE);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_S))  HoE_ext &= idHoverE_ext(towerS);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SW)) HoE_ext &= idHoverE_ext(towerSW);
-      if(cluster.checkClusterFlag(CaloCluster::INCLUDE_W))  HoE_ext &= idHoverE_ext(towerW);
+      //Extended H/E flag computed using all neighbouring towers
+      bool HoE_ext = idHoverE_ext(seed);           
+      HoE_ext &= idHoverE_ext(towerNW);
+      HoE_ext &= idHoverE_ext(towerN);
+      HoE_ext &= idHoverE_ext(towerNE);
+      HoE_ext &= idHoverE_ext(towerE);
+      HoE_ext &= idHoverE_ext(towerSE);
+      HoE_ext &= idHoverE_ext(towerS);
+      HoE_ext &= idHoverE_ext(towerSW);
+      HoE_ext &= idHoverE_ext(towerW);
+      //NN and SS only checked if included
       if(cluster.checkClusterFlag(CaloCluster::INCLUDE_NN)) HoE_ext &= idHoverE_ext(towerNN);
       if(cluster.checkClusterFlag(CaloCluster::INCLUDE_SS)) HoE_ext &= idHoverE_ext(towerSS);
 
@@ -232,7 +233,6 @@ void l1t::Stage2Layer2EGammaAlgorithmFirmwareImp1::processEvent(const std::vecto
       int fgBit     = egammas_raw.at(iEG).hwQual()    & (0x1);
       int hOverEBit = egammas_raw.at(iEG).hwQual()>>1 & (0x1);
       int shapeBit  = egammas_raw.at(iEG).hwQual()>>2 & (0x1);
-
       bool IDcuts = (fgBit && hOverEBit && shapeBit) || (egammas_raw.at(iEG).pt()>=params_->egMaxPtHOverE()) || (params_->egBypassEGVetos());
 
       if(!IDcuts) continue;
