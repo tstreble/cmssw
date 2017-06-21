@@ -117,33 +117,33 @@ void l1t::Stage2Layer2EtSumAlgorithmFirmwareImp1::processEvent(const std::vector
 	  // The trig coefficients themselves take values [-1023,1023] and so were scaled by
 	  // 2^10 = 1024, which requires bitwise shift to the right of the final value by 10 bits.
 	  // This is accounted for at ouput of demux (see Stage2Layer2DemuxSumsAlgoFirmwareImp1.cc)
-	  if(tower.hwPt() >= 509) metSat=true;
+	  if(tower.hwPt() == CaloTools::kSatHcal || tower.hwPt() == CaloTools::kSatEcal || tower.hwPt() == CaloTools::kSatTower) metSat=true;
 	  ringEx += (int32_t) (tower.hwPt() * CaloTools::cos_coeff[iphi - 1] );
 	  ringEy += (int32_t) (tower.hwPt() * CaloTools::sin_coeff[iphi - 1] );	    
 	}
 
 	// MET *with* HF
 	if (tower.hwPt()>towEtMetThresh_ && CaloTools::mpEta(abs(tower.hwEta()))<=CaloTools::mpEta(metEtaMaxHF_) && !metHFSat) {
-	  if(tower.hwPt() >= 509) metHFSat=true;
+	  if(tower.hwPt() == CaloTools::kSatHcal || tower.hwPt() == CaloTools::kSatEcal || tower.hwPt() == CaloTools::kSatTower) metHFSat=true;
 	  ringExHF += (int32_t) (tower.hwPt() * CaloTools::cos_coeff[iphi - 1] );
 	  ringEyHF += (int32_t) (tower.hwPt() * CaloTools::sin_coeff[iphi - 1] );	    
 	}
 
 	// scalar sum
 	if (tower.hwPt()>towEtSumEtThresh_ && CaloTools::mpEta(abs(tower.hwEta()))<=CaloTools::mpEta(ettEtaMax_) && !ettSat){
-	  if(tower.hwPt() >= 509) ettSat=true;
+	  if(tower.hwPt() == CaloTools::kSatHcal || tower.hwPt() == CaloTools::kSatEcal || tower.hwPt() == CaloTools::kSatTower) ettSat=true;
 	  ringEt += tower.hwPt();
 	}
   
 	// scalar sum including HF
 	if (tower.hwPt()>towEtSumEtThresh_ && CaloTools::mpEta(abs(tower.hwEta()))<=CaloTools::mpEta(ettEtaMaxHF_) && !ettHFSat) {
-	  if(tower.hwPt() >= 509) ettHFSat=true;
+	  if(tower.hwPt() == CaloTools::kSatHcal || tower.hwPt() == CaloTools::kSatEcal || tower.hwPt() == CaloTools::kSatTower) ettHFSat=true;
 	  ringEtHF += tower.hwPt();
 	}
 	
         // scalar sum (EM)
         if (tower.hwPt()>towEtEcalSumThresh_ && CaloTools::mpEta(abs(tower.hwEta()))<=CaloTools::mpEta(ettEtaMax_) && !ecalEtSat){
-	  if(tower.hwPt() == 510) ecalEtSat=true;
+	  if(tower.hwPt() == CaloTools::kSatEcal) ecalEtSat=true;
           ringEtEm += tower.hwEtEm();
 	}
 
