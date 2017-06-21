@@ -34,7 +34,7 @@ void l1t::Stage2Layer2DemuxSumsAlgoFirmwareImp1::processEvent(const std::vector<
   uint32_t mbp0(0), mbm0(0), mbp1(0), mbm1(0);
   uint32_t ntow(0);
 
-  bool metSat(0);
+  bool metSat(0), metHFSat(0);
 
   // Add up the x, y and scalar components
   for (std::vector<l1t::EtSum>::const_iterator eSum = inputSums.begin() ; eSum != inputSums.end() ; ++eSum )
@@ -65,28 +65,28 @@ void l1t::Stage2Layer2DemuxSumsAlgoFirmwareImp1::processEvent(const std::vector<
 
       case l1t::EtSum::EtSumType::kTotalHtx:
         mhtx += eSum->hwPt();
-        break;
+	break;
 
       case l1t::EtSum::EtSumType::kTotalHty:
-        mhty += eSum->hwPt();
+	mhty += eSum->hwPt();
         break;
 	
       case l1t::EtSum::EtSumType::kTotalEtxHF:
-	if(eSum->hwPt()==0x7fffffff) metSat=true;
+	if(eSum->hwPt()==0x7fffffff) metHFSat=true;
         else metxHF += eSum->hwPt();
         break;
 	
       case l1t::EtSum::EtSumType::kTotalEtyHF:
-	if(eSum->hwPt()==0x7fffffff) metSat=true;
+	if(eSum->hwPt()==0x7fffffff) metHFSat=true;
         else metyHF += eSum->hwPt();
         break;
 
       case l1t::EtSum::EtSumType::kTotalHtxHF:
-        mhtxHF += eSum->hwPt();
+	mhtxHF += eSum->hwPt();
         break;
 	
       case l1t::EtSum::EtSumType::kTotalHtyHF:
-        mhtyHF += eSum->hwPt();
+	mhtyHF += eSum->hwPt();
         break;
 
       case l1t::EtSum::EtSumType::kMinBiasHFP0:
@@ -133,24 +133,24 @@ void l1t::Stage2Layer2DemuxSumsAlgoFirmwareImp1::processEvent(const std::vector<
   met >>= 10; 
 
   // Final METHF calculation
-  if ( (metxHF != 0 || metyHF != 0) && !metSat ) cordic_( metxHF , metyHF , metPhiHF , metHF );
+  if ( (metxHF != 0 || metyHF != 0) && !metHFSat ) cordic_( metxHF , metyHF , metPhiHF , metHF );
   metHF >>= 10;
 
 
   // Final MHT calculation
-  if (mhtx != 0 || mhty != 0 ) cordic_( mhtx , mhty , mhtPhi , mht );
+  if ( mhtx != 0 || mhty != 0 ) cordic_( mhtx , mhty , mhtPhi , mht );
   // sets the mht scale back to the original range for output into GT, the other 4
   // bits are brought back just before the accumulation of ring sum in MP jet sum algorithm
   mht >>= 6; 
 
-  if (mhtxHF != 0 || mhtyHF != 0 ) cordic_( mhtxHF , mhtyHF , mhtPhiHF , mhtHF );
+  if ( mhtxHF != 0 || mhtyHF != 0 ) cordic_( mhtxHF , mhtyHF , mhtPhiHF , mhtHF );
   mhtHF >>= 6; 
 
 
-  if(metSat){ 
-    met=0xFFF;
-    metHF=0xFFF;
-  }
+  if(metSat) met=0xFFF;
+  if(metHFSat) metHF=0xFFF;
+  if(mht>0xFFF) mht=0xFFF;
+  if(mhtHF>0xFFF) mhtHF=0xFFF;
 
   // Make final collection
   math::XYZTLorentzVector p4;
