@@ -178,6 +178,12 @@ def L1TReEmulFromRAW(process):
         print process.schedule
         return process
 
+def L1TReEmulFromRAWCalouGT(process):
+    L1TReEmulFromRAW2016(process)
+    process.simGtStage2Digis.MuonInputTag   = cms.InputTag("gtStage2Digis","Muon")
+    return process 
+
+
 def L1TReEmulMCFromRAW(process):
     L1TReEmulFromRAW(process)
     if stage2L1Trigger.isChosen():
