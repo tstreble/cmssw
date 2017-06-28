@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Modifier_stage2L1Trigger_cff import stage2L1Trigger
 
@@ -111,7 +112,7 @@ def L1TReEmulFromRAW2015simCaloTP(process):
             process.simCaloStage2Layer1Digis.ecalToken = cms.InputTag("simEcalTriggerPrimitiveDigis")
     return process
 
-def L1TReEmulFromRAW(process):
+def L1TReEmulFromRAW2016(process):
     process.load('L1Trigger.Configuration.SimL1Emulator_cff')
     process.load('L1Trigger.Configuration.CaloTriggerPrimitives_cff')
     process.simEcalTriggerPrimitiveDigis.Label = 'ecalDigis'
@@ -160,6 +161,28 @@ def L1TReEmulFromRAW(process):
         print process.L1TReEmul
         print process.schedule
         return process
+
+def L1TReEmulFromRAW(process):
+    L1TReEmulFromRAW2016(process)
+
+    if stage2L1Trigger.isChosen():
+        # OMTF
+        process.simOmtfDigis.srcCSC                = cms.InputTag('emtfStage2Digis')
+        print "L1TReEmulPath sequence:  "
+        print process.L1TReEmulPath
+        print process.schedule
+        return process
+    else:
+        print "L1TReEmul sequence:  "
+        print process.L1TReEmul
+        print process.schedule
+        return process
+
+def L1TReEmulFromRAWCalouGT(process):
+    L1TReEmulFromRAW2016(process)
+    process.simGtStage2Digis.MuonInputTag   = cms.InputTag("gtStage2Digis","Muon")
+    return process 
+
 
 def L1TReEmulMCFromRAW(process):
     L1TReEmulFromRAW(process)
