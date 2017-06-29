@@ -58,15 +58,20 @@ printBins = ""
 
 for compNTT4 in compNTT4Range:
     for ieta in etaRange:
-        towEtThresh = int(round(pow(float(towerAreas[ieta]),1.4)*(1/(1+math.exp(-0.1*(ieta-5))))*(pow(float(compNTT4),1.6)/50)))
+        if compNTT4 < 16:
+            towEtThresh = int(round(pow(float(towerAreas[ieta]),1.4)*(1/(1+math.exp(-0.07*(ieta))))*(pow(float(compNTT4),2)/100)))
+        else:
+            towEtThresh = int(round(pow(float(towerAreas[ieta]),1.4)*(1/(1+math.exp(-0.07*(ieta))))*(pow(float(16),2)/100)))
         if ieta > 28:
             towEtThresh -= 2
-        if towEtThresh > 16:
-            towEtThresh = int(16)
+        if towEtThresh > 12:
+            towEtThresh = int(12)
         if ieta < 13 or towEtThresh < 0:
             towEtThresh = 0
         if (addr % 64) == 0:
             printBins = "             # nTT4 = " + str(5*compNTT4) + "-" + str((5*compNTT4)+5) + " ieta = " + str(ieta)  
+        elif ieta>28:
+            printBins = "             # ieta = " + str(ieta+1)
         else:
             printBins = "             # ieta = " + str(ieta)
         towEtThreshLUTFile.write(
