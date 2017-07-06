@@ -127,8 +127,8 @@ void l1t::Stage2Layer2DemuxSumsAlgoFirmwareImp1::processEvent(const std::vector<
   //if (mhty>0xFFF) mhty = 0xFFF;
 
 
-  mhtPhi = (111 << 4);
-  mhtPhiHF = (111 << 4); // to match hw value if undefined
+  //mhtPhi = (111 << 4);
+  //mhtPhiHF = (111 << 4); // to match hw value if undefined
   
   // Final MET calculation
   if ( (metx != 0 || mety != 0) && !metSat ) cordic_( metx , mety , metPhi , met );

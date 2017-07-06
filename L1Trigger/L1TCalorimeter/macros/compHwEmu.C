@@ -547,7 +547,7 @@ void compHwEmu (
     // plot demux jet Et
     create_plot(
       hwJetEt, emJetEt, runNo, dataset,
-      "Jet iE_{T}", "DemuxJets/JetEt.pdf"
+      "Jet iE_{T}", "DemuxJets/JetEt.pdf",  1, 13, 0, 2500
       );
 
     // plot demux jet eta
@@ -899,14 +899,14 @@ void compHwEmu (
     create_plot(
       hwSumEt,
       emSumEt,
-      runNo, dataset, "iE_{T}", "DemuxSums/DemSumEt.pdf"
+      runNo, dataset, "iE_{T}", "DemuxSums/DemSumEt.pdf", 1, 13, 0, 5000
       );
 
     // plot demux sum EtEM
     create_plot(
       hwSumEtEM,
       emSumEtEM,
-      runNo, dataset, "iE_{T}", "DemuxSums/DemSumEtEM.pdf"
+      runNo, dataset, "iE_{T}", "DemuxSums/DemSumEtEM.pdf", 1, 13, 0, 5000
       );
 
     /*
@@ -950,7 +950,7 @@ void compHwEmu (
     create_plot(
       hwSumHt,
       emSumHt,
-      runNo, dataset, "iH_{T}", "DemuxSums/DemSumHt.pdf"
+      runNo, dataset, "iH_{T}", "DemuxSums/DemSumHt.pdf", 1, 13, 0, 5000
       );
 
       // plot demux hi tower count
