@@ -34,7 +34,7 @@ GlobalParameters = cms.ESProducer("StableParametersTrivialProducer",
     NumberL1Jet = cms.uint32(12),
 
     # taus
-    NumberL1Tau = cms.uint32(8),
+    NumberL1Tau = cms.uint32(12),
 
     # hardware
 
