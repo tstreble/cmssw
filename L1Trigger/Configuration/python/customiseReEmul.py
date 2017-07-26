@@ -184,6 +184,7 @@ def L1TReEmulFromRAW(process):
 
 def L1TReEmulFromRAWCalouGT(process):
     L1TReEmulFromRAW2016(process)
+    process.simOmtfDigis.srcCSC = cms.InputTag('emtfStage2Digis')
     process.simGtStage2Digis.MuonInputTag   = cms.InputTag("gtStage2Digis","Muon")
     return process 
 
