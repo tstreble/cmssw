@@ -413,6 +413,22 @@ void PrimitiveSelection::merge(
       }
     }
   }
+}
+
+void PrimitiveSelection::merge_no_truncate(
+    std::map<int, TriggerPrimitiveCollection>& selected_csc_map,
+    std::map<int, TriggerPrimitiveCollection>& selected_rpc_map,
+    std::map<int, TriggerPrimitiveCollection>& selected_gem_map,
+    std::map<int, TriggerPrimitiveCollection>& selected_prim_map
+) const {
+  // First, put CSC hits
+  merge_map_into_map(selected_csc_map, selected_prim_map);
+
+  // Second, insert GEM hits
+  merge_map_into_map(selected_gem_map, selected_prim_map);
+
+  // Third, insert RPC hits
+  merge_map_into_map(selected_rpc_map, selected_prim_map);
 
   // Finally, clear the input maps to save memory
   selected_csc_map.clear();
