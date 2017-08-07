@@ -1,6 +1,7 @@
 
 import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Modifier_stage2L1Trigger_cff import stage2L1Trigger
+from Configuration.Eras.Modifier_stage2L1Trigger_2017_cff import stage2L1Trigger_2017
 
 def L1TCaloStage2ParamsForHW(process):
     process.load("L1Trigger.L1TCalorimeter.caloStage2Params_HWConfig_cfi")
@@ -76,9 +77,6 @@ def L1TReEmulFromRAW2015(process):
         process.simCaloStage2Layer1Digis.ecalToken = cms.InputTag("ecalDigis:EcalTriggerPrimitives")
         process.L1TReEmulPath = cms.Path(process.L1TReEmul)    
         process.schedule.append(process.L1TReEmulPath)
-        print "# L1TReEmul sequence:  "
-        print "# {0}".format(process.L1TReEmul)
-        print "# {0}".format(process.schedule)
         # quiet warning abouts missing Stage-2 payloads, since they won't reliably exist in 2015 data.
         if hasattr(process, "caloStage2Digis"):
             process.caloStage2Digis.MinFeds = cms.uint32(0)
@@ -86,7 +84,6 @@ def L1TReEmulFromRAW2015(process):
             process.gmtStage2Digis.MinFeds = cms.uint32(0)
         if hasattr(process, "gtStage2Digis"):
             process.gtStage2Digis.MinFeds = cms.uint32(0)            
-        return process
     else:
         process.simRctDigis.ecalDigis = cms.VInputTag('simEcalTriggerPrimitiveDigis')
         process.simRctDigis.hcalDigis = cms.VInputTag('simHcalTriggerPrimitiveDigis')
@@ -94,10 +91,11 @@ def L1TReEmulFromRAW2015(process):
         process.simRpcTechTrigDigis.RPCDigiLabel  = 'muonRPCDigis'
         process.L1TReEmulPath = cms.Path(process.L1TReEmul)    
         process.schedule.append(process.L1TReEmulPath)
-        print "# L1TReEmul sequence:  "
-        print "# {0}".format(process.L1TReEmul)
-        print "# {0}".format(process.schedule)
-        return process
+
+    print "# L1TReEmul sequence:  "
+    print "# {0}".format(process.L1TReEmul)
+    print "# {0}".format(process.schedule)
+    return process
 
 def L1TReEmulMCFromRAW2015(process):
     L1TReEmulFromRAW2015(process)
@@ -151,9 +149,6 @@ def L1TReEmulFromRAW2016(process):
         process.simCaloStage2Layer1Digis.hcalToken = cms.InputTag('hcalDigis:')
         process.L1TReEmulPath = cms.Path(process.L1TReEmul)    
         process.schedule.append(process.L1TReEmulPath)
-        print "# L1TReEmulPath sequence:  "
-        print "# {0}".format(process.L1TReEmulPath)
-        print "# {0}".format(process.schedule)
         return process
     else:
         process.simRctDigis.ecalDigis = cms.VInputTag( cms.InputTag( 'ecalDigis:EcalTriggerPrimitives' ) )
@@ -161,30 +156,21 @@ def L1TReEmulFromRAW2016(process):
         process.simRpcTriggerDigis.label         = 'muonRPCDigis'
         process.L1TReEmulPath = cms.Path(process.L1TReEmul)    
         process.schedule.append(process.L1TReEmulPath)
-        print "# L1TReEmul sequence:  "
-        print "# {0}".format(process.L1TReEmul)
-        print "# {0}".format(process.schedule)
         return process
 
 def L1TReEmulFromRAW(process):
     L1TReEmulFromRAW2016(process)
 
-    if stage2L1Trigger.isChosen():
-        # OMTF
+    if stage2L1Trigger_2017.isChosen():
         process.simOmtfDigis.srcCSC                = cms.InputTag('emtfStage2Digis')
-        print "# L1TReEmulPath sequence:  "
-        print "# {0}".format(process.L1TReEmulPath)
-        print "# {0}".format(process.schedule)
-        return process
-    else:
-        print "# L1TReEmul sequence:  "
-        print "# {0}".format(process.L1TReEmul)
-        print "# {0}".format(process.schedule)
-        return process
+
+    print "# L1TReEmul sequence:  "
+    print "# {0}".format(process.L1TReEmul)
+    print "# {0}".format(process.schedule)
+    return process
 
 def L1TReEmulFromRAWCalouGT(process):
-    L1TReEmulFromRAW2016(process)
-    process.simOmtfDigis.srcCSC = cms.InputTag('emtfStage2Digis')
+    L1TReEmulFromRAW(process)
     process.simGtStage2Digis.MuonInputTag   = cms.InputTag("gtStage2Digis","Muon")
     return process 
 
