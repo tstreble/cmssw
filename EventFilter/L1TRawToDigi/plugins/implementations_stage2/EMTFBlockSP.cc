@@ -229,11 +229,12 @@ namespace l1t {
 	// if      (nDelay[2]                         >= 1) trk_delay = 2;
 	// else if (nDelay[2] + nDelay[1]             >= 1) trk_delay = 1;
 	// else if (nDelay[2] + nDelay[1] + nDelay[0] >= 1) trk_delay = 0;
-	
+
 	int St_hits[4] = {0, 0, 0, 0}; // Number of matched hits in each station
 
 	for (uint iHit = 0; iHit < res_hit->size(); iHit++) {
 	  
+	  if ( Track_.Mode() == 1 ) continue;  // Special case dealt with later
 	  if ( (res_hit->at(iHit)).Endcap() != Track_.Endcap() ) continue;
 	  
 	  int hit_delay = -99;
@@ -355,6 +356,72 @@ namespace l1t {
 	  
 	} // End loop: for (uint iHit = 0; iHit < res_hit->size(); iHit++)
       
+
+	// Special configuration for single-stub tracks from ME1/1
+	if (Track_.Mode() == 1) {
+
+	  // Infer ME1/1 chamber based on track phi
+	  int chamber_min = ((Track_.GMT_phi() - 17) / 16) + Track_.Sector()*6 - 3;
+	  int chamber_max = ((Track_.GMT_phi() +  1) / 16) + Track_.Sector()*6 - 3;
+	  for (int iChamb = chamber_max; iChamb >= chamber_min; iChamb--) {
+	    int chamber = (iChamb < 37 ? iChamb : (iChamb % 36));
+
+	    for (uint iHit = 0; iHit < res_hit->size(); iHit++) {
+	      if ( (res_hit->at(iHit)).Sector_idx()   != Track_.Sector_idx() ) continue;
+	      if ( (res_hit->at(iHit)).BX()           != Track_.BX() ) continue;
+	      if ( (res_hit->at(iHit)).Chamber()      != chamber ) continue;
+	      if ( (res_hit->at(iHit)).Is_CSC()       != 1 ) continue;
+	      if ( (res_hit->at(iHit)).Station()      != 1 ) continue;
+	      if ( ( (res_hit->at(iHit)).Ring() % 3 ) != 1 ) continue;	      
+	      if ( (res_hit->at(iHit)).Neighbor()     == 1 ) continue;
+
+	      // Don't use LCTs that were already used in a multi-station track
+	      bool hit_already_used = false;
+	      for (uint iTrk = 0; iTrk < res_track->size(); iTrk++) {
+		if ( (res_track->at(iTrk)).Sector_idx() != Track_.Sector_idx() ) continue;
+		if ( (res_track->at(iTrk)).NumHits()     < 1 ) continue;
+		
+		if ( (res_track->at(iTrk)).Hits().at(0).Station() == 1 &&
+		     (res_track->at(iTrk)).Hits().at(0).Chamber() == chamber &&
+		     (res_track->at(iTrk)).Hits().at(0).BX()      == (res_hit->at(iHit)).BX() &&
+		     (res_track->at(iTrk)).Hits().at(0).Ring()    == (res_hit->at(iHit)).Ring() &&
+		     (res_track->at(iTrk)).Hits().at(0).Strip()   == (res_hit->at(iHit)).Strip() &&
+		     (res_track->at(iTrk)).Hits().at(0).Wire()    == (res_hit->at(iHit)).Wire() ) {
+		  hit_already_used = true;
+		  break;
+		}
+	      } // End loop: for (uint iTrk = 0; iTrk < res_track->size(); iTrk++)
+
+	      if (!hit_already_used) {
+		Track_.push_Hit( res_hit->at(iHit) );
+		break;
+	      }
+	    } // End loop: for (uint iHit = 0; iHit < res_hit->size(); iHit++)
+	    if (Track_.NumHits() > 0) break;
+	  } // End loop: for (int iChamb = chamber_max; iChamb >= chamber_min; iChamb--)
+
+	  // if (Track_.NumHits() != 1) {
+	  //   std::cout << "\n\n***********************************************************" << std::endl;
+	  //   std::cout << "Bug in unpacked EMTF event! Mode " << Track_.Mode() << " track in sector " << Track_.Sector()*Track_.Endcap() 
+	  // 	      << ", BX " << Track_.BX() << ", GMT phi " << Track_.GMT_phi() << ", GMT eta " << Track_.GMT_eta()
+	  // 	      << " should have found an LCT between chamber " << chamber_min << " and " << chamber_max << std::endl;
+	  //   std::cout << "All available LCTs as follows:" << std::endl;
+	  //   for (uint jHit = 0; jHit < res_hit->size(); jHit++)
+	  //     std::cout << "Hit: Is CSC = " << (res_hit->at(jHit)).Is_CSC() << ", CSC ID = " << (res_hit->at(jHit)).CSC_ID() 
+	  // 		<< ", sector = " << (res_hit->at(jHit)).Sector()*(res_hit->at(jHit)).Endcap() << ", sub = " << (res_hit->at(jHit)).Subsector()
+	  // 		<< ", neighbor = " << (res_hit->at(jHit)).Neighbor() << ", station = " << (res_hit->at(jHit)).Station()
+	  // 		<< ", ring = " << (res_hit->at(jHit)).Ring() << ", chamber = " << (res_hit->at(jHit)).Chamber()
+	  // 		<< ", stub = " << (res_hit->at(jHit)).Stub_num() << ", BX = " << (res_hit->at(jHit)).BX() << std::endl;
+	  //   std::cout << "All other tracks are as follows:" << std::endl;
+	  //   for (uint jTrk = 0; jTrk < res_track->size(); jTrk++) {
+	  //     std::cout << "Track: mode " << (res_track->at(jTrk)).Mode() << " track in sector " << (res_track->at(jTrk)).Sector()*(res_track->at(jTrk)).Endcap() 
+	  // 		<< ", BX " << (res_track->at(jTrk)).BX() << ", GMT phi " << (res_track->at(jTrk)).GMT_phi() << ", GMT eta " << (res_track->at(jTrk)).GMT_eta() << std::endl;
+	  //   }
+	  //   std::cout << "***********************************************************\n\n" << std::endl;
+	  // } // End conditional: if (Track_.NumHits() != 1)
+
+	} // End conditional: if (Track_.Mode() == 1)
+	  
 	
 	// if ( Track_.Mode() != St_hits[0]*8 + St_hits[1]*4 + St_hits[2]*2 + St_hits[3] && Track_.BX() == 0) {
 	//   std::cout << "\n\n***********************************************************" << std::endl;
@@ -396,8 +463,7 @@ namespace l1t {
 	//   //   if (iHit == 0) (res_hit->at(iHit)).PrintSimulatorHeader();
 	//   //   (res_hit->at(iHit)).PrintForSimulator();
 	//   // }
-	//   std::cout << "***********************************************************" << std::endl;
-	//   std::cout << "" << std::endl;
+	//   std::cout << "***********************************************************\n\n" << std::endl;
 	// }
 	
 	(res->at(iOut)).push_SP(SP_);
