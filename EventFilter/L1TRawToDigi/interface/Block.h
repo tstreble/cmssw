@@ -15,8 +15,6 @@ namespace l1t {
          BlockHeader(unsigned int id, unsigned int size, unsigned int capID=0, unsigned int flags=0, block_t type=MP7) : id_(id), size_(size), capID_(capID), flags_(flags), type_(type) {};
          // Create a MP7 block header: everything is contained in the raw uint32
          BlockHeader(const uint32_t *data) : id_((data[0] >> ID_shift) & ID_mask), size_((data[0] >> size_shift) & size_mask), capID_((data[0] >> capID_shift) & capID_mask), flags_((data[0] >> flags_shift) & flags_mask), type_(MP7) {};
-         // Create a CTP7 block header: size is contained in the general CTP7 header
-         BlockHeader(const uint32_t *data, unsigned int size) : id_((data[0] >> CTP7_shift) & CTP7_mask), size_(size), capID_(0), flags_(0), type_(CTP7) {};
 
          bool operator<(const BlockHeader& o) const { return getID() < o.getID(); };
 
@@ -26,11 +24,9 @@ namespace l1t {
          unsigned int getFlags() const { return flags_; };
          block_t getType() const { return type_; };
 
-         uint32_t raw(block_t type=MP7) const;
+         uint32_t raw() const;
 
       private:
-         static const unsigned int CTP7_shift = 0;
-         static const unsigned int CTP7_mask = 0xffff;
          static const unsigned int ID_shift = 24;
          static const unsigned int ID_mask = 0xff;
          static const unsigned int size_shift = 16;
@@ -124,15 +120,15 @@ namespace l1t {
 
    class CTP7Payload : public Payload {
       public:
-         CTP7Payload(const uint32_t * data, const uint32_t * end);
+         CTP7Payload(const uint32_t * data, const uint32_t * end, amc::Header amcHeader);
          virtual unsigned getHeaderSize() const override { return 2; };
          virtual BlockHeader getHeader() override;
+         virtual std::unique_ptr<Block> getBlock() override;
       private:
-         // FIXME check values
-         static const unsigned int size_mask = 0xff;
-         static const unsigned int size_shift = 16;
-
-         unsigned size_;
+         unsigned capId_;
+         unsigned bx_per_l1a_;
+         unsigned calo_bxid_;
+         amc::Header amcHeader_;
    };
 }
 
