@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(15)
     )
 
 # Input source
@@ -81,7 +81,7 @@ process.generator = cms.EDProducer("FlatRandomPtGunProducer",
     PGunParameters = cms.PSet(
         MaxPt = cms.double(200.00),
         MinPt = cms.double(5.0),
-        PartID = cms.vint32(22),
+        PartID = cms.vint32(211),
         MaxEta = cms.double(3.0),
         MaxPhi = cms.double(3.14159265359),
         MinEta = cms.double(1.47),

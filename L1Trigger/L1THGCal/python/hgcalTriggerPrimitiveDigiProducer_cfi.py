@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import SimCalorimetry.HGCalSimProducers.hgcalDigitizer_cfi as digiparam
 import RecoLocalCalo.HGCalRecProducers.HGCalUncalibRecHit_cfi as recoparam
 import RecoLocalCalo.HGCalRecProducers.HGCalRecHit_cfi as recocalibparam 
+import hgcalLayersCalibrationCoefficients_cfi as matrixcalibcoeff
 
 # Digitization parameters
 adcSaturation_fC = digiparam.hgceeDigitizer.digiCfg.feCfg.adcSaturation_fC
@@ -30,10 +31,11 @@ thicknessCorrection_200 = thicknessCorrection[1]
 
 fe_codec = cms.PSet( CodecName  = cms.string('HGCalTriggerCellThresholdCodec'),
                      CodecIndex = cms.uint32(2),
+                     #  MaxCellsInModule = cms.uint32(116),
                      MaxCellsInModule = cms.uint32(288),
                      DataLength = cms.uint32(20),
                      linLSB = cms.double(triggerCellLsbBeforeCompression),
-                     linnBits = cms.uint32(16),
+                     linnBits = cms.uint32(16),                     
                      triggerCellTruncationBits = cms.uint32(triggerCellTruncationBits),
                      NData = cms.uint32(999),
                      TCThreshold_fC = cms.double(1.),
@@ -68,7 +70,8 @@ C3d_parValues = cms.PSet( dR_multicluster = cms.double(0.01), # dR in normalized
                           calibSF_multicluster = cms.double(1.084),
                           type_multicluster = cms.string('dRC3d'), #'DBSCANC3d' for the DBSCAN algorithm 
                           dist_dbscan_multicluster = cms.double(0.01),
-                          minN_dbscan_multicluster = cms.uint32(2)
+                          minN_dbscan_multicluster = cms.uint32(2),
+                          calibCoeffMtx = matrixcalibcoeff.dEdx_weights_hadron
 
                           )
 cluster_algo =  cms.PSet( AlgorithmName = cms.string('HGCClusterAlgoThreshold'),

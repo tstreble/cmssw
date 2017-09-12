@@ -35,7 +35,8 @@ class HGCalTriggerNtupleHGCTriggerCells : public HGCalTriggerNtupleBase
     std::vector<float> tc_eta_;
     std::vector<float> tc_phi_;
     std::vector<float> tc_z_;
-
+    std::vector<float> tc_mipPt_;
+    std::vector<float> tc_hgclayer_;
 };
 
 DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
@@ -67,6 +68,8 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch("tc_eta", &tc_eta_);
   tree.Branch("tc_phi", &tc_phi_);
   tree.Branch("tc_z", &tc_z_);
+  tree.Branch("tc_mipPt", &tc_mipPt_);
+  tree.Branch("tc_hgclayer", &tc_hgclayer_);
 
 }
 
@@ -105,6 +108,17 @@ fill(const edm::Event& e, const edm::EventSetup& es)
       tc_eta_.emplace_back(tc_itr->eta());
       tc_phi_.emplace_back(tc_itr->phi());
       tc_z_.emplace_back(tc_itr->position().z());
+      tc_mipPt_.emplace_back(tc_itr->mipPt());
+      
+      if(id.subdetId()==3){
+          tc_hgclayer_.emplace_back(id.layer());
+      }else if(id.subdetId()==4){
+          tc_hgclayer_.emplace_back(id.layer()+28);
+      }
+      else if(id.subdetId()==5){
+          tc_hgclayer_.emplace_back(id.layer()+12+28);
+      }
+      
     }
   }
 }
@@ -127,6 +141,8 @@ clear()
   tc_eta_.clear();
   tc_phi_.clear();
   tc_z_.clear();
+  tc_mipPt_.clear();
+  tc_hgclayer_.clear();
 }
 
 

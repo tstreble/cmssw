@@ -39,6 +39,7 @@ private:
     string multiclusterAlgoType_;
     double distDbscan_ = 0.03;
     unsigned minNDbscan_ = 3;
+    std::vector<double> dEdX_;
 
     HGCalShowerShape shape_;
 
