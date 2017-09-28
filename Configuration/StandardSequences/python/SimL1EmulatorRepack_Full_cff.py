@@ -48,6 +48,10 @@ else:
     unpackHcal = EventFilter.HcalRawToDigi.HcalRawToDigi_cfi.hcalDigis.clone(
         InputLabel = cms.InputTag( 'rawDataCollector', processName=cms.InputTag.skipCurrentProcess()))
 
+    import EventFilter.L1TXRawToDigi.caloLayer1Stage2Digis_cfi
+    unpackLayer1 = EventFilter.L1TXRawToDigi.caloLayer1Stage2Digis_cfi.l1tCaloLayer1Digis.clone(
+        fedRawDataLabel = cms.InputTag( 'rawDataCollector', processName=cms.InputTag.skipCurrentProcess()))
+
     # Second, Re-Emulate the entire L1T
 
     from SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff import *
@@ -94,7 +98,7 @@ else:
     simEmtfDigis.RPCInput            = cms.InputTag('unpackRPC')
 
     simCaloStage2Layer1Digis.ecalToken = cms.InputTag('unpackEcal:EcalTriggerPrimitives')
-    simCaloStage2Layer1Digis.hcalToken = cms.InputTag('unpackHcal')
+    simCaloStage2Layer1Digis.hcalToken = cms.InputTag('unpackLayer1')
 
     # Finally, pack the new L1T output back into RAW
     
@@ -117,6 +121,7 @@ else:
 
     
     SimL1Emulator = cms.Sequence(unpackEcal+unpackHcal+unpackCSC+unpackDT+unpackRPC+unpackEmtf+unpackCsctf+unpackBmtf
+                                 +unpackLayer1
                                  +SimL1EmulatorCore+packCaloStage2
                                  +packGmtStage2+packGtStage2+rawDataCollector)
 
