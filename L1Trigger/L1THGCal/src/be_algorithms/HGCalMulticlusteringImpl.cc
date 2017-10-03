@@ -116,7 +116,7 @@ void HGCalMulticlusteringImpl::clusterizeDR( const edm::PtrVector<l1t::HGCalClus
     for( unsigned i(0); i<multiclustersTmp.size(); ++i ){
        
         double calibPt=0.;
-        bool MatrixCalib = false;
+        bool MatrixCalib = true;
         if(MatrixCalib){
             const edm::PtrVector<l1t::HGCalCluster> pertinentClu = multiclustersTmp.at(i).constituents();
             for( edm::PtrVector<l1t::HGCalCluster>::const_iterator it_clu=pertinentClu.begin(); it_clu<pertinentClu.end(); it_clu++){
