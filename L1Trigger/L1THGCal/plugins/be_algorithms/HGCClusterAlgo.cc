@@ -7,6 +7,7 @@
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerBackendAlgorithmBase.h"
 #include "L1Trigger/L1THGCal/interface/fe_codecs/HGCalTriggerCellBestChoiceCodec.h"
 #include "L1Trigger/L1THGCal/interface/fe_codecs/HGCalTriggerCellThresholdCodec.h"
+#include "L1Trigger/L1THGCal/interface/fe_codecs/HGCalTriggerCellTowerMapCodec.h"
 #include "L1Trigger/L1THGCal/interface/be_algorithms/HGCalTriggerCellCalibration.h"
 #include "L1Trigger/L1THGCal/interface/be_algorithms/HGCalClusteringImpl.h"
 #include "L1Trigger/L1THGCal/interface/be_algorithms/HGCalMulticlusteringImpl.h"    
@@ -206,7 +207,7 @@ void HGCClusterAlgo<FECODEC,DATA>::run(const l1t::HGCFETriggerDigiCollection & c
 
 typedef HGCClusterAlgo<HGCalTriggerCellBestChoiceCodec, HGCalTriggerCellBestChoiceCodec::data_type> HGCClusterAlgoBestChoice;
 typedef HGCClusterAlgo<HGCalTriggerCellThresholdCodec, HGCalTriggerCellThresholdCodec::data_type> HGCClusterAlgoThreshold;
-
+typedef HGCClusterAlgo<HGCalTriggerCellTowerMapCodec, HGCalTriggerCellTowerMapCodec::data_type> HGCClusterAlgoTowerMap;
 
 DEFINE_EDM_PLUGIN(HGCalTriggerBackendAlgorithmFactory, 
         HGCClusterAlgoBestChoice,
@@ -215,3 +216,7 @@ DEFINE_EDM_PLUGIN(HGCalTriggerBackendAlgorithmFactory,
 DEFINE_EDM_PLUGIN(HGCalTriggerBackendAlgorithmFactory, 
         HGCClusterAlgoThreshold,
         "HGCClusterAlgoThreshold");
+
+DEFINE_EDM_PLUGIN(HGCalTriggerBackendAlgorithmFactory, 
+        HGCClusterAlgoTowerMap,
+        "HGCClusterAlgoTowerMap");
