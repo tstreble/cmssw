@@ -87,7 +87,7 @@ class HGCalTriggerCellTowerMapCodecImpl
         int      TCThresholdBH_ADC_;
         double   TCThresholdBH_MIP_;
         std::vector<double> thickness_corrections_;
-	l1t::HGCalTriggerTowerMap towerMap_[2][52][700][3];
+	std::map<int,l1t::HGCalTriggerTowerMap> mapTowerMap_;	
 	l1t::HGCalTriggerTowerMap* getTowerMap_(l1t::HGCalTriggerCell TC);
 
 	static const int kLayersEE_=28;

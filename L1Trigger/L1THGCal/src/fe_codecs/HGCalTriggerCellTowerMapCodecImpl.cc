@@ -221,17 +221,8 @@ triggerCellSums(const HGCalTriggerGeometryBase& geometry,  const std::vector<std
 	getTowerMap_(TC)->addTriggerCell(TC);
 	
     }
-    
 
-    for ( auto& it1 : towerMap_){
-      for ( auto& it2 : it1){
-	for ( auto& it3 : it2){
-	  for ( auto& it4 : it3){
-	    it4.processTriggerCells();
-	  }
-	}
-      }
-    }
+    for ( auto& towerMap : mapTowerMap_) towerMap.second.processTriggerCells();
 
 }
 
@@ -262,17 +253,13 @@ getTowerMap_(l1t::HGCalTriggerCell TC)
 {
 
   HGCalDetId TC_id( TC.detId() );
-  int TC_zside = TC_id.zside()==1 ? 0 : 1;
-  int TC_layer = TC_id.layer()-1;
-  if(TC_id.subdetId()==HGCHEF){
-    TC_layer += kLayersEE_;
-  }
-  else if(TC_id.subdetId()==HGCHEB){
-    TC_layer += kLayersFH_+kLayersEE_;
-  }
   int TC_wafer = TC_id.wafer();
-  int TC_3rd = ((TC_id.cell())>>4)&0x3; // TBC!!!
+  int TC_3rd = ((TC_id.cell())>>4)&0x3;
 
-  return &towerMap_[TC_zside][TC_layer][TC_wafer][TC_3rd];
+  long TowerMap_id = 0;
+  if(TC_id.subdetId()!=HGCHEB) TowerMap_id = TC_id.cell();
+  else TowerMap_id = TC_3rd + (TC_wafer<<2);
+
+  return &mapTowerMap_[TowerMap_id];
 
 }
