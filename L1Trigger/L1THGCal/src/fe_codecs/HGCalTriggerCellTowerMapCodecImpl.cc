@@ -257,7 +257,7 @@ getTowerMap_(l1t::HGCalTriggerCell TC)
   int TC_3rd = ((TC_id.cell())>>4)&0x3;
 
   long TowerMap_id = 0;
-  if(TC_id.subdetId()!=HGCHEB) TowerMap_id = TC_id.cell();
+  if(TC_id.subdetId()==HGCHEB) TowerMap_id = TC_id.cell();
   else TowerMap_id = TC_3rd + (TC_wafer<<2);
 
   return &mapTowerMap_[TowerMap_id];
