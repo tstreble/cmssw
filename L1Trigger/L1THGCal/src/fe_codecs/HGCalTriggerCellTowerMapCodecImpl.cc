@@ -177,6 +177,7 @@ triggerCellSums(const HGCalTriggerGeometryBase& geometry,  const std::vector<std
 
     if(linearized_dataframes.size()==0) return;
     std::map<HGCalDetId, uint32_t> payload;
+    mapTowerMap_.erase(mapTowerMap_.begin(),mapTowerMap_.end());
     // sum energies in trigger cells
     for(const auto& frame : linearized_dataframes)
     {
@@ -209,7 +210,7 @@ triggerCellSums(const HGCalTriggerGeometryBase& geometry,  const std::vector<std
     }
     uint32_t module = geometry.getModuleFromTriggerCell(payload.begin()->first);
     HGCalTriggerGeometryBase::geom_ordered_set trigger_cells_in_module = geometry.getOrderedTriggerCellsFromModule(module);
-    // fill data payload    
+    // fill data payload
     for(const auto& id_value : payload)
     {
         // Store only energy value and detid
@@ -221,8 +222,6 @@ triggerCellSums(const HGCalTriggerGeometryBase& geometry,  const std::vector<std
 	getTowerMap_(TC)->addTriggerCell(TC);
 	
     }
-
-    for ( auto& towerMap : mapTowerMap_) towerMap.second.processTriggerCells();
 
 }
 
@@ -238,7 +237,7 @@ towerMapSelect(data_type& data)
     l1t::HGCalTriggerTowerMap* TCmap = getTowerMap_(data.payload[i]);    
     //Check if TC is the most energetic in towerMap and assign the full hwPt of the towerMap
     //Else zeroed
-    if(TCmap->triggerCells()[0].detId() == data.payload[i].detId()) data.payload[i].setHwPt(TCmap->hwPt());
+    if(TCmap->maxTriggerCell().detId() == data.payload[i].detId()) data.payload[i].setHwPt(TCmap->hwPt());
     else data.payload[i].setHwPt(0);
 
   }

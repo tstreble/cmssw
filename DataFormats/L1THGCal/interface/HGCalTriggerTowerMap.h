@@ -22,16 +22,15 @@ namespace l1t
 
             ~HGCalTriggerTowerMap() {}
 
-	    void addTriggerCell( l1t::HGCalTriggerCell TC ) { triggerCells_.emplace_back(TC); }
-	    void processTriggerCells() ;
-
+	    void addTriggerCell( HGCalTriggerCell TC );
 	    std::vector<HGCalTriggerCell> triggerCells() { return triggerCells_; }
-  
+	    HGCalTriggerCell maxTriggerCell() { return maxTriggerCell_; }
 	    
           
         private:
   
 	    std::vector<HGCalTriggerCell> triggerCells_;
+	    HGCalTriggerCell maxTriggerCell_;
 
     };
 
