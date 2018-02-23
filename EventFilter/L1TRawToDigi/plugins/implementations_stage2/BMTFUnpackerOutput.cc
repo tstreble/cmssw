@@ -8,6 +8,7 @@ namespace l1t
 {
   namespace stage2
   {
+
     bool unpacking(const Block& block, UnpackerCollections *coll, const bool isKalman = false)
     {
       unsigned int blockId = block.header().getID();
@@ -87,7 +88,7 @@ namespace l1t
       }//for ibx
 
       return true;
-    }//unpack
+    }//unpacking
 
     bool BMTFUnpackerOutput::unpack(const Block& block, UnpackerCollections *coll) {
       return unpacking(block, coll);
