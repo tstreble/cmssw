@@ -30,7 +30,7 @@ triggerObjectTable = cms.EDProducer("TriggerObjectTableProducer",
             l1seed = cms.string("type(-98)"),  l1deltaR = cms.double(0.3),
             #l2seed = cms.string("type(92) && coll('')"),  l2deltaR = cms.double(0.5),
             qualityBits = cms.string("filter('*CaloIdLTrackIdLIsoVL*TrackIso*Filter') + 2*filter('hltEle*WPTight*TrackIsoFilter*') + 4*filter('hltEle*WPLoose*TrackIsoFilter') + 8*filter('*OverlapFilterIsoEle*PFTau*')"), 
-            qualityBitsDoc = cms.string("1 = CaloIdL_TrackIdL_IsoVL, 2 = WPLoose, 4 = WPTight, 8 = OverlapFilter PFTau"),
+            qualityBitsDoc = cms.string("1 = CaloIdL_TrackIdL_IsoVL, 2 = WPTight, 4 = WPLoose, 8 = OverlapFilter PFTau"),
         ),
         cms.PSet(
             name = cms.string("Photon (PixelMatch-vetoed e/gamma)"), 
