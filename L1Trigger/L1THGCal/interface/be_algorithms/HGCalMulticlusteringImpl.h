@@ -28,6 +28,10 @@ public:
                       const l1t::HGCalMulticluster & mclu, 
                       double dR ) const;
 
+    double distanceMultiCone( const l1t::HGCalCluster & clu,
+			      const l1t::HGCalMulticluster & mclu,
+			      int memory) const;
+
     void clusterizeDR( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtr, 
                      l1t::HGCalMulticlusterBxCollection & multiclusters,
                      const HGCalTriggerGeometryBase & triggerGeometry
@@ -38,12 +42,18 @@ public:
                      const HGCalTriggerGeometryBase & triggerGeometry
                      );
 
+    void clusterizeMultiCone( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs,
+			      l1t::HGCalMulticlusterBxCollection & multiclusters,
+			      const HGCalTriggerGeometryBase & triggerGeometry);
+
+
 private:
 
     void findNeighbor( const std::vector<std::pair<unsigned int,double>>&  rankedList,
                        unsigned int searchInd,
                        const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtr, 
                        std::vector<unsigned int>& neigbors);
+
     void finalizeClusters(std::vector<l1t::HGCalMulticluster>&,
             l1t::HGCalMulticlusterBxCollection&,
             const HGCalTriggerGeometryBase&);
@@ -53,6 +63,7 @@ private:
     std::string multiclusterAlgoType_;
     double distDbscan_ = 0.005;
     unsigned minNDbscan_ = 3;
+    unsigned memoryMultiCone_ = 3;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;

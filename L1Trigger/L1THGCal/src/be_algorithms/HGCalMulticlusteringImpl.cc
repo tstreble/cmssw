@@ -10,13 +10,15 @@ HGCalMulticlusteringImpl::HGCalMulticlusteringImpl( const edm::ParameterSet& con
     ptC3dThreshold_(conf.getParameter<double>("minPt_multicluster")),
     multiclusterAlgoType_(conf.getParameter<string>("type_multicluster")),
     distDbscan_(conf.getParameter<double>("dist_dbscan_multicluster")),
-    minNDbscan_(conf.getParameter<unsigned>("minN_dbscan_multicluster"))
+    minNDbscan_(conf.getParameter<unsigned>("minN_dbscan_multicluster")),
+    memoryMultiCone_(conf.getParameter<unsigned>("memory_multicluster"))
 {    
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR for Near Neighbour search: " << dr_;  
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster minimum transverse-momentum: " << ptC3dThreshold_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster DBSCAN Clustering distance: " << distDbscan_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster clustering min number of subclusters: " << minNDbscan_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster type of multiclustering algortihm: " << multiclusterAlgoType_;
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster multi cone memory: " << memoryMultiCone_;
     id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
     id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification")); 
 }
@@ -38,6 +40,37 @@ bool HGCalMulticlusteringImpl::isPertinent( const l1t::HGCalCluster & clu,
     return false;
 
 }
+
+
+double HGCalMulticlusteringImpl::distanceMultiCone( const l1t::HGCalCluster & clu,
+						    const l1t::HGCalMulticluster & mclu,
+						    int memory) const
+{
+
+  double dRmin = -1.;
+
+  HGCalDetId cluDetId( clu.detId() );
+  HGCalDetId firstClusterDetId( mclu.detId() );
+
+  if( cluDetId.zside() != firstClusterDetId.zside() ){
+    return dRmin;
+  }
+
+  int layer1 = triggerTools_.layerWithOffset(cluDetId);
+
+  const std::unordered_map<uint32_t, edm::Ptr<l1t::HGCalCluster>>& clusters = mclu.constituents();
+  for( const auto& id_cluster : clusters ){
+    int layer2 = triggerTools_.layerWithOffset(id_cluster.first);
+    if( abs(layer2-layer1) > memory ) continue;
+    double dR = ( id_cluster.second->centreProj() - clu.centreProj() ).mag();
+    if( dRmin < 0 || dR < dRmin ) dRmin = dR;
+  }
+
+  return dRmin;
+
+}
+
+
 
 
 void HGCalMulticlusteringImpl::findNeighbor( const std::vector<std::pair<unsigned int,double>>&  rankedList,
@@ -113,6 +146,72 @@ void HGCalMulticlusteringImpl::clusterizeDR( const std::vector<edm::Ptr<l1t::HGC
     finalizeClusters(multiclustersTmp, multiclusters, triggerGeometry);
     
 }
+
+
+
+
+
+void HGCalMulticlusteringImpl::clusterizeMultiCone( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs,
+						    l1t::HGCalMulticlusterBxCollection & multiclusters,
+						    const HGCalTriggerGeometryBase & triggerGeometry)
+{
+
+  std::unordered_map<int,std::vector<edm::Ptr<l1t::HGCalCluster> > > C2Ds;
+
+  for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
+
+    unsigned layer = triggerTools_.layerWithOffset((**clu).detId());
+    C2Ds[layer].emplace_back(*clu);
+
+  }
+
+
+  std::vector<l1t::HGCalMulticluster> multiclustersTmp;
+
+  for(unsigned layer=1;layer<=triggerTools_.lastLayerBH();layer++){
+
+    for(auto clu : C2Ds[layer]){
+
+      int imclu=0;
+      vector<pair<double,int> > tcPertinentMulticlusters;
+      for( const auto& mclu : multiclustersTmp ){
+	double dist = this->distanceMultiCone(*clu, mclu, memoryMultiCone_);
+	if( dist>0 && dist<dr_ ){
+	  tcPertinentMulticlusters.push_back(make_pair(dist,imclu));
+	}
+	++imclu;
+      }
+
+      if( tcPertinentMulticlusters.empty() ){
+	multiclustersTmp.emplace_back( clu );
+      }
+      else{
+	unsigned minDist = 1;
+	unsigned targetMulticlu = 0;
+	for( auto dist_imclu : tcPertinentMulticlusters ){
+	  double d = dist_imclu.first ;
+	  if( d < minDist ){
+	    minDist = d;
+	    targetMulticlu = dist_imclu.second;
+	  }
+	}
+
+	multiclustersTmp.at( targetMulticlu ).addConstituent( clu );
+
+      }
+
+    }
+
+  }
+
+  /* making the collection of multiclusters */
+  finalizeClusters(multiclustersTmp, multiclusters, triggerGeometry);
+
+}
+
+
+
+
 void HGCalMulticlusteringImpl::clusterizeDBSCAN( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs, 
                                                  l1t::HGCalMulticlusterBxCollection & multiclusters,
                                                  const HGCalTriggerGeometryBase & triggerGeometry)
