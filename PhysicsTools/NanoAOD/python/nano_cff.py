@@ -6,6 +6,7 @@ from PhysicsTools.NanoAOD.taus_cff import *
 from PhysicsTools.NanoAOD.electrons_cff import *
 from PhysicsTools.NanoAOD.photons_cff import *
 from PhysicsTools.NanoAOD.globals_cff import *
+from PhysicsTools.NanoAOD.extraflags_cff import *
 from PhysicsTools.NanoAOD.ttbarCategorization_cff import *
 from PhysicsTools.NanoAOD.genparticles_cff import *
 from PhysicsTools.NanoAOD.particlelevel_cff import *
@@ -15,6 +16,8 @@ from PhysicsTools.NanoAOD.triggerObjects_cff import *
 from PhysicsTools.NanoAOD.isotracks_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
 
+from Configuration.Eras.Modifier_run2_miniAOD_80XLegacy_cff import run2_miniAOD_80XLegacy
+from Configuration.Eras.Modifier_run2_nanoAOD_92X_cff import run2_nanoAOD_92X
 
 nanoMetadata = cms.EDProducer("UniqueStringProducer",
     strings = cms.PSet(
@@ -47,6 +50,49 @@ simpleCleanerTable = cms.EDProducer("NanoAODSimpleCrossCleaner",
    tauName=cms.string("Tau"),photonName=cms.string("Photon")
 )
 
+btagSFdir="/src/PhysicsTools/NanoAOD/data/btagSF/"
+
+btagWeightTable = cms.EDProducer("BTagSFProducer",
+    src = cms.InputTag("linkedObjects","jets"),
+    cut = cms.string("pt > 25. && abs(eta) < 2.5"),
+    discNames = cms.vstring(
+        "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+        "pfDeepCSVJetTags:probb+pfDeepCSVJetTags:probbb",       #if multiple MiniAOD branches need to be summed up (e.g., DeepCSV b+bb), separate them using '+' delimiter
+        "pfCombinedMVAV2BJetTags"        
+    ),
+    discShortNames = cms.vstring(
+        "CSVV2",
+        "DeepCSVB",
+        "CMVA"
+    ),
+    weightFiles = cms.vstring(                                  #default settings are for 2017 94X. toModify function is called later for other eras.
+        btagSFdir+"CSVv2_94XSF_V2_B_F.csv",
+        btagSFdir+"DeepCSV_94XSF_V2_B_F.csv",                    
+        "unavailable"                                           #if SFs for an algorithm in an era is unavailable, the corresponding branch will not be stored
+    ),
+    operatingPoints = cms.vstring("3","3","3"),                 #loose = 0, medium = 1, tight = 2, reshaping = 3
+    measurementTypesB = cms.vstring("iterativefit","iterativefit","iterativefit"),     #e.g. "comb", "incl", "ttbar", "iterativefit"
+    measurementTypesC = cms.vstring("iterativefit","iterativefit","iterativefit"),
+    measurementTypesUDSG = cms.vstring("iterativefit","iterativefit","iterativefit"),
+    sysTypes = cms.vstring("central","central","central")
+)
+
+run2_miniAOD_80XLegacy.toModify(btagWeightTable,                
+    cut = cms.string("pt > 25. && abs(eta) < 2.4"),             #80X corresponds to 2016, |eta| < 2.4
+    weightFiles = cms.vstring(                                  #80X corresponds to 2016 SFs
+        btagSFdir+"CSVv2_Moriond17_B_H.csv",            
+        "unavailable",                    
+        btagSFdir+"cMVAv2_Moriond17_B_H.csv"                                            
+    )
+)
+
+run2_nanoAOD_92X.toModify(btagWeightTable,                      #92X corresponds to MCv1, for which SFs are unavailable
+    weightFiles = cms.vstring(
+        "unavailable",
+        "unavailable",                    
+        "unavailable"                                            
+    )
+)                    
 
 genWeightsTable = cms.EDProducer("GenWeightsTableProducer",
     genEvent = cms.InputTag("generator"),
@@ -78,7 +124,7 @@ nanoSequence = cms.Sequence(
         jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + triggerObjectTables + isoTrackTables +
 	l1bits)
 
-nanoSequenceMC = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
+nanoSequenceMC = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + btagWeightTable + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
 
 
 def nanoAOD_customizeCommon(process):
@@ -104,6 +150,9 @@ _80x_sequence = nanoSequence.copy()
 #remove stuff 
 _80x_sequence.remove(isoTrackTable)
 _80x_sequence.remove(isoTrackSequence)
+#add stuff
+_80x_sequence.insert(_80x_sequence.index(jetSequence), extraFlagsProducers)
+_80x_sequence.insert(_80x_sequence.index(l1bits)+1, extraFlagsTable)
 
 run2_miniAOD_80XLegacy.toReplaceWith( nanoSequence, _80x_sequence)
 
