@@ -89,8 +89,14 @@ private:
     double ptMin_;
     double etaMax_;
     double DCASigMin_;
+    double massMinKPi_;
+    double massMaxKPi_;
+    double CLVtxMinKPi_;
     bool KPiCharge_;
-    
+    double massMinB_;
+    double massMaxB_;
+    double CLVtxMinB_;
+
     float KaonMass_ = 0.493677;
     float KaonMassErr_ = 1.6e-5;
     float PionMass_ = 0.139570; //TBC
@@ -107,7 +113,13 @@ PFCandSrc_(   consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<e
 ptMin_(     iConfig.getParameter<double>( "MinPt" ) ),
 etaMax_(    iConfig.getParameter<double>( "MaxEta" ) ),
 DCASigMin_( iConfig.getParameter<double>( "MinDCASig") ),
-KPiCharge_( iConfig.getParameter<bool>( "KPiChargeCheck" ) )
+massMinKPi_( iConfig.getParameter<double>( "D0MinMass" )),
+massMaxKPi_( iConfig.getParameter<double>( "D0MaxMass" )),
+CLVtxMinKPi_(iConfig.getParameter<double>( "D0MinCLVtx" )),
+KPiCharge_( iConfig.getParameter<bool>( "KPiChargeCheck" ) ),
+massMinB_(  iConfig.getParameter<double>( "BMinMass" )),
+massMaxB_(  iConfig.getParameter<double>( "BMaxMass" )),
+CLVtxMinB_( iConfig.getParameter<double>( "BMinCLVtx" ))
 {
     produces<pat::CompositeCandidateCollection>();
 }
@@ -197,6 +209,11 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                 double KPiVtx_CL = TMath::Prob((double)refitVertexKPi->chiSquared(),
                                                 int(rint(refitVertexKPi->degreesOfFreedom())));
                 
+                if(KPiVtx_CL<CLVtxMinKPi_) continue;
+
+                double KPi_mass = refitKPi->currentState().mass();
+                if(KPi_mass<massMinKPi_ || KPi_mass>massMaxKPi_) continue;
+
                 double KPi_mass_err = sqrt(refitKPi->currentState().kinematicParametersError().matrix()(6,6));
                 
                 math::XYZVector refitKaonV3D_KPi = refitKaon_KPi->refittedTransientTrack().track().momentum();
@@ -244,9 +261,13 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     double BToKPiPiVtx_CL = TMath::Prob((double)refitVertexBToKPiPi->chiSquared(),
                                                     int(rint(refitVertexBToKPiPi->degreesOfFreedom())));
 
+                    if(BToKPiPiVtx_CL<CLVtxMinB_) continue;
                     
                     double cosAlpha = computeCosAlpha(refitBToKPiPi,refitVertexBToKPiPi,beamSpot);
                     
+                    double mass = refitBToKPiPi->currentState().mass();
+                    if(mass<massMinB_ || mass>massMaxB_) continue;
+
                     double mass_err = sqrt(refitBToKPiPi->currentState().kinematicParametersError().matrix()(6,6));
                     
                     pat::CompositeCandidate BToKPiPiCand;
@@ -278,7 +299,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKPiPiCand.addUserFloat("Kpi_pt",     sqrt(refitKPiV3D.perp2()));
                     BToKPiPiCand.addUserFloat("Kpi_eta",    refitKPiV3D.eta());
                     BToKPiPiCand.addUserFloat("Kpi_phi",    refitKPiV3D.phi());
-                    BToKPiPiCand.addUserFloat("Kpi_mass",   refitKPi->currentState().mass());
+                    BToKPiPiCand.addUserFloat("Kpi_mass",   KPi_mass);
                     BToKPiPiCand.addUserFloat("Kpi_mass_err",   KPi_mass_err);
                     BToKPiPiCand.addUserFloat("Kpi_Lxy", (float) KPiLSBS/KPiLSBSErr);
                     BToKPiPiCand.addUserFloat("Kpi_CL_vtx", (float) KPiVtx_CL);
@@ -287,9 +308,8 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKPiPiCand.addUserFloat("pt",     sqrt(refitBToKPiPiV3D.perp2()));
                     BToKPiPiCand.addUserFloat("eta",    refitBToKPiPiV3D.eta());
                     BToKPiPiCand.addUserFloat("phi",    refitBToKPiPiV3D.phi());
-                    BToKPiPiCand.addUserFloat("mass",   refitBToKPiPi->currentState().mass());
+                    BToKPiPiCand.addUserFloat("mass",   mass);
                     BToKPiPiCand.addUserFloat("mass_err", mass_err);
-                    
                     BToKPiPiCand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
                     BToKPiPiCand.addUserFloat("CL_vtx", (float) BToKPiPiVtx_CL);
                     BToKPiPiCand.addUserFloat("cosAlpha", (float) cosAlpha);
