@@ -16,6 +16,9 @@
 <use   name="DQMServices/Core"/>
 <use   name="CondFormats/BTauObjects"/>
 <use   name="CondTools/BTau"/>
+<use   name="RecoVertex/KinematicFitPrimitives"/>
+<use   name="RecoVertex/KinematicFit"/>
+<use   name="MagneticField/Records"/>
 <library   file="*.cc" name="PhysicsToolsNanoAODPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
