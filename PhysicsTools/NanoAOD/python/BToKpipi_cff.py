@@ -8,7 +8,13 @@ BToKpipi=cms.EDProducer("BToKpipiProducer",
                         MinPt=cms.double(1.),
                         MaxEta=cms.double(2.4),
                         MinDCASig=cms.double(3.3),
-                        KPiChargeCheck=cms.bool(True)
+                        D0MinMass=cms.double(0.),
+                        D0MaxMass=cms.double(10.),
+                        D0MinCLVtx=cms.double(0.),
+                        KPiChargeCheck=cms.bool(True),
+                        BMinMass=cms.double(0.),
+                        BMaxMass=cms.double(10.),
+                        BMinCLVtx=cms.double(0.)
                         )
 
 BToKpipiTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
