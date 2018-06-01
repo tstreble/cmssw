@@ -11,7 +11,8 @@ HGCalMulticlusteringImpl::HGCalMulticlusteringImpl( const edm::ParameterSet& con
     multiclusterAlgoType_(conf.getParameter<string>("type_multicluster")),
     distDbscan_(conf.getParameter<double>("dist_dbscan_multicluster")),
     minNDbscan_(conf.getParameter<unsigned>("minN_dbscan_multicluster")),
-    memoryMultiCone_(conf.getParameter<unsigned>("memory_multicluster"))
+    memoryMultiCone_(conf.getParameter<unsigned>("memory_multicluster")),
+    dRMultiCone_(conf.getParameter<vector<double>>("dR_MultiCone_multicluster"))
 {    
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR for Near Neighbour search: " << dr_;  
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster minimum transverse-momentum: " << ptC3dThreshold_;
@@ -19,6 +20,9 @@ HGCalMulticlusteringImpl::HGCalMulticlusteringImpl( const edm::ParameterSet& con
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster clustering min number of subclusters: " << minNDbscan_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster type of multiclustering algortihm: " << multiclusterAlgoType_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster multi cone memory: " << memoryMultiCone_;
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster multi cone dR parameters: {";
+    for(auto dR : dRMultiCone_) edm::LogInfo("HGCalMulticlusterParameters") << dR << ",";
+    edm::LogInfo("HGCalMulticlusterParameters") << "}";
     id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
     id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification")); 
 }
@@ -156,6 +160,11 @@ void HGCalMulticlusteringImpl::clusterizeMultiCone( const std::vector<edm::Ptr<l
 						    const HGCalTriggerGeometryBase & triggerGeometry)
 {
 
+  if(multiclusterAlgoType_=="MultiConeC3d" && dRMultiCone_.size()!=triggerTools_.lastLayerBH()+1){
+    throw edm::Exception(edm::errors::Configuration, "Configuration")
+      << "HGCalMulticlusteringImpl wrong number of dR_MultiCone_multicluster elements: "<<triggerTools_.lastLayerBH()+1<<" needed, "<<dRMultiCone_.size()<<" provided"<<endl;
+  }
+
   std::unordered_map<int,std::vector<edm::Ptr<l1t::HGCalCluster> > > C2Ds;
 
   for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
@@ -170,13 +179,22 @@ void HGCalMulticlusteringImpl::clusterizeMultiCone( const std::vector<edm::Ptr<l
 
   for(unsigned layer=1;layer<=triggerTools_.lastLayerBH();layer++){
 
+    double dR = dRMultiCone_[layer];
+
     for(auto clu : C2Ds[layer]){
+
+      if(dR==0.){
+	throw cms::Exception("BadConfiguration")
+	  <<"3D cluster multicone dR forced to 0 by coefficients.\n"
+	  <<"The configuration should be changed. "
+	  <<"Discarded layers should be defined in hgcalTriggerGeometryESProducer.TriggerGeometry.DisconnectedLayers and not with multicone dR coefficients = 0\n";
+      }      
 
       int imclu=0;
       vector<pair<double,int> > tcPertinentMulticlusters;
       for( const auto& mclu : multiclustersTmp ){
 	double dist = this->distanceMultiCone(*clu, mclu, memoryMultiCone_);
-	if( dist>0 && dist<dr_ ){
+	if( dist>0 && dist<dR ){
 	  tcPertinentMulticlusters.push_back(make_pair(dist,imclu));
 	}
 	++imclu;

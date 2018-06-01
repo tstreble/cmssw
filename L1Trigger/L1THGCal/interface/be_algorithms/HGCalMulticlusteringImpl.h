@@ -64,6 +64,7 @@ private:
     double distDbscan_ = 0.005;
     unsigned minNDbscan_ = 3;
     unsigned memoryMultiCone_ = 3;
+    std::vector<double> dRMultiCone_;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;
