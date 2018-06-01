@@ -19,6 +19,7 @@
 <use   name="RecoVertex/KinematicFitPrimitives"/>
 <use   name="RecoVertex/KinematicFit"/>
 <use   name="MagneticField/Records"/>
+<use   name="TrackingTools/Records"/>
 <library   file="*.cc" name="PhysicsToolsNanoAODPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
