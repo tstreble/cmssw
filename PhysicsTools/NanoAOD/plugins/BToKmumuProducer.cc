@@ -130,7 +130,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
     
     if ( ! beamSpotHandle.isValid() ) {
-        edm::LogError("BToKMuMuProducer") << "No beam spot available from EventSetup" ;
+        edm::LogError("BToKmumuProducer") << "No beam spot available from EventSetup" ;
     }
     
     reco::BeamSpot beamSpot = *beamSpotHandle;
