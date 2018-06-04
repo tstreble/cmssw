@@ -103,14 +103,14 @@ private:
 
 
 BToKeeProducer::BToKeeProducer(const edm::ParameterSet &iConfig):
-beamSpotSrc_( consumes<reco::BeamSpot>                  ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
-electronSrc_(     consumes<std::vector<pat::Electron>>          ( iConfig.getParameter<edm::InputTag>( "electronCollection" ) ) ),
-PFCandSrc_(   consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
-ptMinEle_(     iConfig.getParameter<double>( "ElectronMinPt" ) ),
-etaMaxEle_(    iConfig.getParameter<double>( "ElectronMaxEta" ) ),
-ptMinKaon_(   iConfig.getParameter<double>( "KaonMinPt" ) ),
-etaMaxKaon_(  iConfig.getParameter<double>( "KaonMaxEta" ) ),
-DCASigMinKaon_(   iConfig.getParameter<double>( "KaonMinDCASig" ) ),
+beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
+electronSrc_( consumes<std::vector<pat::Electron>> ( iConfig.getParameter<edm::InputTag>( "electronCollection" ) ) ),
+PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+ptMinEle_( iConfig.getParameter<double>( "ElectronMinPt" ) ),
+etaMaxEle_( iConfig.getParameter<double>( "ElectronMaxEta" ) ),
+ptMinKaon_( iConfig.getParameter<double>( "KaonMinPt" ) ),
+etaMaxKaon_( iConfig.getParameter<double>( "KaonMaxEta" ) ),
+DCASigMinKaon_( iConfig.getParameter<double>( "KaonMinDCASig" ) ),
 diEleCharge_( iConfig.getParameter<bool>( "DiElectronChargeCheck" ) )
 {
     produces<pat::CompositeCandidateCollection>();
@@ -161,7 +161,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
             
             for (unsigned int j = 0; j < electronNumber; ++j) {
                 
-	        if(i==j) continue;
+                if(i==j) continue;
 
                 const pat::Electron & ele2 = (*electronHandle)[j];
 
@@ -174,7 +174,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                 RefCountedKinematicVertex refitVertexEE;
                 RefCountedKinematicParticle refitEE;
                 RefCountedKinematicParticle refitEle1_EE;
-		RefCountedKinematicParticle refitEle2_EE;
+                RefCountedKinematicParticle refitEle2_EE;
                 
                 bool passed = EEVertexRefitting(ele1, ele2,
 						theTTBuilder,
@@ -195,9 +195,9 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                 
                 double EE_mass_err = sqrt(refitEE->currentState().kinematicParametersError().matrix()(6,6));
 
-		math::XYZVector refitEle1V3D_EE = refitEle1_EE->refittedTransientTrack().track().momentum();
-		math::XYZVector refitEle2V3D_EE = refitEle2_EE->refittedTransientTrack().track().momentum();		
-		math::XYZVector refitEEV3D = refitEle1V3D_EE + refitEle2V3D_EE;
+                math::XYZVector refitEle1V3D_EE = refitEle1_EE->refittedTransientTrack().track().momentum();
+                math::XYZVector refitEle2V3D_EE = refitEle2_EE->refittedTransientTrack().track().momentum();		
+                math::XYZVector refitEEV3D = refitEle1V3D_EE + refitEle2V3D_EE;
               
                 //Kaon
                 for (unsigned int k = 0; k < pfCandNumber; ++k) {
@@ -207,13 +207,13 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     if(!pfCand.hasTrackDetails()) continue;
                     if(pfCand.pt()<ptMinKaon_ || abs(pfCand.eta())>etaMaxKaon_) continue;
 
-		    pair<double,double> DCA = computeDCA(pfCand,
+                    pair<double,double> DCA = computeDCA(pfCand,
 							 bFieldHandle,
 							 beamSpot);
-		    double DCABS = DCA.first;
-		    double DCABSErr = DCA.second;
+                    double DCABS = DCA.first;
+                    double DCABSErr = DCA.second;
 
-		    if(DCABS/DCABSErr<DCASigMinKaon_) continue;
+                    if(DCABS/DCABSErr<DCASigMinKaon_) continue;
                     
                     RefCountedKinematicVertex refitVertexBToKEE;
                     RefCountedKinematicParticle refitBToKEE;
@@ -249,24 +249,24 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addDaughter( ele2 , "ele2");
                     BToKEECand.addDaughter( pfCand, "kaon");
                     
-		    math::XYZVector refitEle1V3D = refitEle1->refittedTransientTrack().track().momentum();
+                    math::XYZVector refitEle1V3D = refitEle1->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("ele1_pt",     sqrt(refitEle1V3D.perp2()));
                     BToKEECand.addUserFloat("ele1_eta",    refitEle1V3D.eta());
                     BToKEECand.addUserFloat("ele1_phi",    refitEle1V3D.phi());
                     BToKEECand.addUserFloat("ele1_charge", refitEle1->currentState().particleCharge());
 
-		    math::XYZVector refitEle2V3D = refitEle2->refittedTransientTrack().track().momentum();
+                    math::XYZVector refitEle2V3D = refitEle2->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("ele2_pt",     sqrt(refitEle2V3D.perp2()));
                     BToKEECand.addUserFloat("ele2_eta",    refitEle2V3D.eta());
                     BToKEECand.addUserFloat("ele2_phi",    refitEle2V3D.phi());
-		    BToKEECand.addUserFloat("ele2_charge", refitEle2->currentState().particleCharge());		    
+                    BToKEECand.addUserFloat("ele2_charge", refitEle2->currentState().particleCharge());		    
 
-		    math::XYZVector refitKaonV3D = refitKaon->refittedTransientTrack().track().momentum();
+                    math::XYZVector refitKaonV3D = refitKaon->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
                     BToKEECand.addUserFloat("kaon_eta",   refitKaonV3D.eta());
                     BToKEECand.addUserFloat("kaon_phi",   refitKaonV3D.phi());
                     BToKEECand.addUserFloat("kaon_charge",refitKaon->currentState().particleCharge());
-		    BToKEECand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
+                    BToKEECand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
                     BToKEECand.addUserFloat("ee_pt",     sqrt(refitEEV3D.perp2()));
                     BToKEECand.addUserFloat("ee_eta",    refitEEV3D.eta());
@@ -277,7 +277,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ee_Lxy", (float) EELSBS/EELSBSErr);
                     BToKEECand.addUserFloat("ee_CL_vtx", (float) EEVtx_CL);
                     
-		    math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
+                    math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
                     BToKEECand.addUserFloat("pt",     sqrt(refitBToKEEV3D.perp2()));
                     BToKEECand.addUserFloat("eta",    refitBToKEEV3D.eta());
                     BToKEECand.addUserFloat("phi",    refitBToKEEV3D.phi());
