@@ -104,15 +104,15 @@ private:
 
 
 BToKmumuProducer::BToKmumuProducer(const edm::ParameterSet &iConfig):
-beamSpotSrc_( consumes<reco::BeamSpot>                  ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
-vertexSrc_( consumes<reco::VertexCollection>            ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
-muonSrc_(     consumes<std::vector<pat::Muon>>          ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
-PFCandSrc_(   consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
-ptMinMu_(     iConfig.getParameter<double>( "MuonMinPt" ) ),
-etaMaxMu_(    iConfig.getParameter<double>( "MuonMaxEta" ) ),
-ptMinKaon_(   iConfig.getParameter<double>( "KaonMinPt" ) ),
-etaMaxKaon_(  iConfig.getParameter<double>( "KaonMaxEta" ) ),
-DCASigMinKaon_(   iConfig.getParameter<double>( "KaonMinDCASig" ) ),
+beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
+vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
+muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
+PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+ptMinMu_( iConfig.getParameter<double>( "MuonMinPt" ) ),
+etaMaxMu_( iConfig.getParameter<double>( "MuonMaxEta" ) ),
+ptMinKaon_( iConfig.getParameter<double>( "KaonMinPt" ) ),
+etaMaxKaon_( iConfig.getParameter<double>( "KaonMaxEta" ) ),
+DCASigMinKaon_( iConfig.getParameter<double>( "KaonMinDCASig" ) ),
 diMuonCharge_( iConfig.getParameter<bool>( "DiMuonChargeCheck" ) )
 {
     produces<pat::CompositeCandidateCollection>();
