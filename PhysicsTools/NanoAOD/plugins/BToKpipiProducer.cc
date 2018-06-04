@@ -108,18 +108,18 @@ private:
 
 
 BToKpipiProducer::BToKpipiProducer(const edm::ParameterSet &iConfig):
-beamSpotSrc_( consumes<reco::BeamSpot>                  ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
-PFCandSrc_(   consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
-ptMin_(     iConfig.getParameter<double>( "MinPt" ) ),
-etaMax_(    iConfig.getParameter<double>( "MaxEta" ) ),
+beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
+PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+ptMin_( iConfig.getParameter<double>( "MinPt" ) ),
+etaMax_( iConfig.getParameter<double>( "MaxEta" ) ),
 DCASigMin_( iConfig.getParameter<double>( "MinDCASig") ),
-massMinKPi_( iConfig.getParameter<double>( "D0MinMass" )),
-massMaxKPi_( iConfig.getParameter<double>( "D0MaxMass" )),
-CLVtxMinKPi_(iConfig.getParameter<double>( "D0MinCLVtx" )),
+massMinKPi_( iConfig.getParameter<double>( "D0MinMass" ) ),
+massMaxKPi_( iConfig.getParameter<double>( "D0MaxMass" ) ),
+CLVtxMinKPi_(iConfig.getParameter<double>( "D0MinCLVtx" ) ),
 KPiCharge_( iConfig.getParameter<bool>( "KPiChargeCheck" ) ),
-massMinB_(  iConfig.getParameter<double>( "BMinMass" )),
-massMaxB_(  iConfig.getParameter<double>( "BMaxMass" )),
-CLVtxMinB_( iConfig.getParameter<double>( "BMinCLVtx" ))
+massMinB_( iConfig.getParameter<double>( "BMinMass" ) ),
+massMaxB_( iConfig.getParameter<double>( "BMaxMass" ) ),
+CLVtxMinB_( iConfig.getParameter<double>( "BMinCLVtx" ) )
 {
     produces<pat::CompositeCandidateCollection>();
 }
