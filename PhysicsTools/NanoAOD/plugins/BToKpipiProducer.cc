@@ -87,6 +87,7 @@ private:
     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> PFCandSrc_;
     
     double ptMin_;
+    double ptMinPiB_;
     double etaMax_;
     double DCASigMin_;
     double massMinKPi_;
@@ -111,6 +112,7 @@ BToKpipiProducer::BToKpipiProducer(const edm::ParameterSet &iConfig):
 beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
 ptMin_( iConfig.getParameter<double>( "MinPt" ) ),
+ptMinPiB_( iConfig.getParameter<double>( "MinPtPiB" ) ),
 etaMax_( iConfig.getParameter<double>( "MaxEta" ) ),
 DCASigMin_( iConfig.getParameter<double>( "MinDCASig") ),
 massMinKPi_( iConfig.getParameter<double>( "D0MinMass" ) ),
@@ -152,90 +154,91 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     if(pfCandNumber>1){        
 
         // loop on all the Kpipi triplets
-        for (unsigned int i = 0; i < pfCandNumber; ++i) {            
+        for (unsigned int i = 0; i < pfCandNumber; ++i) {
 
-            const pat::PackedCandidate & kaon = (*pfCandHandle)[i];
-            
-            if(abs(kaon.pdgId())!=211) continue; //Charged hadrons
-            if(!kaon.hasTrackDetails()) continue;
-            if(kaon.pt()<ptMin_ || abs(kaon.eta())>etaMax_) continue;
-            
-            pair<double,double> kaon_DCA = computeDCA(kaon,
-                                                      bFieldHandle,
-                                                      beamSpot);
-            double kaon_DCABS = kaon_DCA.first;
-            double kaon_DCABSErr = kaon_DCA.second;
-            
-            if(kaon_DCABS/kaon_DCABSErr<DCASigMin_) continue;            
+	    const pat::PackedCandidate & piBu = (*pfCandHandle)[i];
+	    if(abs(piBu.pdgId())!=211) continue; //Charged hadrons
+	    if(!piBu.hasTrackDetails()) continue;
+	    if(piBu.pt()<ptMinPiB_ || abs(piBu.eta())>etaMax_) continue;
+
+	    pair<double,double> piBu_DCA = computeDCA(piBu,
+						      bFieldHandle,
+						      beamSpot);
+	    double piBu_DCABS = piBu_DCA.first;
+	    double piBu_DCABSErr = piBu_DCA.second;
+
+	    if(piBu_DCABS/piBu_DCABSErr<DCASigMin_) continue;
+
 
             for (unsigned int j = 0; j < pfCandNumber; ++j) {
                 
                 if(j==i) continue;
-                
-                const pat::PackedCandidate & piD0 = (*pfCandHandle)[j];
 
-                if(abs(piD0.pdgId())!=211) continue; //Charged hadrons
-                if(!piD0.hasTrackDetails()) continue;
-                if(piD0.pt()<ptMin_ || abs(piD0.eta())>etaMax_) continue;
+                const pat::PackedCandidate & kaon = (*pfCandHandle)[j];
 
-                if(KPiCharge_ && kaon.charge()*piD0.charge()>0) continue;
-                
-                pair<double,double> piD0_DCA = computeDCA(piD0,
-                                                          bFieldHandle,
-                                                          beamSpot);
-                double piD0_DCABS = piD0_DCA.first;
-                double piD0_DCABSErr = piD0_DCA.second;
-                if(piD0_DCABS/piD0_DCABSErr<DCASigMin_) continue;
-                
-                RefCountedKinematicVertex refitVertexKPi;
-                RefCountedKinematicParticle refitKPi;
-                RefCountedKinematicParticle refitKaon_KPi;
-                RefCountedKinematicParticle refitPiD0_KPi;                
+                if(abs(kaon.pdgId())!=211) continue; //Charged hadrons
+                if(!kaon.hasTrackDetails()) continue;
+                if(kaon.pt()<ptMin_ || abs(kaon.eta())>etaMax_) continue;
 
-        	bool passed = KPiVertexRefitting(kaon, piD0,
-                                                 bFieldHandle,
-                                                 refitVertexKPi,
-                                                 refitKPi,
-                                                 refitKaon_KPi,
-                                                 refitPiD0_KPi);
-                
-                if ( !passed) continue;
-                
-                pair<double,double> KPiLS = computeLS(refitVertexKPi,beamSpot);
-                double KPiLSBS = KPiLS.first;
-                double KPiLSBSErr = KPiLS.second;
+                pair<double,double> kaon_DCA = computeDCA(kaon,
+							  bFieldHandle,
+							  beamSpot);
+                double kaon_DCABS = kaon_DCA.first;
+                double kaon_DCABSErr = kaon_DCA.second;
 
-                
-                double KPiVtx_CL = TMath::Prob((double)refitVertexKPi->chiSquared(),
-                                                int(rint(refitVertexKPi->degreesOfFreedom())));
-                
-                if(KPiVtx_CL<CLVtxMinKPi_) continue;
+                if(kaon_DCABS/kaon_DCABSErr<DCASigMin_) continue;
 
-                double KPi_mass = refitKPi->currentState().mass();
-                if(KPi_mass<massMinKPi_ || KPi_mass>massMaxKPi_) continue;
-
-                double KPi_mass_err = sqrt(refitKPi->currentState().kinematicParametersError().matrix()(6,6));
-                
-                math::XYZVector refitKaonV3D_KPi = refitKaon_KPi->refittedTransientTrack().track().momentum();
-                math::XYZVector refitPiD0V3D_KPi = refitPiD0_KPi->refittedTransientTrack().track().momentum();
-                math::XYZVector refitKPiV3D = refitKaonV3D_KPi + refitPiD0V3D_KPi;                
 
                 for (unsigned int k = 0; k < pfCandNumber; ++k) {
                     
                     if(k==i || k==j) continue;
-                    
-                    const pat::PackedCandidate & piBu = (*pfCandHandle)[k];
-                    if(abs(piBu.pdgId())!=211) continue; //Charged hadrons
-                    if(!piBu.hasTrackDetails()) continue;
-                    if(piBu.pt()<ptMin_ || abs(piBu.eta())>etaMax_) continue;
-                    
-                    pair<double,double> piBu_DCA = computeDCA(piBu,
-                                                              bFieldHandle,
-                                                              beamSpot);
-                    double piBu_DCABS = piBu_DCA.first;
-                    double piBu_DCABSErr = piBu_DCA.second;
-                    
-                    if(piBu_DCABS/piBu_DCABSErr<DCASigMin_) continue;
+
+                    const pat::PackedCandidate & piD0 = (*pfCandHandle)[k];
+
+                    if(abs(piD0.pdgId())!=211) continue; //Charged hadrons
+                    if(!piD0.hasTrackDetails()) continue;
+                    if(piD0.pt()<ptMin_ || abs(piD0.eta())>etaMax_) continue;
+
+                    if(KPiCharge_ && kaon.charge()*piD0.charge()>0) continue;
+
+                    pair<double,double> piD0_DCA = computeDCA(piD0,
+							      bFieldHandle,
+							      beamSpot);
+                    double piD0_DCABS = piD0_DCA.first;
+                    double piD0_DCABSErr = piD0_DCA.second;
+                    if(piD0_DCABS/piD0_DCABSErr<DCASigMin_) continue;
+
+                    RefCountedKinematicVertex refitVertexKPi;
+                    RefCountedKinematicParticle refitKPi;
+                    RefCountedKinematicParticle refitKaon_KPi;
+                    RefCountedKinematicParticle refitPiD0_KPi;
+
+                    bool passed = KPiVertexRefitting(kaon, piD0,
+						     bFieldHandle,
+						     refitVertexKPi,
+						     refitKPi,
+						     refitKaon_KPi,
+						     refitPiD0_KPi);
+
+                    if ( !passed) continue;
+
+                    pair<double,double> KPiLS = computeLS(refitVertexKPi,beamSpot);
+                    double KPiLSBS = KPiLS.first;
+                    double KPiLSBSErr = KPiLS.second;
+
+                    double KPiVtx_CL = TMath::Prob((double)refitVertexKPi->chiSquared(),
+						   int(rint(refitVertexKPi->degreesOfFreedom())));
+
+                    if(KPiVtx_CL<CLVtxMinKPi_) continue;
+
+                    double KPi_mass = refitKPi->currentState().mass();
+                    if(KPi_mass<massMinKPi_ || KPi_mass>massMaxKPi_) continue;
+
+                    double KPi_mass_err = sqrt(refitKPi->currentState().kinematicParametersError().matrix()(6,6));
+
+                    math::XYZVector refitKaonV3D_KPi = refitKaon_KPi->refittedTransientTrack().track().momentum();
+                    math::XYZVector refitPiD0V3D_KPi = refitPiD0_KPi->refittedTransientTrack().track().momentum();
+                    math::XYZVector refitKPiV3D = refitKaonV3D_KPi + refitPiD0V3D_KPi;
                     
                     RefCountedKinematicVertex refitVertexBToKPiPi;
                     RefCountedKinematicParticle refitBToKPiPi;
