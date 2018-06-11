@@ -166,7 +166,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
             double kaon_DCABS = kaon_DCA.first;
             double kaon_DCABSErr = kaon_DCA.second;
             
-            if(kaon_DCABS/kaon_DCABSErr<DCASigMin_) continue;            
+            if(fabs(kaon_DCABS/kaon_DCABSErr)<DCASigMin_) continue;            
 
             for (unsigned int j = 0; j < pfCandNumber; ++j) {
                 
@@ -185,7 +185,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                                                           beamSpot);
                 double piD0_DCABS = piD0_DCA.first;
                 double piD0_DCABSErr = piD0_DCA.second;
-                if(piD0_DCABS/piD0_DCABSErr<DCASigMin_) continue;
+                if(fabs(piD0_DCABS/piD0_DCABSErr)<DCASigMin_) continue;
                 
                 RefCountedKinematicVertex refitVertexKPi;
                 RefCountedKinematicParticle refitKPi;
@@ -235,7 +235,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     double piBu_DCABS = piBu_DCA.first;
                     double piBu_DCABSErr = piBu_DCA.second;
                     
-                    if(piBu_DCABS/piBu_DCABSErr<DCASigMin_) continue;
+                    if(fabs(piBu_DCABS/piBu_DCABSErr)<DCASigMin_) continue;
                     
                     RefCountedKinematicVertex refitVertexBToKPiPi;
                     RefCountedKinematicParticle refitBToKPiPi;
