@@ -93,7 +93,8 @@ private:
     double massMinKPi_;
     double massMaxKPi_;
     double CLVtxMinKPi_;
-    bool KPiCharge_;
+    bool D0Charge_;
+    bool KCharge_;
     double massMinB_;
     double massMaxB_;
     double CLVtxMinB_;
@@ -118,7 +119,8 @@ DCASigMin_( iConfig.getParameter<double>( "MinDCASig") ),
 massMinKPi_( iConfig.getParameter<double>( "D0MinMass" ) ),
 massMaxKPi_( iConfig.getParameter<double>( "D0MaxMass" ) ),
 CLVtxMinKPi_(iConfig.getParameter<double>( "D0MinCLVtx" ) ),
-KPiCharge_( iConfig.getParameter<bool>( "KPiChargeCheck" ) ),
+D0Charge_( iConfig.getParameter<bool>( "D0ChargeCheck" ) ),
+KCharge_( iConfig.getParameter<bool>( "KaonChargeCheck" ) ),
 massMinB_( iConfig.getParameter<double>( "BMinMass" ) ),
 massMaxB_( iConfig.getParameter<double>( "BMaxMass" ) ),
 CLVtxMinB_( iConfig.getParameter<double>( "BMinCLVtx" ) )
@@ -179,6 +181,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                 if(abs(kaon.pdgId())!=211) continue; //Charged hadrons
                 if(!kaon.hasTrackDetails()) continue;
                 if(kaon.pt()<ptMin_ || abs(kaon.eta())>etaMax_) continue;
+                if(KCharge_ && kaon.charge()*piBu.charge()<0) continue; //Removed suppressed decays
 
                 pair<double,double> kaon_DCA = computeDCA(kaon,
 							  bFieldHandle,
@@ -199,7 +202,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     if(!piD0.hasTrackDetails()) continue;
                     if(piD0.pt()<ptMin_ || abs(piD0.eta())>etaMax_) continue;
 
-                    if(KPiCharge_ && kaon.charge()*piD0.charge()>0) continue;
+                    if(D0Charge_ && kaon.charge()*piD0.charge()>0) continue;
 
                     pair<double,double> piD0_DCA = computeDCA(piD0,
 							      bFieldHandle,
