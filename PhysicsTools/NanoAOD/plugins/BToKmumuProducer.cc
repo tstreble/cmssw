@@ -215,7 +215,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		    double DCABS = DCA.first;
 		    double DCABSErr = DCA.second;
 
-		    if(DCABS/DCABSErr<DCASigMinKaon_) continue;
+		    if(fabs(DCABS/DCABSErr)<DCASigMinKaon_) continue;
                     
                     RefCountedKinematicVertex refitVertexBToKMuMu;
                     RefCountedKinematicParticle refitBToKMuMu;
