@@ -15,6 +15,7 @@ from PhysicsTools.NanoAOD.triggerObjects_cff import *
 from PhysicsTools.NanoAOD.isotracks_cff import *
 from PhysicsTools.NanoAOD.BToKmumu_cff import *
 from PhysicsTools.NanoAOD.BToKee_cff import *
+from PhysicsTools.NanoAOD.BToKeTrk_cff import *
 from PhysicsTools.NanoAOD.BToKpipi_cff import *
 from PhysicsTools.NanoAOD.PFCands_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
@@ -77,8 +78,8 @@ nanoSequence = cms.Sequence(
         nanoMetadata + muonSequence + jetSequence + tauSequence + electronSequence+photonSequence+vertexSequence+metSequence+
         isoTrackSequence + # must be after all the leptons 
         linkedObjects  +
-        BToKmumuSequence + BToKeeSequence + BToKpipiSequence + PFCandSequence +
-        jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + triggerObjectTables + isoTrackTables + BToKmumuTables + BToKeeTables + BToKpipiTables + PFCandTables +
+        BToKmumuSequence + BToKeeSequence + BToKeTrkSequence + BToKpipiSequence + PFCandSequence +
+        jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + triggerObjectTables + isoTrackTables + BToKmumuTables + BToKeeTables + BToKeTrkTables + BToKpipiTables + PFCandTables +
 	l1bits)
 
 nanoSequenceMC = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
