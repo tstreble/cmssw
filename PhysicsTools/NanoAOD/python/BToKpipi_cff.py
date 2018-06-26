@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 BToKpipi=cms.EDProducer("BToKpipiProducer",
                         beamSpot=cms.InputTag("offlineBeamSpot"),
                         PFCandCollection=cms.InputTag("packedPFCandidates"),
-                        MinPt=cms.double(1.),
+                        MinPt=cms.double(2.),
                         MinPtPiB=cms.double(2.),
                         MaxEta=cms.double(2.4),
                         MinDCASig=cms.double(2.),
