@@ -11,7 +11,7 @@ BToKee=cms.EDProducer("BToKeeProducer",
                       KaonMinPt=cms.double(1.),
                       KaonMaxEta=cms.double(2.4),
                       KaonMinDCASig=cms.double(3.3),
-                      DiElectronChargeCheck=cms.bool(True),
+                      DiElectronChargeCheck=cms.bool(False),
                       RunDiElectronRefitting=cms.bool(True)
                       )
 
