@@ -12,7 +12,8 @@ BToKmumu=cms.EDProducer("BToKmumuProducer",
                         KaonMinPt=cms.double(1.),
                         KaonMaxEta=cms.double(2.4),
                         KaonMinDCASig=cms.double(3.3),
-                        DiMuonChargeCheck=cms.bool(True)
+                        DiMuonChargeCheck=cms.bool(True),
+                        RunDiMuonRefitting=cms.bool(True)
                         )
 
 BToKmumuTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
