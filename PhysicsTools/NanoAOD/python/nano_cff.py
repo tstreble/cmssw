@@ -81,7 +81,7 @@ nanoSequence = cms.Sequence(
         jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + triggerObjectTables + isoTrackTables + BToKmumuTables + BToKeeTables + BToKpipiTables + PFCandTables +
 	l1bits)
 
-nanoSequenceMC = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
+nanoSequenceMC = cms.Sequence(particleLevelSequence + genParticleSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
 
 
 def nanoAOD_customizeCommon(process):
