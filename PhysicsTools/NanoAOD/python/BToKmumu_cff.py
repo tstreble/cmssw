@@ -13,8 +13,28 @@ BToKmumu=cms.EDProducer("BToKmumuProducer",
                         KaonMaxEta=cms.double(2.4),
                         KaonMinDCASig=cms.double(3.3),
                         DiMuonChargeCheck=cms.bool(False),
-                        RunDiMuonRefitting=cms.bool(True)
+                        JPsiMassConstraint=cms.double(-1), #2-trk refitting uses measured di-ele mass
+                        save2TrackRefit=cms.bool(True)
                         )
+
+
+#Example not used for now: could replace BToKmumu collection in BToKmumuTable or be used in a cloned BToKJPsimumuTable
+BToKJPsimumu=cms.EDProducer("BToKmumuProducer",
+                            beamSpot=cms.InputTag("offlineBeamSpot"),
+                            vertexCollection=cms.InputTag("offlineSlimmedPrimaryVertices"),
+                            muonCollection=cms.InputTag("slimmedMuons"), #NanoAOD muon collection has pT>3 GeV, can go lower here
+                            PFCandCollection=cms.InputTag("packedPFCandidates"),
+                            MuonMinPt=cms.double(1.),
+                            MuonMaxEta=cms.double(2.4),
+                            KaonMinPt=cms.double(1.),
+                            KaonMaxEta=cms.double(2.4),
+                            KaonMinDCASig=cms.double(3.3),
+                            DiMuonChargeCheck=cms.bool(False),
+                            JPsiMassConstraint=cms.double(3.096916), #2-trk refitting uses measured di-ele mass
+                            save2TrackRefit=cms.bool(True)
+                            )
+
+
 
 BToKmumuTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
                              src=cms.InputTag("BToKmumu"),
@@ -58,6 +78,14 @@ BToKmumuTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
                                 Lxy=Var("userFloat('Lxy')", float,doc="significance of BToKmumu vertex-beamspot xy-separation"),
                                 CL_vtx=Var("userFloat('CL_vtx')", float,doc="BToKmumu chi2 vertex probability"),
                                 cosAlpha=Var("userFloat('cosAlpha')", float,doc="cosine of angle between BToKmumu momentum and vertex-beamspot separation"),
+                                pt_2trk=Var("userFloat('pt_2trk')", float,doc="pt of BToKee candidate (2-trk refitted)"),
+                                eta_2trk=Var("userFloat('eta_2trk')", float,doc="eta of BToKee candidate (2-trk refitted)"),
+                                phi_2trk=Var("userFloat('phi_2trk')", float,doc="phi of BToKee candidate (2-trk refitted)"),
+                                mass_2trk=Var("userFloat('mass_2trk')", float,doc="mass of BToKee candidate (2-trk refitted)"),
+                                mass_err_2trk=Var("userFloat('mass_err_2trk')", float,doc="error on mass of BToKee candidate (2-trk refitted)"),
+                                Lxy_2trk=Var("userFloat('Lxy_2trk')", float,doc="significance of BToKee vertex-beamspot xy-separation (2-trk refitted)"),
+                                CL_vtx_2trk=Var("userFloat('CL_vtx_2trk')", float,doc="BToKee chi2 vertex probability (2-trk refitted)"),
+                                cosAlpha_2trk=Var("userFloat('cosAlpha_2trk')", float,doc="cosine of angle between BToKmumu momentum and vertex-beamspot separation (2-trk refitted)"),
                                 )
                              )
 
