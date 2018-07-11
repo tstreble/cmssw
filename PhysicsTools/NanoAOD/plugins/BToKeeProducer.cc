@@ -173,7 +173,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                 
                 if(diEleCharge_ && ele1.charge()*ele2.charge()>0) continue;
                 
-                bool passedDiEle = true;
+                bool passedDiEle = false;
 
                 double EELSBS = -1.;
                 double EELSBSErr = -1.;
@@ -190,11 +190,11 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                   RefCountedKinematicParticle refitEle2_EE;
 
                   passedDiEle = EEVertexRefitting(ele1, ele2,
-					     theTTBuilder,
-					     refitVertexEE,
-					     refitEE,
-					     refitEle1_EE,
-					     refitEle2_EE);
+						  theTTBuilder,
+						  refitVertexEE,
+						  refitEE,
+						  refitEle1_EE,
+						  refitEle2_EE);
 
 		  if (passedDiEle){
 		  pair<double,double> EELS = computeLS(refitVertexEE,beamSpot);
@@ -236,12 +236,12 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     
                     
                     bool passed = BToKEEVertexRefitting(ele1, ele2, pfCand,
-						   theTTBuilder,
-						   refitVertexBToKEE,
-						   refitBToKEE,
-						   refitEle1,
-						   refitEle2,
-						   refitKaon);
+							theTTBuilder,
+							refitVertexBToKEE,
+							refitBToKEE,
+							refitEle1,
+							refitEle2,
+							refitKaon);
                     
                     if (!passed) continue;
                     
@@ -277,6 +277,12 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ele2_phi",    refitEle2V3D.phi());
                     BToKEECand.addUserFloat("ele2_charge", refitEle2->currentState().particleCharge());		    
 
+		    TLorentzVector ele1cand;
+		    ele1cand.SetPtEtaPhiM(sqrt(refitEle1V3D.perp2()), refitEle1V3D.eta(), refitEle1V3D.phi(), ElectronMass_);
+		    TLorentzVector ele2cand;
+		    ele2cand.SetPtEtaPhiM(sqrt(refitEle2V3D.perp2()), refitEle2V3D.eta(), refitEle2V3D.phi(), ElectronMass_);
+		    BToKEECand.addUserFloat("eeKFit_ee_mass", (ele1cand+ele2cand).Mag());
+
                     math::XYZVector refitKaonV3D = refitKaon->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
                     BToKEECand.addUserFloat("kaon_eta",   refitKaonV3D.eta());
@@ -285,18 +291,14 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
                     BToKEECand.addUserInt("eeRefit", (int)passedDiEle);
+		    BToKEECand.addUserFloat("ee_pt",    (passedDiEle)? sqrt(refitEEV3D.perp2()) : -1.);
+		    BToKEECand.addUserFloat("ee_eta",   (passedDiEle)? refitEEV3D.eta() : -9.);
+		    BToKEECand.addUserFloat("ee_phi",   (passedDiEle)? refitEEV3D.phi() : -9.);
+		    BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
+		    BToKEECand.addUserFloat("ee_mass_err",   EE_mass_err);
+		    BToKEECand.addUserFloat("ee_Lxy", (float) EELSBS/EELSBSErr);
+		    BToKEECand.addUserFloat("ee_CL_vtx", (float) EEVtx_CL);
 
-                    if(runDiEleRefit_){
-
-                      BToKEECand.addUserFloat("ee_pt",    (passedDiEle)? sqrt(refitEEV3D.perp2()) : -1.);
-                      BToKEECand.addUserFloat("ee_eta",   (passedDiEle)? refitEEV3D.eta() : -9.);
-                      BToKEECand.addUserFloat("ee_phi",   (passedDiEle)? refitEEV3D.phi() : -9.);
-                      BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
-                      BToKEECand.addUserFloat("ee_mass_err",   EE_mass_err);
-                      BToKEECand.addUserFloat("ee_Lxy", (float) EELSBS/EELSBSErr);
-                      BToKEECand.addUserFloat("ee_CL_vtx", (float) EEVtx_CL);
-
-                    }
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
                     BToKEECand.addUserFloat("pt",     sqrt(refitBToKEEV3D.perp2()));
