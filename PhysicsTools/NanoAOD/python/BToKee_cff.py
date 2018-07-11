@@ -4,7 +4,7 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 BToKee=cms.EDProducer("BToKeeProducer",
                       beamSpot=cms.InputTag("offlineBeamSpot"),
-                      electronCollection=cms.InputTag("slimmedElectronsWithUserData"), #NanoAOD electron collection has pT>5 GeV, can go lower here
+                      electronCollection = cms.InputTag("linkedObjects","electrons"),#ref slimmedElectronsWithUserData: nanoAOD ele collection has pT>5 GeV, can go lower here
                       PFCandCollection=cms.InputTag("packedPFCandidates"),
                       ElectronMinPt=cms.double(1.),
                       ElectronMaxEta=cms.double(2.4),
@@ -39,6 +39,7 @@ BToKeeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
                                 ele2_charge=Var("userFloat('ele2_charge')", int,doc="charge of subleading electron"),
                                 ele2_dxy=Var("daughter('ele2').dB('PV2D')", float,doc="dxy of subleading electron (with sign) wrt first PV, in cm"),
                                 ele2_dz=Var("daughter('ele2').dB('PVDZ')", float,doc="dz of subleading electron (with sign) wrt first PV, in cm"),
+                                eeKFit_ee_mass=Var("userFloat('eeKFit_ee_mass')", float, doc="dielectron invariant mass post 3tracks refit"),
                                 kaon_pt=Var("userFloat('kaon_pt')", float,doc="pt of kaon (refitted)"),
                                 kaon_eta=Var("userFloat('kaon_eta')", float,doc="eta of kaon (refitted)"),
                                 kaon_phi=Var("userFloat('kaon_phi')", float,doc="phi of kaon (refitted)"),
