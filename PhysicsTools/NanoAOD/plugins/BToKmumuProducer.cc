@@ -175,6 +175,8 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                 
                 if(diMuonCharge_ && muon1.charge()*muon2.charge()>0) continue;
 
+		bool passedDiMuon = false;
+
                 double MuMuLSBS = -1.;
                 double MuMuLSBSErr = -1.;
                 double MuMuVtx_CL = -1.;
@@ -183,23 +185,20 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                 RefCountedKinematicParticle refitMuMu;
                 math::XYZVector refitMuMuV3D;
 
-                bool passed = true;
-
                 if(runDiMuonRefit_){
 
                   RefCountedKinematicVertex refitVertexMuMu;
                   RefCountedKinematicParticle refitMu1_MuMu;
                   RefCountedKinematicParticle refitMu2_MuMu;
 
-                  passed = MuMuVertexRefitting(muon1, muon2,
-                                               bFieldHandle,
-                                               refitVertexMuMu,
-                                               refitMuMu,
-                                               refitMu1_MuMu,
-                                               refitMu2_MuMu);
+                  passedDiMuon = MuMuVertexRefitting(muon1, muon2,
+						     bFieldHandle,
+						     refitVertexMuMu,
+						     refitMuMu,
+						     refitMu1_MuMu,
+						     refitMu2_MuMu);
                 
-                  if ( !passed) continue;
-
+                  if (passedDiMuon){
                   pair<double,double> MuMuLS = computeLS(refitVertexMuMu,beamSpot);
                   MuMuLSBS = MuMuLS.first;
                   MuMuLSBSErr = MuMuLS.second;
@@ -212,7 +211,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                   math::XYZVector refitMu1V3D_MuMu = refitMu1_MuMu->refittedTransientTrack().track().momentum();
                   math::XYZVector refitMu2V3D_MuMu = refitMu2_MuMu->refittedTransientTrack().track().momentum();
                   refitMuMuV3D = refitMu1V3D_MuMu + refitMu2V3D_MuMu;
-              
+		  }
 		}
 
                 //Kaon
@@ -238,13 +237,13 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     RefCountedKinematicParticle refitKaon;
                     
                     
-                    passed = BToKMuMuVertexRefitting(muon1, muon2, pfCand,
-                                                     bFieldHandle,
-                                                     refitVertexBToKMuMu,
-                                                     refitBToKMuMu,
-                                                     refitMuon1,
-                                                     refitMuon2,
-                                                     refitKaon);
+                    bool passed = BToKMuMuVertexRefitting(muon1, muon2, pfCand,
+							  bFieldHandle,
+							  refitVertexBToKMuMu,
+							  refitBToKMuMu,
+							  refitMuon1,
+							  refitMuon2,
+							  refitKaon);
                     
                     if (!passed) continue;
                     
@@ -264,7 +263,10 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addDaughter( muon1 , "muon1");
                     BToKMuMuCand.addDaughter( muon2 , "muon2");
                     BToKMuMuCand.addDaughter( pfCand, "kaon");
-                    
+                    BToKMuMuCand.addUserInt("mu1_index", i);
+                    BToKMuMuCand.addUserInt("mu2_index", j);
+                    BToKMuMuCand.addUserInt("kaon_index", k);
+
 		    math::XYZVector refitMu1V3D = refitMuon1->refittedTransientTrack().track().momentum();
                     BToKMuMuCand.addUserFloat("mu1_pt",     sqrt(refitMu1V3D.perp2()));
                     BToKMuMuCand.addUserFloat("mu1_eta",    refitMu1V3D.eta());
@@ -277,6 +279,12 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addUserFloat("mu2_phi",    refitMu2V3D.phi());
 		    BToKMuMuCand.addUserFloat("mu2_charge", refitMuon2->currentState().particleCharge());		    
 
+		    TLorentzVector muon1cand;
+                    muon1cand.SetPtEtaPhiM(sqrt(refitMu1V3D.perp2()), refitMu1V3D.eta(), refitMu1V3D.phi(), MuonMass_);
+                    TLorentzVector muon2cand;
+                    muon2cand.SetPtEtaPhiM(sqrt(refitMu2V3D.perp2()), refitMu2V3D.eta(), refitMu2V3D.phi(), MuonMass_);
+                    BToKMuMuCand.addUserFloat("mumuKFit_mumu_mass", (muon1cand+muon2cand).Mag());
+
 		    math::XYZVector refitKaonV3D = refitKaon->refittedTransientTrack().track().momentum();
                     BToKMuMuCand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
                     BToKMuMuCand.addUserFloat("kaon_eta",   refitKaonV3D.eta());
@@ -284,17 +292,15 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addUserFloat("kaon_charge",refitKaon->currentState().particleCharge());
                     BToKMuMuCand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
-                    if(runDiMuonRefit_){
-                    		    
-                      BToKMuMuCand.addUserFloat("mumu_pt",     sqrt(refitMuMuV3D.perp2()));
-                      BToKMuMuCand.addUserFloat("mumu_eta",    refitMuMuV3D.eta());
-                      BToKMuMuCand.addUserFloat("mumu_phi",    refitMuMuV3D.phi());
-                      BToKMuMuCand.addUserFloat("mumu_mass",   refitMuMu->currentState().mass());
-                      BToKMuMuCand.addUserFloat("mumu_mass_err",   MuMu_mass_err);
-                      BToKMuMuCand.addUserFloat("mumu_Lxy", (float) MuMuLSBS/MuMuLSBSErr);
-                      BToKMuMuCand.addUserFloat("mumu_CL_vtx", (float) MuMuVtx_CL);
 
-		    }
+		    BToKMuMuCand.addUserInt("mumuRefit", (int)passedDiMuon);
+                    BToKMuMuCand.addUserFloat("mumu_pt",    (passedDiMuon)? sqrt(refitMuMuV3D.perp2()) : -1.);
+                    BToKMuMuCand.addUserFloat("mumu_eta",   (passedDiMuon)? refitMuMuV3D.eta() : -9.);
+                    BToKMuMuCand.addUserFloat("mumu_phi",   (passedDiMuon)? refitMuMuV3D.phi() : -9.);
+                    BToKMuMuCand.addUserFloat("mumu_mass",  (passedDiMuon)? refitMuMu->currentState().mass() : -1.);
+                    BToKMuMuCand.addUserFloat("mumu_mass_err",   MuMu_mass_err);
+                    BToKMuMuCand.addUserFloat("mumu_Lxy", (float) MuMuLSBS/MuMuLSBSErr);
+                    BToKMuMuCand.addUserFloat("mumu_CL_vtx", (float) MuMuVtx_CL);
                     
 		    math::XYZVector refitBToKMuMuV3D = refitMu1V3D + refitMu2V3D + refitKaonV3D;
                     BToKMuMuCand.addUserFloat("pt",     sqrt(refitBToKMuMuV3D.perp2()));
