@@ -204,11 +204,11 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                   RefCountedKinematicParticle refitEle2_EE;
                   
                   passedDiEle = EEVertexRefitting(ele1, ele2,
-						                                      theTTBuilder,
-						                                      refitVertexEE,
-						                                      refitEE,
-						                                      refitEle1_EE,
-						                                      refitEle2_EE);
+						  theTTBuilder,
+						  refitVertexEE,
+						  refitEE,
+						  refitEle1_EE,
+						  refitEle2_EE);
 
                   if(passedDiEle){
 
@@ -219,11 +219,10 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                      EE_mass_err = sqrt(refitEE->currentState().kinematicParametersError().matrix()(6,6));
 
                      pair<double,double> EELS = computeLS(refitVertexEE,beamSpot);
-                     double EELSBS = EELS.first;
-                     double EELSBSErr = EELS.second;
-                     EE_Lxy = EELSBS/EELSBSErr;
+                     EELSBS = EELS.first;
+                     EELSBSErr = EELS.second;
 
-                     EE_CL_vtx = TMath::Prob((double)refitVertexEE->chiSquared(),
+                     EEVtx_CL = TMath::Prob((double)refitVertexEE->chiSquared(),
                                              int(rint(refitVertexEE->degreesOfFreedom())));
                   }
                   
@@ -311,9 +310,9 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ee_eta",   (passedDiEle)? refitEEV3D.eta() : -9.);
                     BToKEECand.addUserFloat("ee_phi",   (passedDiEle)? refitEEV3D.phi() : -9.);
                     BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
-                    BToKEECand.addUserFloat("ee_mass_err",   EE_mass_err);
-                    BToKEECand.addUserFloat("ee_Lxy", (float) EELSBS/EELSBSErr);
-                    BToKEECand.addUserFloat("ee_CL_vtx", (float) EEVtx_CL);
+                    BToKEECand.addUserFloat("ee_mass_err", (passedDiEle)? EE_mass_err : -1.);
+                    BToKEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
+                    BToKEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
                     BToKEECand.addUserFloat("pt",     sqrt(refitBToKEEV3D.perp2()));
