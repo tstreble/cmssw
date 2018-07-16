@@ -68,6 +68,15 @@ private:
 			       RefCountedKinematicParticle &refitEle1,
 			       RefCountedKinematicParticle &refitEle2,
 			       RefCountedKinematicParticle &refitKaon);
+
+    bool BToKJPsiEEVertexRefitting(const RefCountedKinematicParticle refitEE,
+				   const pat::PackedCandidate &kaon,
+				   edm::ESHandle<MagneticField> bFieldHandle,
+				   RefCountedKinematicVertex &refitVertex,
+				   RefCountedKinematicParticle &refitBToKJPsiEE,
+				   RefCountedKinematicParticle &refitJPsi,
+				   RefCountedKinematicParticle &refitKaon);
+
     
     pair<double,double> computeLS(RefCountedKinematicVertex refitVertex,
 				  reco::BeamSpot beamSpot);
@@ -92,12 +101,15 @@ private:
     double etaMaxKaon_;
     double DCASigMinKaon_;
     bool diEleCharge_;
-    bool runDiEleRefit_;
+    double JPsiMassConstraint_;
+    bool save2TrkRefit_;
     
     float ElectronMass_ = 0.5109989e-3;
     float ElectronMassErr_ = 3.1*1e-12;
     float KaonMass_ = 0.493677;
     float KaonMassErr_ = 1.6e-5;
+    //float JPsiMass_ = 3.096916;  //Configurable parameter
+    float JPsiMassErr_ = 0.011;
     
 };
 
@@ -113,7 +125,8 @@ ptMinKaon_( iConfig.getParameter<double>( "KaonMinPt" ) ),
 etaMaxKaon_( iConfig.getParameter<double>( "KaonMaxEta" ) ),
 DCASigMinKaon_( iConfig.getParameter<double>( "KaonMinDCASig" ) ),
 diEleCharge_( iConfig.getParameter<bool>( "DiElectronChargeCheck" ) ),
-runDiEleRefit_( iConfig.getParameter<bool>( "RunDiElectronRefitting" ) )
+JPsiMassConstraint_( iConfig.getParameter<double>( "JPsiMassConstraint" ) ),
+save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) )
 {
     produces<pat::CompositeCandidateCollection>();
 }
@@ -183,12 +196,13 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                 RefCountedKinematicParticle refitEE;
                 math::XYZVector refitEEV3D;
 
-                if(runDiEleRefit_){
+
+                if(save2TrkRefit_){
 
                   RefCountedKinematicVertex refitVertexEE;
                   RefCountedKinematicParticle refitEle1_EE;
                   RefCountedKinematicParticle refitEle2_EE;
-
+                  
                   passedDiEle = EEVertexRefitting(ele1, ele2,
 						  theTTBuilder,
 						  refitVertexEE,
@@ -196,21 +210,23 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
 						  refitEle1_EE,
 						  refitEle2_EE);
 
-		  if (passedDiEle){
-		  pair<double,double> EELS = computeLS(refitVertexEE,beamSpot);
-		  EELSBS = EELS.first;
-		  EELSBSErr = EELS.second;
+                  if(passedDiEle){
 
-		  EEVtx_CL = TMath::Prob((double)refitVertexEE->chiSquared(),
-                                                int(rint(refitVertexEE->degreesOfFreedom())));
+                     math::XYZVector refitEle1V3D_EE = refitEle1_EE->refittedTransientTrack().track().momentum();
+                     math::XYZVector refitEle2V3D_EE = refitEle2_EE->refittedTransientTrack().track().momentum();
+                     refitEEV3D = refitEle1V3D_EE + refitEle2V3D_EE;
 
-		  EE_mass_err = sqrt(refitEE->currentState().kinematicParametersError().matrix()(6,6));
+                     EE_mass_err = sqrt(refitEE->currentState().kinematicParametersError().matrix()(6,6));
 
-		  math::XYZVector refitEle1V3D_EE = refitEle1_EE->refittedTransientTrack().track().momentum();
-		  math::XYZVector refitEle2V3D_EE = refitEle2_EE->refittedTransientTrack().track().momentum();
-		  refitEEV3D = refitEle1V3D_EE + refitEle2V3D_EE;
-		  }
-		}
+                     pair<double,double> EELS = computeLS(refitVertexEE,beamSpot);
+                     EELSBS = EELS.first;
+                     EELSBSErr = EELS.second;
+
+                     EEVtx_CL = TMath::Prob((double)refitVertexEE->chiSquared(),
+                                             int(rint(refitVertexEE->degreesOfFreedom())));
+                  }
+                  
+                }
               
                 //Kaon
                 for (unsigned int k = 0; k < pfCandNumber; ++k) {
@@ -221,8 +237,8 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     if(pfCand.pt()<ptMinKaon_ || abs(pfCand.eta())>etaMaxKaon_) continue;
 
                     pair<double,double> DCA = computeDCA(pfCand,
-							 bFieldHandle,
-							 beamSpot);
+                                                         bFieldHandle,
+                                                         beamSpot);
                     double DCABS = DCA.first;
                     double DCABSErr = DCA.second;
 
@@ -236,12 +252,12 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     
                     
                     bool passed = BToKEEVertexRefitting(ele1, ele2, pfCand,
-							theTTBuilder,
-							refitVertexBToKEE,
-							refitBToKEE,
-							refitEle1,
-							refitEle2,
-							refitKaon);
+                                                        theTTBuilder,
+                                                        refitVertexBToKEE,
+                                                        refitBToKEE,
+                                                        refitEle1,
+                                                        refitEle2,
+                                                        refitKaon);
                     
                     if (!passed) continue;
                     
@@ -250,8 +266,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     double LSBSErr = BToKEELS.second;
                     
                     double BToKEEVtx_CL = TMath::Prob((double)refitVertexBToKEE->chiSquared(),
-                                                    int(rint(refitVertexBToKEE->degreesOfFreedom())));
-
+                                                       int(rint(refitVertexBToKEE->degreesOfFreedom())));
                     
                     double cosAlpha = computeCosAlpha(refitBToKEE,refitVertexBToKEE,beamSpot);
                     
@@ -277,11 +292,11 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ele2_phi",    refitEle2V3D.phi());
                     BToKEECand.addUserFloat("ele2_charge", refitEle2->currentState().particleCharge());		    
 
-		    TLorentzVector ele1cand;
-		    ele1cand.SetPtEtaPhiM(sqrt(refitEle1V3D.perp2()), refitEle1V3D.eta(), refitEle1V3D.phi(), ElectronMass_);
-		    TLorentzVector ele2cand;
-		    ele2cand.SetPtEtaPhiM(sqrt(refitEle2V3D.perp2()), refitEle2V3D.eta(), refitEle2V3D.phi(), ElectronMass_);
-		    BToKEECand.addUserFloat("eeKFit_ee_mass", (ele1cand+ele2cand).Mag());
+                    TLorentzVector ele1cand;
+                    ele1cand.SetPtEtaPhiM(sqrt(refitEle1V3D.perp2()), refitEle1V3D.eta(), refitEle1V3D.phi(), ElectronMass_);
+                    TLorentzVector ele2cand;
+                    ele2cand.SetPtEtaPhiM(sqrt(refitEle2V3D.perp2()), refitEle2V3D.eta(), refitEle2V3D.phi(), ElectronMass_);
+                    BToKEECand.addUserFloat("eeKFit_ee_mass", (ele1cand+ele2cand).Mag());
 
                     math::XYZVector refitKaonV3D = refitKaon->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
@@ -291,14 +306,13 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
                     BToKEECand.addUserInt("eeRefit", (int)passedDiEle);
-		    BToKEECand.addUserFloat("ee_pt",    (passedDiEle)? sqrt(refitEEV3D.perp2()) : -1.);
-		    BToKEECand.addUserFloat("ee_eta",   (passedDiEle)? refitEEV3D.eta() : -9.);
-		    BToKEECand.addUserFloat("ee_phi",   (passedDiEle)? refitEEV3D.phi() : -9.);
-		    BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
-		    BToKEECand.addUserFloat("ee_mass_err",   EE_mass_err);
-		    BToKEECand.addUserFloat("ee_Lxy", (float) EELSBS/EELSBSErr);
-		    BToKEECand.addUserFloat("ee_CL_vtx", (float) EEVtx_CL);
-
+                    BToKEECand.addUserFloat("ee_pt",    (passedDiEle)? sqrt(refitEEV3D.perp2()) : -1.);
+                    BToKEECand.addUserFloat("ee_eta",   (passedDiEle)? refitEEV3D.eta() : -9.);
+                    BToKEECand.addUserFloat("ee_phi",   (passedDiEle)? refitEEV3D.phi() : -9.);
+                    BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
+                    BToKEECand.addUserFloat("ee_mass_err", (passedDiEle)? EE_mass_err : -1.);
+                    BToKEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
+                    BToKEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
                     BToKEECand.addUserFloat("pt",     sqrt(refitBToKEEV3D.perp2()));
@@ -306,11 +320,72 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("phi",    refitBToKEEV3D.phi());
                     BToKEECand.addUserFloat("mass",   refitBToKEE->currentState().mass());
                     BToKEECand.addUserFloat("mass_err", mass_err);
-
                     BToKEECand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
                     BToKEECand.addUserFloat("CL_vtx", (float) BToKEEVtx_CL);
-                    BToKEECand.addUserFloat("cosAlpha", (float) cosAlpha);
-                    
+                    BToKEECand.addUserFloat("cosAlpha", (float) cosAlpha);                    
+
+                    float pt_2trk = -9999.;
+                    float eta_2trk = -9999.;
+                    float phi_2trk = -9999.;
+                    float mass_2trk = -9999.;
+                    float mass_err_2trk = -9999.;
+                    float Lxy_2trk = -9999.;
+                    float CL_vtx_2trk = -9999.;
+                    float cosAlpha_2trk = -9999.;
+
+                    //This is crashing for some unexplained reason
+                    //https://hypernews.cern.ch/HyperNews/CMS/get/physTools/2746/1/2/1/1.html
+                    //Disabled for now
+
+                    //if(save2TrkRefit_ && passed_MuMuRefit){
+
+                    if(0){
+
+                      RefCountedKinematicVertex refitVertexBToKJPsiEE;
+                      RefCountedKinematicParticle refitBToKJPsiEE;
+                      RefCountedKinematicParticle refitJPsiEE;
+                      RefCountedKinematicParticle refitKaon_KJPsi;
+
+                      passed = BToKJPsiEEVertexRefitting(refitEE, pfCand,
+                                                         bFieldHandle,
+                                                         refitVertexBToKJPsiEE,
+                                                         refitBToKJPsiEE,
+                                                         refitJPsiEE,
+                                                         refitKaon_KJPsi);
+                                                         
+                      if(passed){
+
+                         math::XYZVector refitJPsiEEV3D = refitJPsiEE->refittedTransientTrack().track().momentum();
+                         math::XYZVector refitKaonV3D_KJPsi = refitKaon_KJPsi->refittedTransientTrack().track().momentum();
+                         math::XYZVector refitBToKJPsiEEV3D = refitJPsiEEV3D + refitKaonV3D_KJPsi;
+
+                         pt_2trk = sqrt(refitBToKJPsiEEV3D.perp2());
+                         eta_2trk = refitBToKJPsiEEV3D.eta();
+                         phi_2trk = refitBToKJPsiEEV3D.phi();
+                         mass_2trk = refitBToKJPsiEE->currentState().mass();
+                         mass_err_2trk = sqrt(refitBToKJPsiEE->currentState().kinematicParametersError().matrix()(6,6));
+
+                         pair<double,double> BToKJPsiEELS = computeLS(refitVertexBToKJPsiEE,beamSpot);
+                         double LSBS_2trk = BToKJPsiEELS.first;
+                         double LSBSErr_2trk = BToKJPsiEELS.second;
+                         Lxy_2trk = LSBS_2trk/LSBSErr_2trk;
+                         CL_vtx_2trk = TMath::Prob((double)refitVertexBToKJPsiEE->chiSquared(),
+                                                   int(rint(refitVertexBToKJPsiEE->degreesOfFreedom())));
+                         cosAlpha_2trk = computeCosAlpha(refitBToKJPsiEE,refitVertexBToKJPsiEE,beamSpot);
+
+                      }
+
+                    }
+
+                    BToKEECand.addUserFloat("pt_2trk", pt_2trk);
+                    BToKEECand.addUserFloat("eta_2trk", eta_2trk);
+                    BToKEECand.addUserFloat("phi_2trk", phi_2trk);
+                    BToKEECand.addUserFloat("mass_2trk", mass_2trk);
+                    BToKEECand.addUserFloat("mass_err_2trk", mass_err_2trk);
+                    BToKEECand.addUserFloat("Lxy_2trk", Lxy_2trk);
+                    BToKEECand.addUserFloat("CL_vtx_2trk", CL_vtx_2trk);
+                    BToKEECand.addUserFloat("cosAlpha_2trk", cosAlpha_2trk);
+
                     result->push_back(BToKEECand);
                     
                     
@@ -387,10 +462,10 @@ bool BToKeeProducer::BToKEEVertexRefitting(const pat::Electron &ele1,
     const reco::TransientTrack ele1TT = theTTBuilder->build(ele1.gsfTrack()); //closestCtfTrackRef ?
     const reco::TransientTrack ele2TT = theTTBuilder->build(ele2.gsfTrack());
     const reco::TransientTrack kaonTT = theTTBuilder->build(kaon.bestTrack());
-    
+
     KinematicParticleFactoryFromTransientTrack partFactory;
     KinematicParticleVertexFitter PartVtxFitter;
-    
+
     std::vector<RefCountedKinematicParticle> BToKEEParticles;
     double chi = 0.;
     double ndf = 0.;
@@ -427,6 +502,59 @@ bool BToKeeProducer::BToKEEVertexRefitting(const pat::Electron &ele1,
 }
 
 
+
+bool BToKeeProducer::BToKJPsiEEVertexRefitting(const RefCountedKinematicParticle refitEE,
+					       const pat::PackedCandidate &kaon,
+					       edm::ESHandle<MagneticField> bFieldHandle,
+					       RefCountedKinematicVertex &refitVertex,
+					       RefCountedKinematicParticle &refitBToKJPsiEE,
+					       RefCountedKinematicParticle &refitJPsi,
+					       RefCountedKinematicParticle &refitKaon){
+
+  const reco::TransientTrack EETT = refitEE->refittedTransientTrack();
+  const reco::TransientTrack kaonTT(*(kaon.bestTrack()), &(*bFieldHandle));
+
+  KinematicParticleFactoryFromTransientTrack partFactory;
+  KinematicParticleVertexFitter PartVtxFitter;
+
+  std::vector<RefCountedKinematicParticle> BToKEEParticles;
+  double chi = 0.;
+  double ndf = 0.;
+
+  float EE_mass = refitEE->currentState().mass();
+  float EE_mass_err = sqrt(refitEE->currentState().kinematicParametersError().matrix()(6,6));
+  if(JPsiMassConstraint_ > 0){
+    EE_mass = JPsiMassConstraint_;
+    EE_mass_err = JPsiMassErr_;
+  }
+
+  BToKEEParticles.push_back(partFactory.particle(EETT,EE_mass,chi,ndf,EE_mass_err));
+  BToKEEParticles.push_back(partFactory.particle(kaonTT,KaonMass_,chi,ndf,KaonMassErr_));
+
+  RefCountedKinematicTree BToKEEVertexFitTree = PartVtxFitter.fit(BToKEEParticles);
+
+  if ( !BToKEEVertexFitTree->isValid()) return false;
+
+  BToKEEVertexFitTree->movePointerToTheTop();
+  refitVertex = BToKEEVertexFitTree->currentDecayVertex();
+  refitBToKJPsiEE = BToKEEVertexFitTree->currentParticle();
+
+  if ( !refitVertex->vertexIsValid()) return false;
+
+  // extract the re-fitted tracks
+  BToKEEVertexFitTree->movePointerToTheTop();
+
+  BToKEEVertexFitTree->movePointerToTheFirstChild();
+  refitJPsi = BToKEEVertexFitTree->currentParticle();
+
+  BToKEEVertexFitTree->movePointerToTheNextChild();
+  refitKaon = BToKEEVertexFitTree->currentParticle();
+
+  return true;
+
+
+
+}
 
 
 

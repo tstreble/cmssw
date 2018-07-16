@@ -12,8 +12,26 @@ BToKee=cms.EDProducer("BToKeeProducer",
                       KaonMaxEta=cms.double(2.4),
                       KaonMinDCASig=cms.double(3.3),
                       DiElectronChargeCheck=cms.bool(False),
-                      RunDiElectronRefitting=cms.bool(True)
+                      JPsiMassConstraint=cms.double(-1), #2-trk refitting uses measured di-ele mass
+                      save2TrackRefit=cms.bool(True)
                       )
+
+
+#Example not used for now: could replace BToKee collection in BToKeeTable or be used in a cloned BToKJPsieeTable
+BToKJPsiee=cms.EDProducer("BToKeeProducer",
+                      beamSpot=cms.InputTag("offlineBeamSpot"),
+                      electronCollection=cms.InputTag("slimmedElectronsWithUserData"), #NanoAOD electron collection has pT>5 GeV, can go lower here
+                      PFCandCollection=cms.InputTag("packedPFCandidates"),
+                      ElectronMinPt=cms.double(1.),
+                      ElectronMaxEta=cms.double(2.4),
+                      KaonMinPt=cms.double(1.),
+                      KaonMaxEta=cms.double(2.4),
+                      KaonMinDCASig=cms.double(3.3),
+                      DiElectronChargeCheck=cms.bool(False),
+                      JPsiMassConstraint=cms.double(3.096916), #2-trk refitting uses JPsi mass
+                      save2TrackRefit=cms.bool(True)
+                      )
+
 
 BToKeeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 
                            src=cms.InputTag("BToKee"),
@@ -54,16 +72,24 @@ BToKeeTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
                                 ee_mass_err=Var("userFloat('ee_mass_err')", float,doc="error on dielectron mass"),
                                 ee_Lxy=Var("userFloat('ee_Lxy')", float,doc="significance of dielectron vertex-beamspot xy-separation"),
                                 ee_CL_vtx=Var("userFloat('ee_CL_vtx')", float,doc="dielectron chi2 vertex probability"),
-                                pt=Var("userFloat('pt')", float,doc="pt of BToKee candidate (refitted)"),
-                                eta=Var("userFloat('eta')", float,doc="eta of BToKee candidate (refitted)"),
-                                phi=Var("userFloat('phi')", float,doc="phi of BToKee candidate (refitted)"),
-                                mass=Var("userFloat('mass')", float,doc="mass of BToKee candidate (refitted)"),
-                                mass_err=Var("userFloat('mass_err')", float,doc="error on mass of BToKee candidate"),                                
-                                Lxy=Var("userFloat('Lxy')", float,doc="significance of BToKee vertex-beamspot xy-separation"),
-                                CL_vtx=Var("userFloat('CL_vtx')", float,doc="BToKee chi2 vertex probability"),
-                                cosAlpha=Var("userFloat('cosAlpha')", float,doc="cosine of angle between BToKmumu momentum and vertex-beamspot separation"),
+                                pt=Var("userFloat('pt')", float,doc="pt of BToKee candidate (3-trk refitted)"),
+                                eta=Var("userFloat('eta')", float,doc="eta of BToKee candidate (3-trk refitted)"),
+                                phi=Var("userFloat('phi')", float,doc="phi of BToKee candidate (3-trk refitted)"),
+                                mass=Var("userFloat('mass')", float,doc="mass of BToKee candidate (3-trk refitted)"),
+                                mass_err=Var("userFloat('mass_err')", float,doc="error on mass of BToKee candidate (3-trk refitted)"),
+                                Lxy=Var("userFloat('Lxy')", float,doc="significance of BToKee vertex-beamspot xy-separation (3-trk refitted)"),
+                                CL_vtx=Var("userFloat('CL_vtx')", float,doc="BToKee chi2 vertex probability (3-trk refitted)"),
+                                cosAlpha=Var("userFloat('cosAlpha')", float,doc="cosine of angle between BToKmumu momentum and vertex-beamspot separation (3-trk refitted)"),
+                                pt_2trk=Var("userFloat('pt_2trk')", float,doc="pt of BToKee candidate (2-trk refitted)"),
+                                eta_2trk=Var("userFloat('eta_2trk')", float,doc="eta of BToKee candidate (2-trk refitted)"),
+                                phi_2trk=Var("userFloat('phi_2trk')", float,doc="phi of BToKee candidate (2-trk refitted)"),
+                                mass_2trk=Var("userFloat('mass_2trk')", float,doc="mass of BToKee candidate (2-trk refitted)"),
+                                mass_err_2trk=Var("userFloat('mass_err_2trk')", float,doc="error on mass of BToKee candidate (2-trk refitted)"),
+                                Lxy_2trk=Var("userFloat('Lxy_2trk')", float,doc="significance of BToKee vertex-beamspot xy-separation (2-trk refitted)"),
+                                CL_vtx_2trk=Var("userFloat('CL_vtx_2trk')", float,doc="BToKee chi2 vertex probability (2-trk refitted)"),
+                                cosAlpha_2trk=Var("userFloat('cosAlpha_2trk')", float,doc="cosine of angle between BToKmumu momentum and vertex-beamspot separation (2-trk refitted)"),
                                 )
-                             )
+                           )
 
 BToKeeSequence=cms.Sequence(BToKee)
 BToKeeTables=cms.Sequence(BToKeeTable)
