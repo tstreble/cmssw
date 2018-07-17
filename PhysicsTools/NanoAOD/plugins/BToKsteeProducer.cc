@@ -504,14 +504,14 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 			RefCountedKinematicParticle refitKaon_BToKPiEE;
 			RefCountedKinematicParticle refitPion_BToKPiEE;
 
-			bool passed_4trk = BToKPiEEVertexRefitting(ele1, ele2, kaon, pion,
-								   theTTBuilder,
-								   refitVertexBToKPiEE,
-								   refitBToKPiEE,
-								   refitEle1_BToKPiEE,
-								   refitEle2_BToKPiEE,
-								   refitKaon_BToKPiEE,
-								   refitPion_BToKPiEE);
+			passed_4trk = BToKPiEEVertexRefitting(ele1, ele2, kaon, pion,
+							      theTTBuilder,
+							      refitVertexBToKPiEE,
+							      refitBToKPiEE,
+							      refitEle1_BToKPiEE,
+							      refitEle2_BToKPiEE,
+							      refitKaon_BToKPiEE,
+							      refitPion_BToKPiEE);
 
 
 			if(passed_4trk){
