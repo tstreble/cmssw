@@ -350,7 +350,8 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 		      math::XYZVector refitEle1V3D = refitEle1->refittedTransientTrack().track().momentum();
 		      math::XYZVector refitEle2V3D = refitEle2->refittedTransientTrack().track().momentum();
-		      math::XYZVector refitBToKstEEV3D = refitEle1V3D + refitEle2V3D + refitKstV3D;
+		      math::XYZVector refitKst_BToKstEE_V3D = refitKst_BToKstEE->refittedTransientTrack().track().momentum();
+		      math::XYZVector refitBToKstEEV3D = refitEle1V3D + refitEle2V3D + refitKst_BToKstEE_V3D;
 
       
 		      pat::CompositeCandidate BToKstEECand;
