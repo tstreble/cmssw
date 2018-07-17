@@ -71,7 +71,7 @@ private:
 
     bool BToKJPsiEEVertexRefitting(const RefCountedKinematicParticle refitEE,
 				   const pat::PackedCandidate &kaon,
-				   edm::ESHandle<MagneticField> bFieldHandle,
+				   edm::ESHandle<TransientTrackBuilder> theTTBuilder,
 				   RefCountedKinematicVertex &refitVertex,
 				   RefCountedKinematicParticle &refitBToKJPsiEE,
 				   RefCountedKinematicParticle &refitJPsi,
@@ -347,7 +347,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                       RefCountedKinematicParticle refitKaon_KJPsi;
 
                       passed = BToKJPsiEEVertexRefitting(refitEE, pfCand,
-                                                         bFieldHandle,
+                                                         theTTBuilder,
                                                          refitVertexBToKJPsiEE,
                                                          refitBToKJPsiEE,
                                                          refitJPsiEE,
@@ -452,7 +452,7 @@ bool BToKeeProducer::EEVertexRefitting(const pat::Electron & ele1,
 bool BToKeeProducer::BToKEEVertexRefitting(const pat::Electron &ele1,
 					   const pat::Electron &ele2,
 					   const pat::PackedCandidate &kaon,
-					   edm::ESHandle<TransientTrackBuilder> theTTBuilder,					   
+					   edm::ESHandle<TransientTrackBuilder> theTTBuilder,
 					   RefCountedKinematicVertex &refitVertex,
 					   RefCountedKinematicParticle &refitBToKEE,
 					   RefCountedKinematicParticle &refitEle1,
@@ -505,14 +505,14 @@ bool BToKeeProducer::BToKEEVertexRefitting(const pat::Electron &ele1,
 
 bool BToKeeProducer::BToKJPsiEEVertexRefitting(const RefCountedKinematicParticle refitEE,
 					       const pat::PackedCandidate &kaon,
-					       edm::ESHandle<MagneticField> bFieldHandle,
+					       edm::ESHandle<TransientTrackBuilder> theTTBuilder,
 					       RefCountedKinematicVertex &refitVertex,
 					       RefCountedKinematicParticle &refitBToKJPsiEE,
 					       RefCountedKinematicParticle &refitJPsi,
 					       RefCountedKinematicParticle &refitKaon){
 
   const reco::TransientTrack EETT = refitEE->refittedTransientTrack();
-  const reco::TransientTrack kaonTT(*(kaon.bestTrack()), &(*bFieldHandle));
+  const reco::TransientTrack kaonTT = theTTBuilder->build(kaon.bestTrack());
 
   KinematicParticleFactoryFromTransientTrack partFactory;
   KinematicParticleVertexFitter PartVtxFitter;

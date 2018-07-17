@@ -16,6 +16,7 @@
 
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/TransientTrackKinematicParticle.h"
@@ -53,16 +54,16 @@ private:
     
     bool MuMuVertexRefitting(const pat::Muon & muon1,
                              const pat::Muon & muon2,
-                             edm::ESHandle<MagneticField> bFieldHandle,
+                             edm::ESHandle<TransientTrackBuilder> theTTBuilder,
                              RefCountedKinematicVertex &refitVertex,
                              RefCountedKinematicParticle &refitMuMu,
-			     RefCountedKinematicParticle &refitMu1,
-			     RefCountedKinematicParticle &refitMu2);
+                             RefCountedKinematicParticle &refitMu1,
+                             RefCountedKinematicParticle &refitMu2);
     
     bool BToKMuMuVertexRefitting(const pat::Muon &muon1,
                                  const pat::Muon &muon2,
                                  const pat::PackedCandidate &kaon,
-                                 edm::ESHandle<MagneticField> bFieldHandle,
+                                 edm::ESHandle<TransientTrackBuilder> theTTBuilder,
                                  RefCountedKinematicVertex &refitVertex,
                                  RefCountedKinematicParticle &refitBToKMuMu,
                                  RefCountedKinematicParticle &refitMu1,
@@ -71,7 +72,7 @@ private:
 
     bool BToKJPsiMuMuVertexRefitting(const RefCountedKinematicParticle refitMuMu,
 				     const pat::PackedCandidate &kaon,
-				     edm::ESHandle<MagneticField> bFieldHandle,
+				     edm::ESHandle<TransientTrackBuilder> theTTBuilder,
 				     RefCountedKinematicVertex &refitVertex,
 				     RefCountedKinematicParticle &refitBToKJPsiMuMu,
 				     RefCountedKinematicParticle &refitJPsi,
@@ -136,11 +137,14 @@ save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) )
 void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
     edm::ESHandle<MagneticField> bFieldHandle;
+    edm::ESHandle<TransientTrackBuilder> theTTBuilder;
+
+    iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTTBuilder);
+
     edm::Handle<reco::BeamSpot> beamSpotHandle;
     edm::Handle<reco::VertexCollection> vertexHandle;
     
-    iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
-
     iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
     
     if ( ! beamSpotHandle.isValid() ) {
@@ -204,7 +208,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                   RefCountedKinematicParticle refitMu2_MuMu;
                   
                   passedDiMuon = MuMuVertexRefitting(muon1, muon2,
-                                                     bFieldHandle,
+                                                     theTTBuilder,
                                                      refitVertexMuMu,
                                                      refitMuMu,
                                                      refitMu1_MuMu,
@@ -252,7 +256,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     RefCountedKinematicParticle refitKaon;
 
                     bool passed = BToKMuMuVertexRefitting(muon1, muon2, pfCand,
-                                                          bFieldHandle,
+                                                          theTTBuilder,
                                                           refitVertexBToKMuMu,
                                                           refitBToKMuMu,
                                                           refitMuon1,
@@ -350,7 +354,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                        RefCountedKinematicParticle refitKaon_KJPsi;
 
                        passed = BToKJPsiMuMuVertexRefitting(refitMuMu, pfCand,
-                                                            bFieldHandle,
+                                                            theTTBuilder,
                                                             refitVertexBToKJPsiMuMu,
                                                             refitBToKJPsiMuMu,
                                                             refitJPsiMuMu,
@@ -408,14 +412,14 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 bool BToKmumuProducer::MuMuVertexRefitting(const pat::Muon & muon1,
                                            const pat::Muon & muon2,
-                                           edm::ESHandle<MagneticField> bFieldHandle,
+                                           edm::ESHandle<TransientTrackBuilder> theTTBuilder,
                                            RefCountedKinematicVertex &refitVertex,
                                            RefCountedKinematicParticle &refitMuMu,
                                            RefCountedKinematicParticle &refitMu1,
                                            RefCountedKinematicParticle &refitMu2){
     
-    const reco::TransientTrack muon1TT(muon1.innerTrack(), &(*bFieldHandle));
-    const reco::TransientTrack muon2TT(muon2.innerTrack(), &(*bFieldHandle));
+    const reco::TransientTrack muon1TT = theTTBuilder->build(muon1.innerTrack());
+    const reco::TransientTrack muon2TT = theTTBuilder->build(muon2.innerTrack());
     
     KinematicParticleFactoryFromTransientTrack partFactory;
     KinematicParticleVertexFitter PartVtxFitter;
@@ -454,16 +458,16 @@ bool BToKmumuProducer::MuMuVertexRefitting(const pat::Muon & muon1,
 bool BToKmumuProducer::BToKMuMuVertexRefitting(const pat::Muon &muon1,
                                                const pat::Muon &muon2,
                                                const pat::PackedCandidate &kaon,
-                                               edm::ESHandle<MagneticField> bFieldHandle,
+                                               edm::ESHandle<TransientTrackBuilder> theTTBuilder,
                                                RefCountedKinematicVertex &refitVertex,
                                                RefCountedKinematicParticle &refitBToKMuMu,
                                                RefCountedKinematicParticle &refitMu1,
                                                RefCountedKinematicParticle &refitMu2,
                                                RefCountedKinematicParticle &refitKaon){
 
-    const reco::TransientTrack muon1TT(muon1.innerTrack(), &(*bFieldHandle));
-    const reco::TransientTrack muon2TT(muon2.innerTrack(), &(*bFieldHandle));
-    const reco::TransientTrack kaonTT((*(kaon.bestTrack())), &(*bFieldHandle));
+    const reco::TransientTrack muon1TT = theTTBuilder->build(muon1.innerTrack());
+    const reco::TransientTrack muon2TT = theTTBuilder->build(muon2.innerTrack());
+    const reco::TransientTrack kaonTT = theTTBuilder->build(kaon.bestTrack());
 
     KinematicParticleFactoryFromTransientTrack partFactory;
     KinematicParticleVertexFitter PartVtxFitter;
@@ -507,14 +511,14 @@ bool BToKmumuProducer::BToKMuMuVertexRefitting(const pat::Muon &muon1,
 
 bool BToKmumuProducer::BToKJPsiMuMuVertexRefitting(const RefCountedKinematicParticle refitMuMu,
                                                    const pat::PackedCandidate &kaon,
-                                                   edm::ESHandle<MagneticField> bFieldHandle,
+                                                   edm::ESHandle<TransientTrackBuilder> theTTBuilder,
                                                    RefCountedKinematicVertex &refitVertex,
                                                    RefCountedKinematicParticle &refitBToKJPsiMuMu,
                                                    RefCountedKinematicParticle &refitJPsi,
                                                    RefCountedKinematicParticle &refitKaon){
 
   const reco::TransientTrack MuMuTT = refitMuMu->refittedTransientTrack();
-  const reco::TransientTrack kaonTT(*(kaon.bestTrack()), &(*bFieldHandle));
+  const reco::TransientTrack kaonTT = theTTBuilder->build(kaon.bestTrack());
 
   KinematicParticleFactoryFromTransientTrack partFactory;
   KinematicParticleVertexFitter PartVtxFitter;
