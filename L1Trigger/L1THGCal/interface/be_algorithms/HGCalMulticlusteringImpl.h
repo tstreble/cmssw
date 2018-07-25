@@ -4,6 +4,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/L1THGCal/interface/HGCalCluster.h"
 #include "DataFormats/L1THGCal/interface/HGCalMulticluster.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
@@ -24,9 +25,17 @@ public:
         shape_.eventSetup(es);
     }
 
-    bool isPertinent( const l1t::HGCalCluster & clu, 
-                      const l1t::HGCalMulticluster & mclu, 
+    bool isPertinent( const l1t::HGCalCluster & clu,
+                      const l1t::HGCalMulticluster & mclu,
                       double dR ) const;
+
+    bool isPertinent( const l1t::HGCalMulticluster & clu,
+                      const l1t::HGCalMulticluster & mclu,
+                      double dR ) const;
+
+    bool isPertinent( const l1t::HGCalCluster & clu, 
+		      const GlobalPoint & seed, 
+		      double dR ) const;
 
     void clusterizeDR( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtr, 
                      l1t::HGCalMulticlusterBxCollection & multiclusters,
@@ -37,6 +46,11 @@ public:
                      l1t::HGCalMulticlusterBxCollection & multiclusters,
                      const HGCalTriggerGeometryBase & triggerGeometry
                      );
+
+    void clusterizeHistoDR( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtr,
+			    l1t::HGCalMulticlusterBxCollection & multiclusters,
+			    const HGCalTriggerGeometryBase & triggerGeometry
+			    );
 
 private:
 
@@ -53,10 +67,14 @@ private:
     std::string multiclusterAlgoType_;
     double distDbscan_ = 0.005;
     unsigned minNDbscan_ = 3;
+    unsigned nBinsHisto_;
+    bool superClustering_;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;
     std::unique_ptr<HGCalTriggerClusterIdentificationBase> id_;
+
+    static constexpr double kXYOverZMax_ = 0.5;
 
 };
 
