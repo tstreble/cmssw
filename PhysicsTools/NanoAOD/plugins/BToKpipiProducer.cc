@@ -318,6 +318,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	    BToKPiPiCand.addUserFloat("Kpi_mass",   KPi_mass);
 	    BToKPiPiCand.addUserFloat("Kpi_mass_err",   KPi_mass_err);
 	    BToKPiPiCand.addUserFloat("Kpi_Lxy", (float) KPiLSBS/KPiLSBSErr);
+	    BToKPiPiCand.addUserFloat("Kpi_ctxy", (float) KPiLSBS/sqrt(refitKPiV3D.perp2()));
 	    BToKPiPiCand.addUserFloat("Kpi_CL_vtx", (float) KPiVtx_CL);
 
 	    BToKPiPiCand.addUserFloat("pt",     sqrt(refitBToD0PiV3D.perp2()));
@@ -326,6 +327,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	    BToKPiPiCand.addUserFloat("mass",   mass);
 	    BToKPiPiCand.addUserFloat("mass_err", mass_err);
 	    BToKPiPiCand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
+	    BToKPiPiCand.addUserFloat("ctxy", (float) LSBS/sqrt(refitBToD0PiV3D.perp2()));
 	    BToKPiPiCand.addUserFloat("CL_vtx", (float) BToD0PiVtx_CL);
 	    BToKPiPiCand.addUserFloat("cosAlpha", (float) cosAlpha);
 
@@ -337,6 +339,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	    float mass_3trk = -9999.;
 	    float mass_err_3trk = -9999.;
 	    float Lxy_3trk = -9999.;
+	    float ctxy_3trk = -9999.;
 	    float CL_vtx_3trk = -9999.;
 	    float cosAlpha_3trk = -9999.;
 
@@ -373,6 +376,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		mass_3trk = refitBToKPiPi->currentState().mass();
 		mass_err_3trk = sqrt(refitBToKPiPi->currentState().kinematicParametersError().matrix()(6,6));
 		Lxy_3trk = (float) LSBS_3trk/LSBSErr_3trk;
+		ctxy_3trk = (float) LSBS_3trk/pt_3trk;
 		CL_vtx_3trk = TMath::Prob((double)refitVertexBToKPiPi->chiSquared(),
 					  int(rint(refitVertexBToKPiPi->degreesOfFreedom())));
 		cosAlpha_3trk = computeCosAlpha(refitBToKPiPi,refitVertexBToKPiPi,beamSpot);
@@ -387,6 +391,7 @@ void BToKpipiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	    BToKPiPiCand.addUserFloat("mass_3trk", mass_3trk);
 	    BToKPiPiCand.addUserFloat("mass_err_3trk", mass_err_3trk);
 	    BToKPiPiCand.addUserFloat("Lxy_3trk", Lxy_3trk);
+	    BToKPiPiCand.addUserFloat("ctxy_3trk", ctxy_3trk);
 	    BToKPiPiCand.addUserFloat("CL_vtx_3trk", CL_vtx_3trk);
 	    BToKPiPiCand.addUserFloat("cosAlpha_3trk", cosAlpha_3trk);
 
