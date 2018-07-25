@@ -312,7 +312,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
                     BToKEECand.addUserFloat("ee_mass_err", (passedDiEle)? EE_mass_err : -1.);
                     BToKEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
-		    BToKEECand.addUserFloat("ee_ctxy", (passedDiEle)? (float) EELSBS/sqrt(refitEEV3D.perp2()) : -1.);
+                    BToKEECand.addUserFloat("ee_ctxy", (passedDiEle)? (float) EELSBS/sqrt(refitEEV3D.perp2()) : -1.);
                     BToKEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
