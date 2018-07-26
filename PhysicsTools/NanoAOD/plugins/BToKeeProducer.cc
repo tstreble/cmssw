@@ -312,6 +312,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ee_mass",  (passedDiEle)? refitEE->currentState().mass() : -1.);
                     BToKEECand.addUserFloat("ee_mass_err", (passedDiEle)? EE_mass_err : -1.);
                     BToKEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
+                    BToKEECand.addUserFloat("ee_ctxy", (passedDiEle)? (float) EELSBS/sqrt(refitEEV3D.perp2()) : -1.);
                     BToKEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
@@ -321,6 +322,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("mass",   refitBToKEE->currentState().mass());
                     BToKEECand.addUserFloat("mass_err", mass_err);
                     BToKEECand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
+                    BToKEECand.addUserFloat("ctxy", (float) LSBS/sqrt(refitBToKEEV3D.perp2()));
                     BToKEECand.addUserFloat("CL_vtx", (float) BToKEEVtx_CL);
                     BToKEECand.addUserFloat("cosAlpha", (float) cosAlpha);                    
 
@@ -330,6 +332,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     float mass_2trk = -9999.;
                     float mass_err_2trk = -9999.;
                     float Lxy_2trk = -9999.;
+                    float ctxy_2trk = -9999.;
                     float CL_vtx_2trk = -9999.;
                     float cosAlpha_2trk = -9999.;
 
@@ -369,6 +372,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                          double LSBS_2trk = BToKJPsiEELS.first;
                          double LSBSErr_2trk = BToKJPsiEELS.second;
                          Lxy_2trk = LSBS_2trk/LSBSErr_2trk;
+                         ctxy_2trk = LSBS_2trk/pt_2trk;
                          CL_vtx_2trk = TMath::Prob((double)refitVertexBToKJPsiEE->chiSquared(),
                                                    int(rint(refitVertexBToKJPsiEE->degreesOfFreedom())));
                          cosAlpha_2trk = computeCosAlpha(refitBToKJPsiEE,refitVertexBToKJPsiEE,beamSpot);
@@ -383,6 +387,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("mass_2trk", mass_2trk);
                     BToKEECand.addUserFloat("mass_err_2trk", mass_err_2trk);
                     BToKEECand.addUserFloat("Lxy_2trk", Lxy_2trk);
+                    BToKEECand.addUserFloat("ctxy_2trk", ctxy_2trk);
                     BToKEECand.addUserFloat("CL_vtx_2trk", CL_vtx_2trk);
                     BToKEECand.addUserFloat("cosAlpha_2trk", cosAlpha_2trk);
 

@@ -399,6 +399,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      BToKstEECand.addUserFloat("Kst_mass", refitKst->currentState().mass());
 		      BToKstEECand.addUserFloat("Kst_mass_err",  Kst_mass_err);
 		      BToKstEECand.addUserFloat("Kst_Lxy", (float) KstLSBS/KstLSBSErr);
+		      BToKstEECand.addUserFloat("Kst_ctxy", (float) KstLSBS/sqrt(refitKstV3D.perp2()));
 		      BToKstEECand.addUserFloat("Kst_CL_vtx", (float) KstVtx_CL);
 
 		      BToKstEECand.addUserFloat("pt",     sqrt(refitBToKstEEV3D.perp2()));
@@ -407,6 +408,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      BToKstEECand.addUserFloat("mass",   refitBToKstEE->currentState().mass());
 		      BToKstEECand.addUserFloat("mass_err", mass_err);
 		      BToKstEECand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
+		      BToKstEECand.addUserFloat("ctxy", (float) LSBS/sqrt(refitBToKstEEV3D.perp2()));
 		      BToKstEECand.addUserFloat("CL_vtx", (float) BToKstEEVtx_CL);
 		      BToKstEECand.addUserFloat("cosAlpha", (float) cosAlpha);
 
@@ -418,6 +420,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      BToKstEECand.addUserFloat("ee_mass", (passedDiEle)? refitEE->currentState().mass() : -1.);
 		      BToKstEECand.addUserFloat("ee_mass_err", (passedDiEle)?  EE_mass_err : -1.);
 		      BToKstEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
+		      BToKstEECand.addUserFloat("ee_ctxy", (passedDiEle)? (float) EELSBS/sqrt(refitEEV3D.perp2()) : -1.);
 		      BToKstEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
 
@@ -428,6 +431,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      float mass_2trk = -9999.;
 		      float mass_err_2trk = -9999.;
 		      float Lxy_2trk = -9999.;
+		      float ctxy_2trk = -9999.;
 		      float CL_vtx_2trk = -9999.;
 		      float cosAlpha_2trk = -9999.;
 
@@ -465,6 +469,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 			  double LSBS_2trk = BToKstJPsiEELS.first;
 			  double LSBSErr_2trk = BToKstJPsiEELS.second;
 			  Lxy_2trk = LSBS_2trk/LSBSErr_2trk;
+			  ctxy_2trk = LSBS_2trk/pt_2trk;
 			  CL_vtx_2trk = TMath::Prob((double)refitVertexBToKstJPsiEE->chiSquared(),
 						    int(rint(refitVertexBToKstJPsiEE->degreesOfFreedom())));
 			  cosAlpha_2trk = computeCosAlpha(refitBToKstJPsiEE,refitVertexBToKstJPsiEE,beamSpot);
@@ -480,6 +485,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      BToKstEECand.addUserFloat("mass_2trk", mass_2trk);
 		      BToKstEECand.addUserFloat("mass_err_2trk", mass_err_2trk);
 		      BToKstEECand.addUserFloat("Lxy_2trk", Lxy_2trk);
+		      BToKstEECand.addUserFloat("ctxy_2trk", ctxy_2trk);
 		      BToKstEECand.addUserFloat("CL_vtx_2trk", CL_vtx_2trk);
 		      BToKstEECand.addUserFloat("cosAlpha_2trk", cosAlpha_2trk);
 
@@ -492,6 +498,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      float mass_4trk = -9999.;
 		      float mass_err_4trk = -9999.;
 		      float Lxy_4trk = -9999.;
+		      float ctxy_4trk = -9999.;
 		      float CL_vtx_4trk = -9999.;
 		      float cosAlpha_4trk = -9999.;
 
@@ -534,6 +541,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 			  double LSBS_4trk = BToKPiEELS.first;
 			  double LSBSErr_4trk = BToKPiEELS.second;
 			  Lxy_4trk = LSBS_4trk/LSBSErr_4trk;
+			  ctxy_4trk = LSBS_4trk/pt_4trk;
 			  CL_vtx_4trk = TMath::Prob((double)refitVertexBToKPiEE->chiSquared(),
 						    int(rint(refitVertexBToKPiEE->degreesOfFreedom())));
 			  cosAlpha_4trk = computeCosAlpha(refitBToKPiEE,refitVertexBToKPiEE,beamSpot);
@@ -549,6 +557,7 @@ void BToKsteeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		      BToKstEECand.addUserFloat("mass_4trk", mass_4trk);
 		      BToKstEECand.addUserFloat("mass_err_4trk", mass_err_4trk);
 		      BToKstEECand.addUserFloat("Lxy_4trk", Lxy_4trk);
+		      BToKstEECand.addUserFloat("ctxy_4trk", ctxy_4trk);
 		      BToKstEECand.addUserFloat("CL_vtx_4trk", CL_vtx_4trk);
 		      BToKstEECand.addUserFloat("cosAlpha_4trk", cosAlpha_4trk);
 
