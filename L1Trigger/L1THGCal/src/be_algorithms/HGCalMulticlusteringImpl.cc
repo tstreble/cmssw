@@ -296,6 +296,7 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
   }
 
 
+
   //Clustering
   for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
 
@@ -319,7 +320,11 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
       }
     }
 
-    mapSeedMulticluster[targetSeed].addConstituent( *clu );
+    if(mapSeedMulticluster[targetSeed].size()==0){
+      l1t::HGCalMulticluster newMclu(*clu);
+      mapSeedMulticluster[targetSeed] = newMclu;
+    }
+    else mapSeedMulticluster[targetSeed].addConstituent(*clu);
 
   }
 
