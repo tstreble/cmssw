@@ -33,9 +33,8 @@ public:
                       const l1t::HGCalMulticluster & mclu,
                       double dR ) const;
 
-    bool isPertinent( const l1t::HGCalCluster & clu, 
-		      const GlobalPoint & seed, 
-		      double dR ) const;
+    float dR( const l1t::HGCalCluster & clu, 
+	      const GlobalPoint & seed ) const;
 
     void clusterizeDR( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtr, 
                      l1t::HGCalMulticlusterBxCollection & multiclusters,

@@ -67,14 +67,14 @@ bool HGCalMulticlusteringImpl::isPertinent( const l1t::HGCalMulticluster & clu,
 
 
 
-bool HGCalMulticlusteringImpl::isPertinent( const l1t::HGCalCluster & clu,
-                                            const GlobalPoint & seed,
-                                            double dR ) const
+float HGCalMulticlusteringImpl::dR( const l1t::HGCalCluster & clu,
+				   const GlobalPoint & seed) const
 {
     HGCalDetId cluDetId( clu.detId() );
-
     if( cluDetId.zside()*seed.z()<0) return false;
-    else return (seed - clu.centreProj() ).mag() < dR;
+    Basic3DVector<float> seed_3dv( seed );
+    GlobalPoint seed_proj = GlobalPoint( seed_3dv / seed.z() );
+    return (seed_proj - clu.centreProj() ).mag();
 
 }
 
@@ -235,12 +235,10 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
   std::map<std::vector<int>,float> histoMultiCluster; //key[0] = z.side(), key[1] = bin_x, key[2] = bin_y
 
   for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
-
     int bin_x = int( (**clu).centreProj().x()*nBinsHisto_/kXYOverZMax_ );
     int bin_y = int( (**clu).centreProj().y()*nBinsHisto_/kXYOverZMax_ );
     std::vector<int> key = { (**clu).zside(), bin_x, bin_y };
     histoMultiCluster[key]+=(**clu).mipPt();
-
   }
 
 
@@ -254,6 +252,7 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
     //Define seeds
     for(int bin_x = -nBinsHisto_+1; bin_x<int(nBinsHisto_); bin_x++){
       for(int bin_y = -nBinsHisto_+1; bin_y<int(nBinsHisto_); bin_y++){
+	if((bin_x+bin_y)%2) continue; //Avoid two neighbouring bins to be considered as seeds
 
 	//Build seed with four adjacent bins
 	float MIPT = histoMultiCluster[{ z_side, bin_x, bin_y }];
@@ -282,7 +281,7 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
 	MIPT_NE += histoMultiCluster[{ z_side, bin_x+2, bin_y }];
 	MIPT_NE += histoMultiCluster[{ z_side, bin_x+2, bin_y-1 }];
 
-	bool isSeed = MIPT>=MIPT_NW && MIPT>=MIPT_SW && MIPT>MIPT_NE && MIPT>MIPT_SE;
+	bool isSeed = MIPT>0 && MIPT>=MIPT_NW && MIPT>=MIPT_SW && MIPT>MIPT_NE && MIPT>MIPT_SE;
 
 	if(isSeed){
 	  float x_seed = (bin_x+0.5)/float(nBinsHisto_)*kXYOverZMax_;
@@ -296,29 +295,20 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
   }
 
 
-
   //Clustering
   for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
 
-    int iseed=0;
-    vector<int> tcPertinentSeeds;
-    for( const auto& seed : seedPositions ){
-      if( this->isPertinent(**clu, seed, dr_) ){
-	tcPertinentSeeds.push_back(iseed);
-      }
-      ++iseed;
-    }
-
-    unsigned minDist = 1;
-    unsigned targetSeed = 0;
-    for( int iseed : tcPertinentSeeds ){
-      GlobalPoint seed = seedPositions[iseed];
-      double d = (seed - (**clu).centreProj() ).mag() ;
-      if( d < minDist ){
+    double minDist = dr_;
+    int targetSeed = -1;
+    for( unsigned int iseed=0; iseed<seedPositions.size(); iseed++ ){
+      double d = this->dR(**clu, seedPositions[iseed]);
+      if(d<minDist){
 	minDist = d;
 	targetSeed = iseed;
       }
     }
+
+    if(targetSeed<0) continue;
 
     if(mapSeedMulticluster[targetSeed].size()==0){
       l1t::HGCalMulticluster newMclu(*clu);
