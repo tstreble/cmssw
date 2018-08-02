@@ -70,8 +70,7 @@ bool HGCalMulticlusteringImpl::isPertinent( const l1t::HGCalMulticluster & clu,
 float HGCalMulticlusteringImpl::dR( const l1t::HGCalCluster & clu,
 				   const GlobalPoint & seed) const
 {
-    HGCalDetId cluDetId( clu.detId() );
-    if( cluDetId.zside()*seed.z()<0) return false;
+
     Basic3DVector<float> seed_3dv( seed );
     GlobalPoint seed_proj = GlobalPoint( seed_3dv / seed.z() );
     return (seed_proj - clu.centreProj() ).mag();
@@ -298,9 +297,16 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
   //Clustering
   for(std::vector<edm::Ptr<l1t::HGCalCluster>>::const_iterator clu = clustersPtrs.begin(); clu != clustersPtrs.end(); ++clu){
 
+    HGCalDetId cluDetId( (**clu).detId() );
+    int z_side = cluDetId.zside();
+
     double minDist = dr_;
     int targetSeed = -1;
+
     for( unsigned int iseed=0; iseed<seedPositions.size(); iseed++ ){
+
+      if( z_side*seedPositions[iseed].z()<0) continue;
+
       double d = this->dR(**clu, seedPositions[iseed]);
       if(d<minDist){
 	minDist = d;
