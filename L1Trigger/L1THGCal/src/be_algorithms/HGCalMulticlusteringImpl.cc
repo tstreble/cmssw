@@ -20,7 +20,7 @@ HGCalMulticlusteringImpl::HGCalMulticlusteringImpl( const edm::ParameterSet& con
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster DBSCAN Clustering distance: " << distDbscan_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster clustering min number of subclusters: " << minNDbscan_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of bins for the histo algorithm: " << nBinsHisto_<<endl;
-    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of bins for the histo algorithm: " << superClustering_<<endl;
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster superclustering flag: " << superClustering_<<endl;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster type of multiclustering algortihm: " << multiclusterAlgoType_;
     id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
     id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
@@ -283,8 +283,8 @@ void HGCalMulticlusteringImpl::clusterizeHistoDR( const std::vector<edm::Ptr<l1t
 	bool isSeed = MIPT>0 && MIPT>=MIPT_NW && MIPT>=MIPT_SW && MIPT>MIPT_NE && MIPT>MIPT_SE;
 
 	if(isSeed){
-	  float x_seed = (bin_x+0.5)/float(nBinsHisto_)*kXYOverZMax_;
-	  float y_seed = (bin_y+0.5)/float(nBinsHisto_)*kXYOverZMax_;
+	  float x_seed = z_side*(bin_x+0.5)/float(nBinsHisto_)*kXYOverZMax_;
+	  float y_seed = z_side*(bin_y+0.5)/float(nBinsHisto_)*kXYOverZMax_;
 	  GlobalPoint seed(x_seed,y_seed,z_side);
 	  seedPositions.emplace_back(seed);
 	}
