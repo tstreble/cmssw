@@ -78,6 +78,9 @@ C3d_parValues = cms.PSet( dR_multicluster = cms.double(0.01), # dR in normalized
                           # Parameters not used by this clustering
                           dist_dbscan_multicluster=cms.double(0.),
                           minN_dbscan_multicluster=cms.uint32(0),
+                          nBins_R_histo_multicluster=cms.uint32(36),
+                          nBins_Phi_histo_multicluster=cms.uint32(216),
+                          superClustering=cms.bool(False),
                           EGIdentification=egamma_identification_drnn_cone.clone()
 )
 

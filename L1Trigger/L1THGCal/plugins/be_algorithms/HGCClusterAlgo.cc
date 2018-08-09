@@ -31,7 +31,8 @@ class HGCClusterAlgo : public Algorithm<FECODEC>
         };
         enum MulticlusterType{
             dRC3d,
-            DBSCANC3d
+            DBSCANC3d,
+            PolarHistodRC3d
         };
     
     public:
@@ -63,6 +64,8 @@ class HGCClusterAlgo : public Algorithm<FECODEC>
                 multiclusteringAlgoType_ = dRC3d;
             }else if(typeMulticluster=="DBSCANC3d"){
                 multiclusteringAlgoType_ = DBSCANC3d;
+            }else if(typeMulticluster=="PolarHistodRC3d"){
+                multiclusteringAlgoType_ = PolarHistodRC3d;
             }else {
                 throw cms::Exception("HGCTriggerParameterError")
                     << "Unknown Multiclustering type '" << typeMulticluster;
@@ -198,6 +201,9 @@ void HGCClusterAlgo<FECODEC,DATA>::run(const l1t::HGCFETriggerDigiCollection & c
             break;
         case DBSCANC3d:
             multiclustering_.clusterizeDBSCAN( clustersPtrs, *multicluster_product_, *triggerGeometry_);
+            break;
+	case PolarHistodRC3d:
+            multiclustering_.clusterizePolarHistoDR( clustersPtrs, *multicluster_product_, *triggerGeometry_);
             break;
         default:
             // Should not happen, clustering type checked in constructor
