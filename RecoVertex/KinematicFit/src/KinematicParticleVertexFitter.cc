@@ -97,6 +97,9 @@ RefCountedKinematicTree KinematicParticleVertexFitter::fit(const std::vector<Ref
      return ReferenceCountingPointer<KinematicTree>(new KinematicTree()); // return invalid vertex
    }
    ttf.push_back(vFactory->vertexTrack((i)->particleLinearizedTrackState(linPoint),state,1.));
+   if(std::isnan(ttf.back()->linearizedTrack()->predictedStateMomentumError()(0,0))){
+     return ReferenceCountingPointer<KinematicTree>(new KinematicTree()); // return invalid vertex
+   }
  }
 
 // //debugging code to check neutrals: 
