@@ -3,6 +3,9 @@
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: test_data_101X -s NANO --data --eventcontent NANOAOD --datatier NANOAOD --filein /store/data/Run2018A/ParkingBPH1/MINIAOD/14May2018-v1/710000/E8D42FDB-2460-E811-A2A5-FA163EB200B1.root --conditions 101X_dataRun2_Prompt_v10 -n 100 --era Run2_2018 --customise_commands=process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
+
+runBToKPiPi = False
+
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -21,7 +24,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -62,6 +65,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '101X_dataRun2_Prompt_v10', '')
 
 # Path and EndPath definitions
+if runBToKPiPi:
+    from PhysicsTools.NanoAOD.BToKpipi_cff import *
+    process.nanoSequence = cms.Sequence( process.nanoSequence + BToKpipiSequence + BToKpipiTables)
+
 process.nanoAOD_step = cms.Path(process.nanoSequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)

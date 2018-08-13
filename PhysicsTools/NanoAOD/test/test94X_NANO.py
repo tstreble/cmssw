@@ -3,6 +3,9 @@
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: test94X -s NANO --mc --eventcontent NANOAODSIM --datatier NANOAODSIM --filein /store/user/tstreble/BToKee_Pythia/BToKee_Pythia_MINIAODSIM_18_03_22/180322_124850/0000/BToKee_MINIAODSIM_284.root --no_exec --conditions auto:phase1_2017_realistic -n 1000 --era Run2_2017,run2_nanoAOD_94XMiniAODv1 --customise_commands=process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
+
+runBToKPiPi = False
+
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -21,8 +24,9 @@ process.load('PhysicsTools.NanoAOD.nano_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
+
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -62,6 +66,10 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 
 # Path and EndPath definitions
+if runBToKPiPi:
+    from PhysicsTools.NanoAOD.BToKpipi_cff import *
+    process.nanoSequenceMC = cms.Sequence( process.nanoSequenceMC + BToKpipiSequence + BToKpipiTables)
+
 process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
