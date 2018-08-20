@@ -343,10 +343,6 @@ std::vector<GlobalPoint> HGCalMulticlusteringImpl::computeSeeds( std::map<std::v
 
     for(int bin_R = 0; bin_R<int(nBinsRHisto_); bin_R++){
 
-      int nBinsSide = (binSums[bin_R]-1)/2;
-      int nBinsSideDown = bin_R==0 ? 0 : (binSums[bin_R-1]-1)/2;
-      int nBinsSideUp = bin_R==int(nBinsRHisto_)-1 ? 0 : (binSums[bin_R+1]-1)/2;
-
       for(int bin_phi = 0; bin_phi<int(nBinsPhiHisto_); bin_phi++){
 
 	float MIPT_seed = histoClusters[{z_side,bin_R,bin_phi}];
@@ -355,30 +351,26 @@ std::vector<GlobalPoint> HGCalMulticlusteringImpl::computeSeeds( std::map<std::v
 	float MIPT_S = histoClusters[{z_side,bin_R+1,bin_phi}];
 	float MIPT_N = histoClusters[{z_side,bin_R-1,bin_phi}];
 
+	int binLeft = bin_phi - 1;
+	if( binLeft<0 ) binLeft += nBinsPhiHisto_;
+	int binRight = bin_phi + 1;
+	if( binRight>=int(nBinsPhiHisto_) ) binRight -= nBinsPhiHisto_;
+
+	float MIPT_W = histoClusters[{z_side,bin_R,binLeft}];
+	float MIPT_E = histoClusters[{z_side,bin_R,binRight}];
+	float MIPT_SW = histoClusters[{z_side,bin_R-1,binLeft}];
+	float MIPT_SE = histoClusters[{z_side,bin_R-1,binRight}];
+	float MIPT_NW = histoClusters[{z_side,bin_R+1,binLeft}];
+	float MIPT_NE = histoClusters[{z_side,bin_R+1,binRight}];
+
 	isMax &= MIPT_seed>=MIPT_S;
 	isMax &= MIPT_seed>MIPT_N;
-
-	for(int bin_phi2=1; bin_phi2<=nBinsSideDown; bin_phi2++){ //Down side has always larger number of bins
-	  int binLeft = bin_phi - bin_phi2;
-	  if( binLeft<0 ) binLeft += nBinsPhiHisto_;
-	  int binRight = bin_phi + bin_phi2;
-	  if( binRight>=int(nBinsPhiHisto_) ) binRight -= nBinsPhiHisto_;
-
-	  float MIPT_W = bin_phi2<=nBinsSide ? histoClusters[{z_side,bin_R,binLeft}] : 0;
-	  float MIPT_E = bin_phi2<=nBinsSide ? histoClusters[{z_side,bin_R,binRight}] : 0;
-	  float MIPT_SW = bin_phi2<=nBinsSideDown ? histoClusters[{z_side,bin_R-1,binLeft}] : 0;
-	  float MIPT_SE = bin_phi2<=nBinsSideDown ? histoClusters[{z_side,bin_R-1,binRight}] : 0;
-	  float MIPT_NW = bin_phi2<=nBinsSideUp ? histoClusters[{z_side,bin_R+1,binLeft}] : 0;
-	  float MIPT_NE = bin_phi2<=nBinsSideUp ? histoClusters[{z_side,bin_R+1,binRight}] : 0;
-
-	  isMax &= MIPT_seed>=MIPT_E;
-	  isMax &= MIPT_seed>=MIPT_SE;
-	  isMax &= MIPT_seed>=MIPT_NE;
-	  isMax &= MIPT_seed>MIPT_W;
-	  isMax &= MIPT_seed>MIPT_SW;
-	  isMax &= MIPT_seed>MIPT_NW;
-
-	}
+	isMax &= MIPT_seed>=MIPT_E;
+	isMax &= MIPT_seed>=MIPT_SE;
+	isMax &= MIPT_seed>=MIPT_NE;
+	isMax &= MIPT_seed>MIPT_W;
+	isMax &= MIPT_seed>MIPT_SW;
+	isMax &= MIPT_seed>MIPT_NW;
 
 	if(isMax){
 	  float ROverZ_seed = kROverZMin_ + (bin_R+0.5) * (kROverZMax_-kROverZMin_)/nBinsRHisto_;
