@@ -51,7 +51,7 @@ run2_nanoAOD_92X.toModify(slimmedMuonsWithUserData, src = "slimmedMuonsUpdated")
 
 finalMuons = cms.EDFilter("PATMuonRefSelector",
     src = cms.InputTag("slimmedMuonsWithUserData"),
-    cut = cms.string("pt > 3 && track.isNonnull && isLooseMuon")
+    cut = cms.string("pt > 1 && track.isNonnull && isLooseMuon")
 )
 
 muonMVATTH= cms.EDProducer("MuonBaseMVAValueMapProducer",
