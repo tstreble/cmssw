@@ -5,6 +5,8 @@
 # with command line options: test_data_101X -s NANO --data --eventcontent NANOAOD --datatier NANOAOD --filein /store/data/Run2018A/ParkingBPH1/MINIAOD/14May2018-v1/710000/E8D42FDB-2460-E811-A2A5-FA163EB200B1.root --conditions 101X_dataRun2_Prompt_v10 -n 100 --era Run2_2018 --customise_commands=process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
 runBToKPiPi = False
+runBToKee = True
+runBToKmumu = True
 
 import FWCore.ParameterSet.Config as cms
 
@@ -68,6 +70,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '101X_dataRun2_Prompt_v10', '')
 if runBToKPiPi:
     from PhysicsTools.NanoAOD.BToKpipi_cff import *
     process.nanoSequence = cms.Sequence( process.nanoSequence + BToKpipiSequence + BToKpipiTables)
+if runBToKee:
+    from PhysicsTools.NanoAOD.BToKee_cff import *
+    from PhysicsTools.NanoAOD.BToKstee_cff import *
+    process.nanoSequence = cms.Sequence( process.nanoSequence + BToKeeSequence + BToKsteeSequence + BToKeeTables + BToKsteeTables)
+if runBToKmumu:
+    from PhysicsTools.NanoAOD.BToKmumu_cff import *
+    from PhysicsTools.NanoAOD.BToKstmumu_cff import *
+    process.nanoSequence = cms.Sequence( process.nanoSequence + BToKmumuSequence + BToKstmumuSequence + BToKmumuTables + BToKstmumuTables)
 
 process.nanoAOD_step = cms.Path(process.nanoSequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)

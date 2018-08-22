@@ -13,7 +13,7 @@ BToKee=cms.EDProducer("BToKeeProducer",
                       KaonMinDCASig=cms.double(-1.),
                       DiElectronChargeCheck=cms.bool(False),
                       JPsiMassConstraint=cms.double(-1), #2-trk refitting uses measured di-ele mass
-                      save2TrackRefit=cms.bool(True)
+                      save2TrackRefit=cms.bool(False)
                       )
 
 
