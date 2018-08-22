@@ -19,8 +19,8 @@ BToKstmumu=cms.EDProducer("BToKstmumuProducer",
                           KstarChargeCheck=cms.bool(True),
                           JPsiMassConstraint=cms.double(-1), #2-trk refitting uses measured di-ele mass
                           KstMassConstraint=cms.double(0.89176), #2-trk refitting uses nominal K*(892) mass
-                          save2TrackRefit=cms.bool(True),
-                          save4TrackRefit=cms.bool(True)
+                          save2TrackRefit=cms.bool(False),
+                          save4TrackRefit=cms.bool(False)
                           )
 
 BToKstmumuTable=cms.EDProducer("SimpleCompositeCandidateFlatTableProducer", 

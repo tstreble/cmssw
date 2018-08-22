@@ -222,9 +222,9 @@ void BToKstmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                 if(muon2.pt()<ptMinMu_ || abs(muon2.eta())>etaMaxMu_) continue;
                 if(diMuonCharge_ && muon1.charge()*muon2.charge()>0) continue;
 
-                bool passedDiMuon = true;
+                bool passedDiMuon = false;
 
-		double MuMuLSBS = -1.;
+                double MuMuLSBS = -1.;
                 double MuMuLSBSErr = -1.;
                 double MuMuVtx_CL = -1.;
                 double MuMu_mass_err = -1.;

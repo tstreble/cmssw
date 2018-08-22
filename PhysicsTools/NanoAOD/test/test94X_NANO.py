@@ -5,6 +5,8 @@
 # with command line options: test94X -s NANO --mc --eventcontent NANOAODSIM --datatier NANOAODSIM --filein /store/user/tstreble/BToKee_Pythia/BToKee_Pythia_MINIAODSIM_18_03_22/180322_124850/0000/BToKee_MINIAODSIM_284.root --no_exec --conditions auto:phase1_2017_realistic -n 1000 --era Run2_2017,run2_nanoAOD_94XMiniAODv1 --customise_commands=process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
 runBToKPiPi = False
+runBToKee = True
+runBToKmumu = True
 
 import FWCore.ParameterSet.Config as cms
 
@@ -69,6 +71,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '
 if runBToKPiPi:
     from PhysicsTools.NanoAOD.BToKpipi_cff import *
     process.nanoSequenceMC = cms.Sequence( process.nanoSequenceMC + BToKpipiSequence + BToKpipiTables)
+if runBToKee:
+    from PhysicsTools.NanoAOD.BToKee_cff import *
+    from PhysicsTools.NanoAOD.BToKstee_cff import *
+    process.nanoSequence = cms.Sequence( process.nanoSequence + BToKeeSequence + BToKsteeSequence + BToKeeTables + BToKsteeTables)
+if runBToKmumu:
+    from PhysicsTools.NanoAOD.BToKmumu_cff import *
+    from PhysicsTools.NanoAOD.BToKstmumu_cff import *
+    process.nanoSequence = cms.Sequence( process.nanoSequence + BToKmumuSequence + BToKstmumuSequence + BToKmumuTables + BToKstmumuTables)
 
 process.nanoAOD_step = cms.Path(process.nanoSequenceMC)
 process.endjob_step = cms.EndPath(process.endOfProcess)

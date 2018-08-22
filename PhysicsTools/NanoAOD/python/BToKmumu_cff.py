@@ -14,7 +14,7 @@ BToKmumu=cms.EDProducer("BToKmumuProducer",
                         KaonMinDCASig=cms.double(-1.),
                         DiMuonChargeCheck=cms.bool(False),
                         JPsiMassConstraint=cms.double(-1), #2-trk refitting uses measured di-ele mass
-                        save2TrackRefit=cms.bool(True)
+                        save2TrackRefit=cms.bool(False)
                         )
 
 
