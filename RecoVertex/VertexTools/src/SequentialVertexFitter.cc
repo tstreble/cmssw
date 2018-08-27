@@ -300,7 +300,7 @@ SequentialVertexFitter<N>::fit(const std::vector<RefCountedVertexTrack> & tracks
 
     if (validVertex && !validTracks) {
       LogDebug("RecoVertex/SequentialVertexFitter")
-	 << "Refited tracks have Nan in momentumJacobian or constantTerm.\n";
+	 << "Relinearized tracks have Nan in momentumJacobian or constantTerm.\n";
       validVertex = false;
     }
 
