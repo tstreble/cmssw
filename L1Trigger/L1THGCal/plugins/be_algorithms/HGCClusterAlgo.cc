@@ -27,7 +27,8 @@ class HGCClusterAlgo : public Algorithm<FECODEC>
         enum ClusterType{
             dRC2d,
             NNC2d,
-            dRNNC2d
+            dRNNC2d,
+            dummyC2d
         };
         enum MulticlusterType{
             dRC3d,
@@ -55,6 +56,8 @@ class HGCClusterAlgo : public Algorithm<FECODEC>
                 clusteringAlgorithmType_ = NNC2d;
             }else if(typeCluster=="dRNNC2d"){
                 clusteringAlgorithmType_ = dRNNC2d;
+	    }else if(typeCluster=="dummyC2d"){
+                clusteringAlgorithmType_ = dummyC2d;
             }else {
                 throw cms::Exception("HGCTriggerParameterError")
                     << "Unknown clustering type '" << typeCluster;
@@ -178,6 +181,9 @@ void HGCClusterAlgo<FECODEC,DATA>::run(const l1t::HGCFETriggerDigiCollection & c
             break;
         case dRNNC2d:
             clustering_.clusterizeDRNN( triggerCellsPtrs, *cluster_product_, *triggerGeometry_ );
+            break;
+	case dummyC2d:
+            clustering_.clusterizeDummy( triggerCellsPtrs, *cluster_product_ );
             break;
         default:
             // Should not happen, clustering type checked in constructor
