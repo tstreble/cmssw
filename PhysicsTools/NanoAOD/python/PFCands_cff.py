@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 PFCand=cms.EDProducer("PFCandProducer",
                       beamSpot=cms.InputTag("offlineBeamSpot"),
-                      PFCandCollection=cms.InputTag("packedPFCandidates")
+                      PFCandCollection=cms.InputTag("packedPFCandidates"),
+                      IsoTrackCollection=cms.InputTag("isolatedTracks")
                       )
 
 
@@ -20,6 +21,8 @@ PFCandTable=cms.EDProducer("SimpleCandidateFlatTableProducer",
                                                 mass = Var("daughter(0).mass()",float,doc="mass"),
                                                 pdgId = Var("daughter(0).pdgId()",int,doc="PF pdgID"),
                                                 DCASig=Var("userFloat('DCASig')", float,doc="significance of xy-distance of closest approach PFCand-beamspot"),
+                                                dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
+                                                dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
                                                 dz = Var("daughter(0).dz()",float,doc="dz (with sign) wrt first PV, in cm",precision=10),
                                                 dxy = Var("daughter(0).dxy()",float,doc="dxy (with sign) wrt first PV, in cm",precision=10),
                                                 ),

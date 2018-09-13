@@ -10,7 +10,9 @@
 
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/IsolatedTrack.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
 
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
@@ -44,12 +46,14 @@ private:
     
     edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> PFCandSrc_;
+    edm::EDGetTokenT<edm::View<pat::IsolatedTrack>> IsoTrackSrc_;
 
 };
 
 PFCandProducer::PFCandProducer(const edm::ParameterSet &iConfig):
 beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
-PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) )
+PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+IsoTrackSrc_( consumes<edm::View<pat::IsolatedTrack>> ( iConfig.getParameter<edm::InputTag>( "IsoTrackCollection" ) ) )
 {
     produces<pat::CompositeCandidateCollection>();
 }
@@ -65,7 +69,7 @@ void PFCandProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
     
     if ( ! beamSpotHandle.isValid() ) {
-        edm::LogError("BToKpipiProducer") << "No beam spot available from EventSetup" ;
+        edm::LogError("PFCandProducer") << "No beam spot available from EventSetup" ;
     }
 
     reco::BeamSpot beamSpot = *beamSpotHandle;
@@ -75,6 +79,12 @@ void PFCandProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     iEvent.getByToken(PFCandSrc_, pfCandHandle);
     
     unsigned int pfCandNumber = pfCandHandle->size();
+
+    edm::Handle<edm::View<pat::IsolatedTrack>> isoTrackHandle;
+
+    iEvent.getByToken(IsoTrackSrc_, isoTrackHandle);
+
+    unsigned int isoTrackNumber = isoTrackHandle->size();
     
     // Output collection
     std::unique_ptr<pat::CompositeCandidateCollection> result( new pat::CompositeCandidateCollection );
@@ -82,26 +92,44 @@ void PFCandProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     for (unsigned int i = 0; i < pfCandNumber; ++i) {            
 
       const pat::PackedCandidate & pfCand = (*pfCandHandle)[i];
+      auto pfCandPtr = edm::Ptr<pat::PackedCandidate>(pfCandHandle,i);
 
-       double DCABS = -1.;
-       double DCABSErr = -1.;
+      double DCABS = -1.;
+      double DCABSErr = -1.;
 
-       if(pfCand.hasTrackDetails()) {
+      if(pfCand.hasTrackDetails()) {
 
-	 pair<double,double> DCA = computeDCA(pfCand,
-					      bFieldHandle,
-					      beamSpot);
+	pair<double,double> DCA = computeDCA(pfCand,
+					     bFieldHandle,
+					     beamSpot);
 	 
-	 DCABS = DCA.first;
-	 DCABSErr = DCA.second;
+	DCABS = DCA.first;
+	DCABSErr = DCA.second;
 
-       }
+      }
 
-       pat::CompositeCandidate pfCandNew;
-       pfCandNew.addDaughter( pfCand );
-       pfCandNew.addUserFloat("DCASig", DCABS/DCABSErr);
+      double dEdXStrip = -1.;
+      double dEdXPixel = -1.;
 
-       result->push_back(pfCandNew);
+      for (unsigned int j = 0; j < isoTrackNumber; ++j) {
+
+	const pat::IsolatedTrack & isoTrack = (*isoTrackHandle)[j];
+	auto pfCand_fromTrack_Ptr = edm::refToPtr(isoTrack.packedCandRef());
+
+	if(isoTrack.packedCandRef().isNonnull() && pfCand_fromTrack_Ptr==pfCandPtr){
+	  dEdXStrip = isoTrack.dEdxStrip();
+	  dEdXPixel = isoTrack.dEdxPixel();
+	}
+
+      }
+
+      pat::CompositeCandidate pfCandNew;
+      pfCandNew.addDaughter( pfCand );
+      pfCandNew.addUserFloat("DCASig", DCABS/DCABSErr);
+      pfCandNew.addUserFloat("dEdXStrip", dEdXStrip);
+      pfCandNew.addUserFloat("dEdXPixel", dEdXPixel);
+
+      result->push_back(pfCandNew);
 
     }
 
