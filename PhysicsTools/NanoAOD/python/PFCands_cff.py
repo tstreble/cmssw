@@ -28,3 +28,13 @@ PFCandTable=cms.EDProducer("SimpleCandidateFlatTableProducer",
 
 PFCandSequence=cms.Sequence(PFCand)
 PFCandTables=cms.Sequence(PFCandTable)
+
+
+LostTrack = PFCand.clone( PFCandCollection=cms.InputTag("lostTracks") )
+LostTrackTable = PFCandTable.clone( src=cms.InputTag("LostTrack"),
+                               name=cms.string("LostTrack"),
+                               doc=cms.string("Lost tracks Variable") )
+
+LostTrackSequence=cms.Sequence(LostTrack)
+LostTrackTables=cms.Sequence(LostTrackTable)
+

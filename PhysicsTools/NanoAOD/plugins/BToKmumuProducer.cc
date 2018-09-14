@@ -95,6 +95,7 @@ private:
     edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> PFCandSrc_;
+    edm::EDGetTokenT<edm::View<pat::PackedCandidate>> lostTrackSrc_;
     
     double ptMinMu_;
     double etaMaxMu_;
@@ -104,6 +105,7 @@ private:
     bool diMuonCharge_;
     double JPsiMassConstraint_;
     bool save2TrkRefit_;
+    bool useLostTracks_;
     
     float MuonMass_ = 0.10565837;
     float MuonMassErr_ = 3.5*1e-9;
@@ -121,6 +123,7 @@ beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "b
 vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
 muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
 PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+lostTrackSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "lostTrackCollection" ) ) ),
 ptMinMu_( iConfig.getParameter<double>( "MuonMinPt" ) ),
 etaMaxMu_( iConfig.getParameter<double>( "MuonMaxEta" ) ),
 ptMinKaon_( iConfig.getParameter<double>( "KaonMinPt" ) ),
@@ -128,7 +131,8 @@ etaMaxKaon_( iConfig.getParameter<double>( "KaonMaxEta" ) ),
 DCASigMinKaon_( iConfig.getParameter<double>( "KaonMinDCASig" ) ),
 diMuonCharge_( iConfig.getParameter<bool>( "DiMuonChargeCheck" ) ),
 JPsiMassConstraint_( iConfig.getParameter<double>( "JPsiMassConstraint" ) ),
-save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) )
+save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) ),
+useLostTracks_( iConfig.getParameter<bool>( "useLostTracks" ) )
 {
     produces<pat::CompositeCandidateCollection>();
 }
@@ -158,12 +162,15 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
     edm::Handle<std::vector<pat::Muon>> muonHandle;
     edm::Handle<edm::View<pat::PackedCandidate>> pfCandHandle;
+    edm::Handle<edm::View<pat::PackedCandidate>> lostTrackHandle;
     
     iEvent.getByToken(muonSrc_, muonHandle);
     iEvent.getByToken(PFCandSrc_, pfCandHandle);
+    if(useLostTracks_) iEvent.getByToken(lostTrackSrc_, lostTrackHandle);
     
     unsigned int muonNumber = muonHandle->size();
     unsigned int pfCandNumber = pfCandHandle->size();
+    unsigned int lostTrackNumber = useLostTracks_ ? lostTrackHandle->size() : 0;
     
     // Output collection
     std::unique_ptr<pat::CompositeCandidateCollection> result( new pat::CompositeCandidateCollection );
@@ -195,6 +202,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
                 double MuMuLSBS = -1.;
                 double MuMuLSBSErr = -1.;
+                double MuMuVtx_Chi2 = -1.;
                 double MuMuVtx_CL = -1.;
                 double MuMu_mass_err = -1.;
 
@@ -226,6 +234,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                      MuMuLSBS = MuMuLS.first;
                      MuMuLSBSErr = MuMuLS.second;
 
+                     MuMuVtx_Chi2 = (double)refitVertexMuMu->chiSquared();
                      MuMuVtx_CL = TMath::Prob((double)refitVertexMuMu->chiSquared(),
 					      int(rint(refitVertexMuMu->degreesOfFreedom())));
 
@@ -234,9 +243,9 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                 }
 
                 //Kaon
-                for (unsigned int k = 0; k < pfCandNumber; ++k) {
-
-                    const pat::PackedCandidate & pfCand = (*pfCandHandle)[k];
+                for (unsigned int k = 0; k < (pfCandNumber+lostTrackNumber); ++k) {
+                    bool isPFCand = k<pfCandNumber;
+                    const pat::PackedCandidate & pfCand = isPFCand ? (*pfCandHandle)[k] : (*lostTrackHandle)[k-pfCandNumber];
                     if(abs(pfCand.pdgId())!=211) continue; //Charged hadrons
                     if(!pfCand.hasTrackDetails()) continue;
                     if(pfCand.pt()<ptMinKaon_ || abs(pfCand.eta())>etaMaxKaon_) continue;
@@ -244,8 +253,8 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     pair<double,double> DCA = computeDCA(pfCand,
                                                          bFieldHandle,
                                                          beamSpot);
-                                                         double DCABS = DCA.first;
-                                                         double DCABSErr = DCA.second;
+                    double DCABS = DCA.first;
+                    double DCABSErr = DCA.second;
 
                     if(fabs(DCABS/DCABSErr)<DCASigMinKaon_) continue;
                     
@@ -269,6 +278,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     double LSBS = BToKMuMuLS.first;
                     double LSBSErr = BToKMuMuLS.second;
                     
+                    double BToKMuMuVtx_Chi2 = (double)refitVertexBToKMuMu->chiSquared();
                     double BToKMuMuVtx_CL = TMath::Prob((double)refitVertexBToKMuMu->chiSquared(),
                                                     int(rint(refitVertexBToKMuMu->degreesOfFreedom())));
 
@@ -284,19 +294,21 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addDaughter( pfCand, "kaon");
                     BToKMuMuCand.addUserInt("mu1_index", i);
                     BToKMuMuCand.addUserInt("mu2_index", j);
-                    BToKMuMuCand.addUserInt("kaon_index", k);
+                    BToKMuMuCand.addUserInt("kaon_index", isPFCand ? k : -1);
+                    BToKMuMuCand.addUserInt("kaon_lostTrack_index", isPFCand ? -1 : k-pfCandNumber);
+                    BToKMuMuCand.addUserInt("kaon_isPFCand", (int)isPFCand);
 
                     math::XYZVector refitMu1V3D = refitMuon1->refittedTransientTrack().track().momentum();
                     BToKMuMuCand.addUserFloat("mu1_pt",     sqrt(refitMu1V3D.perp2()));
                     BToKMuMuCand.addUserFloat("mu1_eta",    refitMu1V3D.eta());
                     BToKMuMuCand.addUserFloat("mu1_phi",    refitMu1V3D.phi());
-                    BToKMuMuCand.addUserFloat("mu1_charge", refitMuon1->currentState().particleCharge());
+                    BToKMuMuCand.addUserInt("mu1_charge", refitMuon1->currentState().particleCharge());
 
                     math::XYZVector refitMu2V3D = refitMuon2->refittedTransientTrack().track().momentum();
                     BToKMuMuCand.addUserFloat("mu2_pt",     sqrt(refitMu2V3D.perp2()));
                     BToKMuMuCand.addUserFloat("mu2_eta",    refitMu2V3D.eta());
                     BToKMuMuCand.addUserFloat("mu2_phi",    refitMu2V3D.phi());
-                    BToKMuMuCand.addUserFloat("mu2_charge", refitMuon2->currentState().particleCharge());		    
+                    BToKMuMuCand.addUserInt("mu2_charge", refitMuon2->currentState().particleCharge());
 
                     TLorentzVector muon1cand;
                     muon1cand.SetPtEtaPhiM(sqrt(refitMu1V3D.perp2()), refitMu1V3D.eta(), refitMu1V3D.phi(), MuonMass_);
@@ -308,7 +320,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
                     BToKMuMuCand.addUserFloat("kaon_eta",   refitKaonV3D.eta());
                     BToKMuMuCand.addUserFloat("kaon_phi",   refitKaonV3D.phi());
-                    BToKMuMuCand.addUserFloat("kaon_charge",refitKaon->currentState().particleCharge());
+                    BToKMuMuCand.addUserInt("kaon_charge",refitKaon->currentState().particleCharge());
                     BToKMuMuCand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
                     BToKMuMuCand.addUserInt("mumuRefit", (int)passedDiMuon);
@@ -319,6 +331,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addUserFloat("mumu_mass_err", (passedDiMuon)? MuMu_mass_err : -1.);
                     BToKMuMuCand.addUserFloat("mumu_Lxy", (passedDiMuon)? (float) MuMuLSBS/MuMuLSBSErr : -1.);
                     BToKMuMuCand.addUserFloat("mumu_ctxy", (passedDiMuon)? (float) MuMuLSBS/sqrt(refitMuMuV3D.perp2()) : -1.);
+                    BToKMuMuCand.addUserFloat("mumu_Chi2_vtx", (passedDiMuon)? (float) MuMuVtx_Chi2 : -1.);
                     BToKMuMuCand.addUserFloat("mumu_CL_vtx", (passedDiMuon)? (float) MuMuVtx_CL : -1.);
                     
                     math::XYZVector refitBToKMuMuV3D = refitMu1V3D + refitMu2V3D + refitKaonV3D;
@@ -330,6 +343,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     
                     BToKMuMuCand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
                     BToKMuMuCand.addUserFloat("ctxy", (float) LSBS/sqrt(refitBToKMuMuV3D.perp2()));
+                    BToKMuMuCand.addUserFloat("Chi2_vtx", (float) BToKMuMuVtx_Chi2);
                     BToKMuMuCand.addUserFloat("CL_vtx", (float) BToKMuMuVtx_CL);
                     BToKMuMuCand.addUserFloat("cosAlpha", (float) cosAlpha);
 
@@ -340,6 +354,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     float mass_err_2trk = -9999.;
                     float Lxy_2trk = -9999.;
                     float ctxy_2trk = -9999.;
+                    float Chi2_vtx_2trk = -9999.;
                     float CL_vtx_2trk = -9999.;
                     float cosAlpha_2trk = -9999.;
 
@@ -380,6 +395,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                           double LSBSErr_2trk = BToKJPsiMuMuLS.second;
                           Lxy_2trk = LSBS_2trk/LSBSErr_2trk;
                           ctxy_2trk = LSBS_2trk/pt_2trk;
+                          Chi2_vtx_2trk = (double)refitVertexBToKJPsiMuMu->chiSquared();
                           CL_vtx_2trk = TMath::Prob((double)refitVertexBToKJPsiMuMu->chiSquared(),
                                                     int(rint(refitVertexBToKJPsiMuMu->degreesOfFreedom())));
                           cosAlpha_2trk = computeCosAlpha(refitBToKJPsiMuMu,refitVertexBToKJPsiMuMu,beamSpot);
@@ -395,6 +411,7 @@ void BToKmumuProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
                     BToKMuMuCand.addUserFloat("mass_err_2trk", mass_err_2trk);
                     BToKMuMuCand.addUserFloat("Lxy_2trk", Lxy_2trk);
                     BToKMuMuCand.addUserFloat("ctxy_2trk", ctxy_2trk);
+                    BToKMuMuCand.addUserFloat("Chi2_vtx_2trk", Chi2_vtx_2trk);
                     BToKMuMuCand.addUserFloat("CL_vtx_2trk", CL_vtx_2trk);
                     BToKMuMuCand.addUserFloat("cosAlpha_2trk", cosAlpha_2trk);
                     

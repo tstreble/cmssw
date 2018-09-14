@@ -94,6 +94,7 @@ private:
     edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
     edm::EDGetTokenT<std::vector<pat::Electron>> electronSrc_;
     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> PFCandSrc_;
+    edm::EDGetTokenT<edm::View<pat::PackedCandidate>> lostTrackSrc_;
     
     double ptMinEle_;
     double etaMaxEle_;
@@ -103,6 +104,7 @@ private:
     bool diEleCharge_;
     double JPsiMassConstraint_;
     bool save2TrkRefit_;
+    bool useLostTracks_;
     
     float ElectronMass_ = 0.5109989e-3;
     float ElectronMassErr_ = 3.1*1e-12;
@@ -119,6 +121,7 @@ BToKeeProducer::BToKeeProducer(const edm::ParameterSet &iConfig):
 beamSpotSrc_( consumes<reco::BeamSpot> ( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
 electronSrc_( consumes<std::vector<pat::Electron>> ( iConfig.getParameter<edm::InputTag>( "electronCollection" ) ) ),
 PFCandSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "PFCandCollection" ) ) ),
+lostTrackSrc_( consumes<edm::View<pat::PackedCandidate>> ( iConfig.getParameter<edm::InputTag>( "lostTrackCollection" ) ) ),
 ptMinEle_( iConfig.getParameter<double>( "ElectronMinPt" ) ),
 etaMaxEle_( iConfig.getParameter<double>( "ElectronMaxEta" ) ),
 ptMinKaon_( iConfig.getParameter<double>( "KaonMinPt" ) ),
@@ -126,7 +129,8 @@ etaMaxKaon_( iConfig.getParameter<double>( "KaonMaxEta" ) ),
 DCASigMinKaon_( iConfig.getParameter<double>( "KaonMinDCASig" ) ),
 diEleCharge_( iConfig.getParameter<bool>( "DiElectronChargeCheck" ) ),
 JPsiMassConstraint_( iConfig.getParameter<double>( "JPsiMassConstraint" ) ),
-save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) )
+save2TrkRefit_( iConfig.getParameter<bool>( "save2TrackRefit" ) ),
+useLostTracks_( iConfig.getParameter<bool>( "useLostTracks" ) )
 {
     produces<pat::CompositeCandidateCollection>();
 }
@@ -153,16 +157,18 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
 
     edm::Handle<std::vector<pat::Electron>> electronHandle;
     edm::Handle<edm::View<pat::PackedCandidate>> pfCandHandle;
+    edm::Handle<edm::View<pat::PackedCandidate>> lostTrackHandle;
     
     iEvent.getByToken(electronSrc_, electronHandle);
     iEvent.getByToken(PFCandSrc_, pfCandHandle);
-    
+    if(useLostTracks_) iEvent.getByToken(lostTrackSrc_, lostTrackHandle);
+
     unsigned int electronNumber = electronHandle->size();
     unsigned int pfCandNumber = pfCandHandle->size();
-    
+    unsigned int lostTrackNumber = useLostTracks_ ? lostTrackHandle->size() : 0;
+
     // Output collection
     std::unique_ptr<pat::CompositeCandidateCollection> result( new pat::CompositeCandidateCollection );
-    
     
     if(electronNumber>1){
         
@@ -191,6 +197,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                 double EELSBS = -1.;
                 double EELSBSErr = -1.;
                 double EEVtx_CL = -1.;
+                double EEVtx_Chi2 = -1.;
                 double EE_mass_err = -1.;
 
                 RefCountedKinematicParticle refitEE;
@@ -222,16 +229,18 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                      EELSBS = EELS.first;
                      EELSBSErr = EELS.second;
 
+                     EEVtx_Chi2 = (double)refitVertexEE->chiSquared();
                      EEVtx_CL = TMath::Prob((double)refitVertexEE->chiSquared(),
                                              int(rint(refitVertexEE->degreesOfFreedom())));
                   }
                   
                 }
-              
+
                 //Kaon
-                for (unsigned int k = 0; k < pfCandNumber; ++k) {
-                    
-                    const pat::PackedCandidate & pfCand = (*pfCandHandle)[k];
+                for (unsigned int k = 0; k < (pfCandNumber+lostTrackNumber); ++k) {
+
+                    bool isPFCand = k<pfCandNumber;
+                    const pat::PackedCandidate & pfCand = isPFCand ? (*pfCandHandle)[k] : (*lostTrackHandle)[k-pfCandNumber];
                     if(abs(pfCand.pdgId())!=211) continue; //Charged hadrons
                     if(!pfCand.hasTrackDetails()) continue;
                     if(pfCand.pt()<ptMinKaon_ || abs(pfCand.eta())>etaMaxKaon_) continue;
@@ -265,6 +274,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     double LSBS = BToKEELS.first;
                     double LSBSErr = BToKEELS.second;
                     
+                    double BToKEEVtx_Chi2 = (double)refitVertexBToKEE->chiSquared();
                     double BToKEEVtx_CL = TMath::Prob((double)refitVertexBToKEE->chiSquared(),
                                                        int(rint(refitVertexBToKEE->degreesOfFreedom())));
                     
@@ -278,19 +288,21 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addDaughter( pfCand, "kaon");
                     BToKEECand.addUserInt("ele1_index", i);
                     BToKEECand.addUserInt("ele2_index", j);
-                    BToKEECand.addUserInt("kaon_index", k);
+                    BToKEECand.addUserInt("kaon_index", isPFCand ? k : -1);
+                    BToKEECand.addUserInt("kaon_lostTrack_index", isPFCand ? -1 : k-pfCandNumber);
+                    BToKEECand.addUserInt("kaon_isPFCand", (int)isPFCand);
 
                     math::XYZVector refitEle1V3D = refitEle1->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("ele1_pt",     sqrt(refitEle1V3D.perp2()));
                     BToKEECand.addUserFloat("ele1_eta",    refitEle1V3D.eta());
                     BToKEECand.addUserFloat("ele1_phi",    refitEle1V3D.phi());
-                    BToKEECand.addUserFloat("ele1_charge", refitEle1->currentState().particleCharge());
+                    BToKEECand.addUserInt("ele1_charge",   refitEle1->currentState().particleCharge());
 
                     math::XYZVector refitEle2V3D = refitEle2->refittedTransientTrack().track().momentum();
                     BToKEECand.addUserFloat("ele2_pt",     sqrt(refitEle2V3D.perp2()));
                     BToKEECand.addUserFloat("ele2_eta",    refitEle2V3D.eta());
                     BToKEECand.addUserFloat("ele2_phi",    refitEle2V3D.phi());
-                    BToKEECand.addUserFloat("ele2_charge", refitEle2->currentState().particleCharge());		    
+                    BToKEECand.addUserInt("ele2_charge",   refitEle2->currentState().particleCharge());
 
                     TLorentzVector ele1cand;
                     ele1cand.SetPtEtaPhiM(sqrt(refitEle1V3D.perp2()), refitEle1V3D.eta(), refitEle1V3D.phi(), ElectronMass_);
@@ -302,7 +314,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("kaon_pt",    sqrt(refitKaonV3D.perp2()));
                     BToKEECand.addUserFloat("kaon_eta",   refitKaonV3D.eta());
                     BToKEECand.addUserFloat("kaon_phi",   refitKaonV3D.phi());
-                    BToKEECand.addUserFloat("kaon_charge",refitKaon->currentState().particleCharge());
+                    BToKEECand.addUserInt("kaon_charge",  refitKaon->currentState().particleCharge());
                     BToKEECand.addUserFloat("kaon_DCASig", DCABS/DCABSErr);
 
                     BToKEECand.addUserInt("eeRefit", (int)passedDiEle);
@@ -313,6 +325,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("ee_mass_err", (passedDiEle)? EE_mass_err : -1.);
                     BToKEECand.addUserFloat("ee_Lxy", (passedDiEle)? (float) EELSBS/EELSBSErr : -1.);
                     BToKEECand.addUserFloat("ee_ctxy", (passedDiEle)? (float) EELSBS/sqrt(refitEEV3D.perp2()) : -1.);
+                    BToKEECand.addUserFloat("ee_Chi2_vtx", (passedDiEle)? (float) EEVtx_Chi2 : -1.);
                     BToKEECand.addUserFloat("ee_CL_vtx", (passedDiEle)? (float) EEVtx_CL : -1.);
 
                     math::XYZVector refitBToKEEV3D = refitEle1V3D + refitEle2V3D + refitKaonV3D;
@@ -323,6 +336,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("mass_err", mass_err);
                     BToKEECand.addUserFloat("Lxy", (float) LSBS/LSBSErr);
                     BToKEECand.addUserFloat("ctxy", (float) LSBS/sqrt(refitBToKEEV3D.perp2()));
+                    BToKEECand.addUserFloat("Chi2_vtx", (float) BToKEEVtx_Chi2);
                     BToKEECand.addUserFloat("CL_vtx", (float) BToKEEVtx_CL);
                     BToKEECand.addUserFloat("cosAlpha", (float) cosAlpha);                    
 
@@ -333,6 +347,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     float mass_err_2trk = -9999.;
                     float Lxy_2trk = -9999.;
                     float ctxy_2trk = -9999.;
+                    float Chi2_vtx_2trk = -9999.;
                     float CL_vtx_2trk = -9999.;
                     float cosAlpha_2trk = -9999.;
 
@@ -373,6 +388,7 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                          double LSBSErr_2trk = BToKJPsiEELS.second;
                          Lxy_2trk = LSBS_2trk/LSBSErr_2trk;
                          ctxy_2trk = LSBS_2trk/pt_2trk;
+                         Chi2_vtx_2trk = (double)refitVertexBToKJPsiEE->chiSquared();
                          CL_vtx_2trk = TMath::Prob((double)refitVertexBToKJPsiEE->chiSquared(),
                                                    int(rint(refitVertexBToKJPsiEE->degreesOfFreedom())));
                          cosAlpha_2trk = computeCosAlpha(refitBToKJPsiEE,refitVertexBToKJPsiEE,beamSpot);
@@ -388,11 +404,11 @@ void BToKeeProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
                     BToKEECand.addUserFloat("mass_err_2trk", mass_err_2trk);
                     BToKEECand.addUserFloat("Lxy_2trk", Lxy_2trk);
                     BToKEECand.addUserFloat("ctxy_2trk", ctxy_2trk);
+                    BToKEECand.addUserFloat("Chi2_vtx_2trk", Chi2_vtx_2trk);
                     BToKEECand.addUserFloat("CL_vtx_2trk", CL_vtx_2trk);
                     BToKEECand.addUserFloat("cosAlpha_2trk", cosAlpha_2trk);
 
                     result->push_back(BToKEECand);
-                    
                     
                 }
                 
