@@ -62,6 +62,7 @@ private:
     unsigned nBinsPhiHisto_ = 216;
     std::vector<unsigned> binsSumsHisto_;
     double histoThreshold_ = 20.;
+    bool histoSmearing_ = false;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;

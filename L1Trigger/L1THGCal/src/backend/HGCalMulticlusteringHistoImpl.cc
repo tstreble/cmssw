@@ -10,13 +10,15 @@ HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::Paramet
     nBinsRHisto_(conf.getParameter<unsigned>("nBins_R_histo_multicluster")),
     nBinsPhiHisto_(conf.getParameter<unsigned>("nBins_Phi_histo_multicluster")),
     binsSumsHisto_(conf.getParameter< std::vector<unsigned> >("binSumsHisto")),
-    histoThreshold_(conf.getParameter<double>("threshold_histo_multicluster"))
+    histoThreshold_(conf.getParameter<double>("threshold_histo_multicluster")),
+    histoSmearing_(conf.getParameter<bool>("smear_histo_multicluster"))
 {    
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR: " << dr_;  
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster minimum transverse-momentum: " << ptC3dThreshold_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of R-bins for the histo algorithm: " << nBinsRHisto_<<endl;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of Phi-bins for the histo algorithm: " << nBinsPhiHisto_<<endl;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster MIPT threshold for histo threshold algorithm: " << histoThreshold_<<endl;
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster histo smearing: "<<histoSmearing_<<endl;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster type of multiclustering algortihm: " << multiclusterAlgoType_;
     id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
     id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
@@ -67,7 +69,11 @@ HGCalMulticlusteringHistoImpl::Histogram HGCalMulticlusteringHistoImpl::fillHist
         int bin_R = int( (ROverZ-kROverZMin_) * nBinsRHisto_ / (kROverZMax_-kROverZMin_) );
         int bin_phi = int( (reco::reduceRange(clu->phi())+M_PI) * nBinsPhiHisto_ / (2*M_PI) );
 
-        histoClusters[{{clu->zside(), bin_R, bin_phi}}]+=clu->mipPt();
+        float R1 = kROverZMin_ + bin_R*(kROverZMax_-kROverZMin_);
+        float R2 = R1 + (kROverZMax_-kROverZMin_);
+        float area = 0.5 * (pow(R2,2)-pow(R1,2));
+
+        histoClusters[{{clu->zside(), bin_R, bin_phi}}]+=clu->mipPt()/area;
 
     }
 
@@ -88,9 +94,7 @@ HGCalMulticlusteringHistoImpl::Histogram HGCalMulticlusteringHistoImpl::fillSmoo
         for(int bin_R = 0; bin_R<int(nBinsRHisto_); bin_R++){
 
             int nBinsSide = (binSums[bin_R]-1)/2;
-            float R1 = kROverZMin_ + bin_R*(kROverZMax_-kROverZMin_);
-            float R2 = R1 + (kROverZMax_-kROverZMin_);
-            double area = 0.5 * (pow(R2,2)-pow(R1,2)) * (1+0.5*(1-pow(0.5,nBinsSide))); // Takes into account different area of bins in different R-rings + sum of quadratic weights used
+            float weight = (1+2*(1-pow(0.5,nBinsSide))); // Takes into account different area of bins in different R-rings + sum of quadratic weights used
 
             for(int bin_phi = 0; bin_phi<int(nBinsPhiHisto_); bin_phi++){
 
@@ -108,7 +112,7 @@ HGCalMulticlusteringHistoImpl::Histogram HGCalMulticlusteringHistoImpl::fillSmoo
 
                 }
 
-                histoSumPhiClusters[{{z_side,bin_R,bin_phi}}] = content/area;
+                histoSumPhiClusters[{{z_side,bin_R,bin_phi}}] = content/weight;
 
             }
 
@@ -302,16 +306,22 @@ void HGCalMulticlusteringHistoImpl::clusterizeHisto( const std::vector<edm::Ptr<
     /* put clusters into an r/z x phi histogram */
     Histogram histoCluster = fillHistoClusters(clustersPtrs); //key[0] = z.side(), key[1] = bin_R, key[2] = bin_phi, content = MIPTs summed along depth
 
-    /* smoothen along the phi direction + normalize each bin to same area */
-    Histogram smoothPhiHistoCluster = fillSmoothPhiHistoClusters(histoCluster,binsSumsHisto_);
+    Histogram finalHisto = histoCluster;
 
-    /* smoothen along the r/z direction */
-    Histogram smoothRPhiHistoCluster = fillSmoothRPhiHistoClusters(histoCluster);
+    if(histoSmearing_){
+
+      /* smoothen along the phi direction + normalize each bin to same area */
+      Histogram smoothPhiHistoCluster = fillSmoothPhiHistoClusters(histoCluster,binsSumsHisto_);
+
+      /* smoothen along the r/z direction */
+      Histogram finalHisto = fillSmoothRPhiHistoClusters(smoothPhiHistoCluster);
+
+    }
 
     /* seeds determined with local maximum criteria */
     std::vector<GlobalPoint> seedPositions;
-    if(multiclusterAlgoType_ == "HistoMaxC3d") seedPositions = computeMaxSeeds(smoothRPhiHistoCluster);
-    else if(multiclusterAlgoType_ == "HistoThresholdC3d") seedPositions = computeThresholdSeeds(smoothRPhiHistoCluster);
+    if(multiclusterAlgoType_ == "HistoMaxC3d") seedPositions = computeMaxSeeds(finalHisto);
+    else if(multiclusterAlgoType_ == "HistoThresholdC3d") seedPositions = computeThresholdSeeds(finalHisto);
 
     /* clusterize clusters around seeds */
     std::vector<l1t::HGCalMulticluster> multiclustersTmp = clusterSeedMulticluster(clustersPtrs,seedPositions);

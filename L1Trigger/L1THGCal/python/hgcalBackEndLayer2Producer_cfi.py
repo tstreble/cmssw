@@ -20,6 +20,7 @@ C3d_parValues = cms.PSet( type_multicluster = cms.string('dRC3d'),
                                                      3, 3, 3, 3, 3, 3, 3, 3  # 28 - 35
                                                      ),
                           threshold_histo_multicluster = cms.double(20.),
+                          smear_histo_multicluster = cms.bool(False),
                           EGIdentification=egamma_identification_drnn_cone.clone()
  )
 

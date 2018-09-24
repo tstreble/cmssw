@@ -77,7 +77,8 @@ def custom_3dclustering_histoMax(process,
                                    7, 7, 7, 7, 7, 7, # 7 - 12
                                    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,  # 13 - 27
                                    3, 3, 3, 3, 3, 3, 3, 3  # 28 - 35
-                                   )
+                                   ),
+        smearing = False,
         ):
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
     parameters_c3d.dR_multicluster = cms.double(distance)
@@ -85,6 +86,7 @@ def custom_3dclustering_histoMax(process,
     parameters_c3d.nBins_Phi_histo_multicluster = cms.uint32(nBins_Phi)
     parameters_c3d.binSumsHisto = binSumsHisto
     parameters_c3d.type_multicluster = cms.string('HistoMaxC3d')
+    parameters_c3d.smear_histo_multicluster = cms.bool(smearing)
     return process
 
 
@@ -100,6 +102,7 @@ def custom_3dclustering_histoThreshold(process,
                                    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,  # 13 - 27
                                    3, 3, 3, 3, 3, 3, 3, 3  # 28 - 35
                                    ),
+        smearing = False,
         ):
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
     parameters_c3d.threshold_histo_multicluster = cms.double(threshold)
@@ -108,4 +111,5 @@ def custom_3dclustering_histoThreshold(process,
     parameters_c3d.nBins_Phi_histo_multicluster = cms.uint32(nBins_Phi)
     parameters_c3d.binSumsHisto = binSumsHisto
     parameters_c3d.type_multicluster = cms.string('HistoThresholdC3d')
+    parameters_c3d.smear_histo_multicluster = cms.bool(smearing)
     return process
